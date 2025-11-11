@@ -363,7 +363,7 @@
 
             <div class="meta-block">
                 <h3>👤 Thông tin khách hàng</h3>
-                <p><strong>{{ $order->user->name ?? 'N/A' }}</strong></p>
+                <p><strong>{{ $order->user?->first_name . ' ' . $order->user?->last_name ?? 'N/A' }}</strong></p>
                 @if ($order->shippingAddress)
                     <p>{{ $order->shippingAddress->address }}</p>
                     <p>{{ $order->shippingAddress->ward }}, {{ $order->shippingAddress->district }}</p>
@@ -466,7 +466,11 @@
                 </div>
                 <div class="total-row grand-total">
                     <span>TỔNG CỘNG:</span>
-                    <strong>{{ number_format($order->total_amount) }}đ</strong>
+                    {{-- <strong>{{ number_format($order->total_amount) }}đ</strong> --}}
+                    {{-- Sửa ngày 11/11/2025 --}}
+                    <strong>
+                        {{ number_format($order->orderItems->sum(fn($item) => $item->price * $item->quantity) + $order->shipping_fee) }}đ
+                    </strong>
                 </div>
             </div>
         </div>

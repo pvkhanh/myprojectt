@@ -53,7 +53,8 @@
                     @endforeach
                     <li class="list-group-item d-flex justify-content-between">
                         <span>Phí giao hàng</span>
-                        <strong>30.000đ</strong>
+                        <span>{{shipping_fee}}</span>
+                        {{-- <strong>30.000đ</strong> --}}
                     </li>
                 </ul>
                 <button class="btn btn-primary w-100">Đặt hàng</button>

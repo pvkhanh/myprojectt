@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đã thanh toán</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .success-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .payment-info {
+            background: #d4edda;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="success-icon">💳</div>
+            <h1>Thanh toán thành công!</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px;">Đơn hàng của bạn đã được xác nhận thanh toán</p>
+        </div>
+
+        <div class="content">
+            <p>Xin chào <strong>{{customer_name}}</strong>,</p>
+            
+            <p>Chúng tôi đã nhận được thanh toán cho đơn hàng <strong>#{{order_number}}</strong>. Đơn hàng của bạn đang được chuẩn bị và sẽ sớm được giao đến bạn.</p>
+
+            <div class="payment-info">
+                <h3 style="margin-top: 0; color: #155724;">✅ Thông tin thanh toán</h3>
+                <div class="info-row">
+                    <span><strong>Mã đơn hàng:</strong></span>
+                    <span>{{order_number}}</span>
+                </div>
+                <div class="info-row">
+                    <span><strong>Thời gian thanh toán:</strong></span>
+                    <span>{{payment_time}}</span>
+                </div>
+                <div class="info-row">
+                    <span><strong>Số tiền:</strong></span>
+                    <span style="color: #28a745; font-weight: bold; font-size: 18px;">{{total_amount}}</span>
+                </div>
+                <div class="info-row">
+                    <span><strong>Phương thức:</strong></span>
+                    <span>{{payment_method}}</span>
+                </div>
+            </div>
+
+            <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #856404; font-size: 16px;">📦 Các bước tiếp theo</h3>
+                <ol style="margin: 10px 0; padding-left: 20px; color: #856404;">
+                    <li>Đơn hàng đang được đóng gói</li>
+                    <li>Bạn sẽ nhận được thông báo khi đơn hàng được giao cho đơn vị vận chuyển</li>
+                    <li>Thời gian giao hàng dự kiến: <strong>2-3 ngày làm việc</strong></li>
+                </ol>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="{{order_url}}" class="btn">Theo dõi đơn hàng</a>
+            </div>
+
+            <p style="margin-top: 30px; color: #6c757d; font-size: 14px; text-align: center;">
+                Cảm ơn bạn đã tin tưởng mua sắm tại {{app_name}}! 🎉
+            </p>
+        </div>
+
+        <div class="footer">
+            <p style="margin: 5px 0;">© 2024 {{app_name}}. All rights reserved.</p>
+            <p style="margin: 5px 0;">
+                <a href="{{app_url}}" style="color: #667eea; text-decoration: none;">Truy cập website</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -281,7 +281,9 @@
                                         <div class="fw-semibold text-primary">
                                             <a href="{{ route('admin.orders.show', $payment->order_id) }}"
                                                 class="text-decoration-none">
-                                                #{{ $payment->order->order_number }}
+                                                {{-- #{{ $payment->order->order_number }} --}}
+                                                {{ $payment->order?->order_number ?? 'N/A' }}
+
                                             </a>
                                         </div>
                                         <div class="small text-muted">{{ $payment->created_at->format('d/m/Y H:i') }}

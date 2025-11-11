@@ -93,6 +93,19 @@ if (!function_exists('createTestOrder')) {
 
             echo "✅ Đã tạo đơn hàng: #{$order->order_number}\n";
 
+            // // 5. Tạo order items
+            // foreach ($orderItems as $item) {
+            //     OrderItem::create([
+            //         'order_id' => $order->id,
+            //         'product_id' => $item['product']->id,
+            //         'variant_id' => null,
+            //         'quantity' => $item['quantity'],
+            //         'price' => $item['price'],
+            //         'total' => $item['total'],
+            //     ]);
+
+            //     echo "  📦 {$item['product']->name} x{$item['quantity']} = " . number_format($item['total']) . "đ\n";
+            // }
             // 5. Tạo order items
             foreach ($orderItems as $item) {
                 OrderItem::create([
@@ -106,6 +119,17 @@ if (!function_exists('createTestOrder')) {
 
                 echo "  📦 {$item['product']->name} x{$item['quantity']} = " . number_format($item['total']) . "đ\n";
             }
+
+            // Reload order items và tính subtotal chính xác
+            $order->load('orderItems');
+
+            $subtotal = $order->orderItems->sum(fn($i) => $i->price * $i->quantity);
+            $totalAmount = $subtotal + $order->shipping_fee;
+
+            $order->update([
+                'subtotal' => $subtotal,
+                'total_amount' => $totalAmount,
+            ]);
 
             // 6. Tạo shipping address (đã thêm receiver_name và province)
             ShippingAddress::create([

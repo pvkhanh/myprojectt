@@ -241,7 +241,7 @@ class OrderController extends Controller
         // ⚠️ Bỏ kiểm tra đăng nhập để test
         // if (!auth()->check()) { ... }
 
-        $order = $this->orderRepository->find($id, ['payments', 'orderItems']);
+        $order = $this->orderRepo->find($id, ['payments', 'orderItems']);
 
         if (!$order) {
             return redirect()->route('admin.orders.index')

@@ -9,6 +9,7 @@ use App\Enums\OrderStatus;
 use App\Models\Scopes\OrderScopes;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus; // nếu dùng PaymentStatus enum
+use Illuminate\Support\Facades\DB;
 
 
 class Order extends Model
@@ -40,8 +41,8 @@ class Order extends Model
         'cancelled_at' => 'datetime',
         'status' => OrderStatus::class,
     ];
-// Thêm vào Order.php nếu chưa có
-protected $with = ['shippingAddress', 'orderItems.product', 'orderItems.variant'];
+    // Thêm vào Order.php nếu chưa có
+    protected $with = ['shippingAddress', 'orderItems.product', 'orderItems.variant'];
     // Relationships
     public function user()
     {
@@ -95,27 +96,70 @@ protected $with = ['shippingAddress', 'orderItems.product', 'orderItems.variant'
     // Events
     protected static function booted()
     {
-        // Tự động tính total khi lưu order
+        // // Tự động tính total khi lưu order
+        // static::saving(function ($order) {
+        //     if ($order->isDirty('shipping_fee')) {
+        //         $subtotal = $order->orderItems->sum(fn($item) => $item->price * $item->quantity);
+        //         $order->total_amount = $subtotal + ($order->shipping_fee ?? 0);
+        //     }
+        // });
+
+        // // Tự động cập nhật timestamp khi thay đổi status
+        // static::updating(function ($order) {
+        //     if ($order->isDirty('status')) {
+        //         match ($order->status) {
+        //             OrderStatus::Paid => $order->paid_at = $order->paid_at ?? now(),
+        //             OrderStatus::Shipped => $order->shipped_at = $order->shipped_at ?? now(),
+        //             OrderStatus::Completed => $order->completed_at = $order->completed_at ?? now(),
+        //             OrderStatus::Cancelled => $order->cancelled_at = $order->cancelled_at ?? now(),
+        //             default => null,
+        //         };
+        //     }
+        // });
+
+
         static::saving(function ($order) {
-            if ($order->isDirty('shipping_fee')) {
-                $subtotal = $order->orderItems->sum(fn($item) => $item->price * $item->quantity);
-                $order->total_amount = $subtotal + ($order->shipping_fee ?? 0);
-            }
+            // Tính tổng tiền tự động
+            $order->total_amount = $order->orderItems->sum(fn($item) => $item->price * $item->quantity)
+                + ($order->shipping_fee ?? 0);
         });
 
-        // Tự động cập nhật timestamp khi thay đổi status
         static::updating(function ($order) {
+            // Cập nhật timestamp khi status thay đổi
             if ($order->isDirty('status')) {
                 match ($order->status) {
-                    OrderStatus::Paid => $order->paid_at = $order->paid_at ?? now(),
-                    OrderStatus::Shipped => $order->shipped_at = $order->shipped_at ?? now(),
-                    OrderStatus::Completed => $order->completed_at = $order->completed_at ?? now(),
-                    OrderStatus::Cancelled => $order->cancelled_at = $order->cancelled_at ?? now(),
+                    OrderStatus::Paid->value => $order->paid_at = $order->paid_at ?? now(),
+                    OrderStatus::Shipped->value => $order->shipped_at = $order->shipped_at ?? now(),
+                    OrderStatus::Completed->value => $order->completed_at = $order->completed_at ?? now(),
+                    OrderStatus::Cancelled->value => $order->cancelled_at = $order->cancelled_at ?? now(),
                     default => null,
                 };
             }
         });
-        
+
+
+        //Thêm ngày 11/11/2025
+        // Tự động tính subtotal và total_amount khi lưu order
+        // static::saving(function ($order) {
+        //     // Luôn tính lại subtotal và total_amount
+        //     $subtotal = $order->orderItems()->sum(DB::raw('price * quantity'));
+        //     $order->subtotal = $subtotal;
+        //     $order->total_amount = $subtotal + ($order->shipping_fee ?? 0);
+        // });
+
+        // static::updating(function ($order) {
+        //     if ($order->isDirty('status')) {
+        //         match ($order->status) {
+        //             OrderStatus::Paid => $order->paid_at = $order->paid_at ?? now(),
+        //             OrderStatus::Shipped => $order->shipped_at = $order->shipped_at ?? now(),
+        //             OrderStatus::Completed => $order->completed_at = $order->completed_at ?? now(),
+        //             OrderStatus::Cancelled => $order->cancelled_at = $order->cancelled_at ?? now(),
+        //             default => null,
+        //         };
+        //     }
+        // });
+
+
         // 🔁 Tự động cập nhật Payment Status khi Order đổi trạng thái (Suy nghĩ thêm)
         // static::updated(function ($order) {
         //     if ($order->isDirty('status')) {
@@ -133,7 +177,7 @@ protected $with = ['shippingAddress', 'orderItems.product', 'orderItems.variant'
         // });
 
     }
-     // ===== AUTO PAYMENT STATUS =====
+    // ===== AUTO PAYMENT STATUS =====
     // public function getPaymentStatusAttribute(): PaymentStatus|string
     // {
     //     $payment = $this->payments->sortByDesc('created_at')->first();
@@ -171,7 +215,7 @@ protected $with = ['shippingAddress', 'orderItems.product', 'orderItems.variant'
     //         default   => 'secondary',
     //     };
     // }
-   
+
     /**
      * Trạng thái thanh toán mới nhất
      */
