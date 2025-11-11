@@ -1,0 +1,4 @@
+Tìm hiểu transaction (không sử dụng job và send mail trong này)
+order thêm rollback
+
+Thêm try-catch
