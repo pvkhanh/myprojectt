@@ -84,12 +84,18 @@ class Order extends Model
     }
 
     // Tính toán và cập nhật total_amount
+    // public function calculateAndUpdateTotal(): void
+    // {
+    //     $subtotal = $this->subtotal;
+    //     $shippingFee = $this->shipping_fee ?? 0;
+    //     $total = $subtotal + $shippingFee;
+
+    //     $this->update(['total_amount' => $total]);
+    // }
+
     public function calculateAndUpdateTotal(): void
     {
-        $subtotal = $this->subtotal;
-        $shippingFee = $this->shipping_fee ?? 0;
-        $total = $subtotal + $shippingFee;
-
+        $total = $this->orderItems->sum(fn($i) => $i->price * $i->quantity) + ($this->shipping_fee ?? 0);
         $this->update(['total_amount' => $total]);
     }
 
@@ -118,11 +124,11 @@ class Order extends Model
         // });
 
 
-        static::saving(function ($order) {
-            // Tính tổng tiền tự động
-            $order->total_amount = $order->orderItems->sum(fn($item) => $item->price * $item->quantity)
-                + ($order->shipping_fee ?? 0);
-        });
+        // static::saving(function ($order) {
+        //     // Tính tổng tiền tự động
+        //     $order->total_amount = $order->orderItems->sum(fn($item) => $item->price * $item->quantity)
+        //         + ($order->shipping_fee ?? 0);
+        // });
 
         static::updating(function ($order) {
             // Cập nhật timestamp khi status thay đổi
@@ -136,6 +142,7 @@ class Order extends Model
                 };
             }
         });
+
 
 
         //Thêm ngày 11/11/2025
