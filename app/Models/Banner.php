@@ -22,4 +22,9 @@ class Banner extends Model
         'is_active' => 'boolean',
         'position' => 'integer',
     ];
+    // Banner Model
+    public function image()
+    {
+        return $this->belongsTo(Image::class, 'image_id');
+    }
 }

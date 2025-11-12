@@ -301,7 +301,7 @@ class UserService
             return back()->with('error', 'Đã xảy ra lỗi khi tải danh sách người dùng!');
         }
     }
-    
+
     // =================== CREATE ===================
     public function create()
     {
@@ -350,25 +350,65 @@ class UserService
         return view('admin.users.edit', compact('user'));
     }
     // =================== UPDATE ===================
+    // public function update(Request $request, $id)
+    // {
+    //     try {
+    //         $user = $this->userRepository->find($id);
+    //         abort_if(!$user, 404);
+
+    //         $validated = $request->validated();
+
+    //         if ($request->filled('password')) {
+    //             $validated['password'] = Hash::make($validated['password']);
+    //         } else {
+    //             unset($validated['password']);
+    //         }
+
+    //         // ⚡ Sử dụng repository avatar
+    //         if ($request->hasFile('avatar')) {
+    //             $this->userRepository->updateAvatar($user, $request->file('avatar'));
+    //         }
+
+    //         $user->fill($validated)->save();
+
+    //         return redirect()->route('admin.users.index')->with('success', 'Cập nhật người dùng thành công!');
+    //     } catch (\Exception $e) {
+    //         Log::error("UserService@update error: {$e->getMessage()}");
+    //         return back()->with('error', 'Lỗi khi cập nhật người dùng!');
+    //     }
+    // }
+
+
     public function update(Request $request, $id)
     {
         try {
             $user = $this->userRepository->find($id);
             abort_if(!$user, 404);
 
+            // Lấy dữ liệu hợp lệ
             $validated = $request->validated();
 
+            // Nếu người dùng đổi mật khẩu
             if ($request->filled('password')) {
-                $validated['password'] = Hash::make($validated['password']);
+                $validated['password'] = Hash::make($request->password);
             } else {
                 unset($validated['password']);
             }
 
-            // ⚡ Sử dụng repository avatar
+            // Nếu có avatar mới upload
             if ($request->hasFile('avatar')) {
-                $this->userRepository->updateAvatar($user, $request->file('avatar'));
+                // Cập nhật avatar qua repository, trả về path mới
+                $avatarPath = $this->userRepository->updateAvatar($user, $request->file('avatar'));
+                $validated['avatar'] = $avatarPath;
             }
 
+            // Nếu user muốn xóa avatar
+            if ($request->input('remove_avatar') == '1') {
+                $this->userRepository->removeAvatar($user);
+                $validated['avatar'] = null;
+            }
+
+            // Cập nhật thông tin user
             $user->fill($validated)->save();
 
             return redirect()->route('admin.users.index')->with('success', 'Cập nhật người dùng thành công!');
@@ -377,6 +417,7 @@ class UserService
             return back()->with('error', 'Lỗi khi cập nhật người dùng!');
         }
     }
+
 
     // =================== AVATAR HANDLERS ===================
 
@@ -421,7 +462,7 @@ class UserService
             return back()->with('error', 'Xóa người dùng thất bại!');
         }
     }
-        // =================== TRASHED ===================
+    // =================== TRASHED ===================
     public function trashed()
     {
         $users = User::onlyTrashed()->paginate(10);
