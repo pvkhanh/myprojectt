@@ -63,7 +63,7 @@
             class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.wishlists.*') ? 'active' : '' }}">
             <i class="fas fa-star me-2"></i> Wishlist
         </a>
-        {{-- <!-- Payments -->
+        <!-- Payments -->
         <a href="{{ route('admin.payments.index') }}"
             class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
             <i class="fas fa-star me-2"></i>
@@ -71,6 +71,6 @@
         <!-- Settings -->
         <a href="#" class="sidebar-menu-item nav-link text-light">
             <i class="fas fa-cog me-2"></i> Cài đặt
-        </a> --}}
+        </a>
     </nav>
 </div>

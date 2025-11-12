@@ -566,7 +566,21 @@
                                     </td>
                                     <td class="px-4">
                                         <div class="d-flex align-items-center">
-                                            {{-- @php
+                                            <img src="{{ $user->avatar_url }}" alt="{{ $user->username }}"
+                                                class="rounded-circle border border-3 border-primary shadow-sm me-3"
+                                                style="width:50px; height:50px; object-fit:cover;">
+                                            <div>
+                                                <div class="fw-bold text-dark mb-1">{{ $user->username }}</div>
+                                                <div class="small text-muted">
+                                                    <i class="fa-solid fa-envelope me-1"></i>{{ $user->email }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    {{-- <td class="px-4">
+                                        <div class="d-flex align-items-center"> --}}
+                                    {{-- @php
                                                 $avatar =
                                                     optional($user->images()->wherePivot('is_main', true)->first())
                                                         ->path ?? null;
@@ -581,7 +595,7 @@
                                                     {{ strtoupper(substr($user->username ?? 'U', 0, 1)) }}
                                                 </div>
                                             @endif --}}
-                                            @php
+                                    {{-- @php
                                                 $avatar = optional(
                                                     $user->images()->wherePivot('is_main', true)->first(),
                                                 )->path;
@@ -600,8 +614,8 @@
                                                     <i class="fa-solid fa-envelope me-1"></i>{{ $user->email }}
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </div> --}}
+                                    {{-- </td> --}}
                                     <td class="px-4">
                                         <div class="small">
                                             @if ($user->phone)
@@ -844,9 +858,12 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').content
                             },
-                            body: JSON.stringify({ is_active: isActive })
+                            body: JSON.stringify({
+                                is_active: isActive
+                            })
                         });
 
                         const data = await response.json();
@@ -892,28 +909,32 @@
                             });
 
                             fetch(`/admin/users/${userId}/resend-welcome`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            })
-                            .then(res => res.json())
-                            .then(data => {
-                                Swal.fire({
-                                    icon: data.success ? 'success' : 'error',
-                                    title: data.success ? 'Thành công!' : 'Thất bại!',
-                                    text: data.message,
-                                    timer: 3000
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector(
+                                            'meta[name="csrf-token"]').content
+                                    }
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    Swal.fire({
+                                        icon: data.success ? 'success' :
+                                            'error',
+                                        title: data.success ? 'Thành công!' :
+                                            'Thất bại!',
+                                        text: data.message,
+                                        timer: 3000
+                                    });
+                                })
+                                .catch(error => {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Lỗi!',
+                                        text: 'Có lỗi xảy ra khi gửi email: ' +
+                                            error
+                                    });
                                 });
-                            })
-                            .catch(error => {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Lỗi!',
-                                    text: 'Có lỗi xảy ra khi gửi email: ' + error
-                                });
-                            });
                         }
                     });
                 });
@@ -943,28 +964,31 @@
                             });
 
                             fetch(`/admin/users/${userId}/send-verification`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            })
-                            .then(res => res.json())
-                            .then(data => {
-                                Swal.fire({
-                                    icon: data.success ? 'success' : 'error',
-                                    title: data.success ? 'Thành công!' : 'Thất bại!',
-                                    text: data.message,
-                                    timer: 3000
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector(
+                                            'meta[name="csrf-token"]').content
+                                    }
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    Swal.fire({
+                                        icon: data.success ? 'success' :
+                                            'error',
+                                        title: data.success ? 'Thành công!' :
+                                            'Thất bại!',
+                                        text: data.message,
+                                        timer: 3000
+                                    });
+                                })
+                                .catch(error => {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Lỗi!',
+                                        text: 'Có lỗi xảy ra: ' + error
+                                    });
                                 });
-                            })
-                            .catch(error => {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Lỗi!',
-                                    text: 'Có lỗi xảy ra: ' + error
-                                });
-                            });
                         }
                     });
                 });

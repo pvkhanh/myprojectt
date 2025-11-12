@@ -24,6 +24,7 @@ class User extends Authenticatable
         'gender',
         'birthday',
         'bio',
+        'avatar', // 👈 thêm dòng này
         'role',
         'is_active',
         'email_verified_at',
@@ -147,11 +148,11 @@ class User extends Authenticatable
     }
 
     // Accessor lấy URL ảnh đại diện
-    public function getAvatarUrlAttribute()
-    {
-        $image = $this->avatarRelation()->first();
-        return $image ? asset('storage/' . $image->path) : asset('images/default-avatar.png');
-    }
+    // public function getAvatarUrlAttribute()
+    // {
+    //     $image = $this->avatarRelation()->first();
+    //     return $image ? asset('storage/' . $image->path) : asset('images/default-avatar.png');
+    // }
 
     // Thêm hoặc thay avatar
     public function setAvatar(Image $image)
@@ -188,5 +189,43 @@ class User extends Authenticatable
                 \App\Helpers\MailHelper::sendToRecipient($mail, $recipient);
             }
         });
+    }
+
+    //Thêm avtar 12/11/2025
+    /**
+     * =====================
+     * 🎨 Avatar quản lý riêng
+     * =====================
+     */
+
+    // Trả về URL đầy đủ của avatar (ưu tiên ảnh riêng trong cột avatar)
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar) {
+            // Nếu avatar đã lưu là URL tuyệt đối
+            if (str_starts_with($this->avatar, 'http')) {
+                return $this->avatar;
+            }
+            // Nếu avatar là đường dẫn tương đối (trong storage)
+            return asset('storage/' . $this->avatar);
+        }
+
+        // Nếu chưa có thì dùng fallback từ quan hệ imageables (nếu có)
+        $image = $this->avatarRelation()->first();
+        if ($image) {
+            return asset('storage/' . $image->path);
+        }
+
+        // Ảnh mặc định
+        return asset('images/default-avatar.png');
+    }
+
+    /**
+     * Upload avatar file mới
+     */
+    public function updateAvatar(\Illuminate\Http\UploadedFile $file): void
+    {
+        $path = $file->store('avatars', 'public');
+        $this->update(['avatar' => $path]);
     }
 }
