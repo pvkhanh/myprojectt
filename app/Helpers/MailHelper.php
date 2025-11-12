@@ -56,13 +56,76 @@ class MailHelper
     /**
      * Send mail to single recipient
      */
+    // public static function sendToRecipient(Mail $mail, MailRecipient $recipient, array $customVariables = []): bool
+    // {
+    //     try {
+    //         $variables = array_merge(
+    //             self::getDefaultVariables($recipient),
+    //             $customVariables,
+    //             $mail->variables ?? []
+    //         );
+
+    //         // Lấy content: DB template > file template > raw content
+    //         if (!empty($mail->template_key)) {
+    //             try {
+    //                 $content = self::getTemplateHtml($mail->template_key, $variables);
+    //             } catch (\Exception $e) {
+    //                 $content = self::replaceVariables($mail->content, $variables);
+    //             }
+    //         } else {
+    //             $content = self::replaceVariables($mail->content, $variables);
+    //         }
+
+    //         // Add tracking pixel
+    //         $content .= self::generateTrackingPixel($recipient);
+
+    //         $subject = self::replaceVariables($mail->subject, $variables);
+
+    //         // Send email
+    //         MailFacade::html($content, function (Message $message) use ($recipient, $subject, $mail) {
+    //             $message->to($recipient->email, $recipient->name)
+    //                     ->subject($subject)
+    //                     ->from($mail->sender_email, config('app.name'));
+    //         });
+
+    //         // Update recipient status
+    //         $recipient->update([
+    //             'status'    => MailRecipientStatus::Sent->value,
+    //             'error_log' => null,
+    //         ]);
+
+    //         return true;
+
+    //     } catch (\Exception $e) {
+    //         $recipient->update([
+    //             'status'    => MailRecipientStatus::Failed->value,
+    //             'error_log' => $e->getMessage(),
+    //         ]);
+
+    //         Log::error("Failed to send mail to {$recipient->email}: {$e->getMessage()}");
+    //         return false;
+    //     }
+    // }
+
     public static function sendToRecipient(Mail $mail, MailRecipient $recipient, array $customVariables = []): bool
     {
         try {
+            // Fix: decode JSON từ DB thành mảng
+            $variablesFromDb = [];
+            if (is_string($mail->variables)) {
+                $variablesFromDb = json_decode($mail->variables, true);
+                if (!is_array($variablesFromDb)) {
+                    $variablesFromDb = [];
+                }
+            } elseif (is_array($mail->variables)) {
+                $variablesFromDb = $mail->variables;
+            }
+
+            // Merge tất cả biến
             $variables = array_merge(
                 self::getDefaultVariables($recipient),
                 $customVariables,
-                $mail->variables ?? []
+                $variablesFromDb
             );
 
             // Lấy content: DB template > file template > raw content
@@ -84,8 +147,8 @@ class MailHelper
             // Send email
             MailFacade::html($content, function (Message $message) use ($recipient, $subject, $mail) {
                 $message->to($recipient->email, $recipient->name)
-                        ->subject($subject)
-                        ->from($mail->sender_email, config('app.name'));
+                    ->subject($subject)
+                    ->from($mail->sender_email, config('app.name'));
             });
 
             // Update recipient status
@@ -95,7 +158,6 @@ class MailHelper
             ]);
 
             return true;
-
         } catch (\Exception $e) {
             $recipient->update([
                 'status'    => MailRecipientStatus::Failed->value,
@@ -107,6 +169,7 @@ class MailHelper
         }
     }
 
+
     /**
      * Send bulk mail
      */
@@ -114,8 +177,8 @@ class MailHelper
     {
         if (!$recipients) {
             $recipients = $mail->recipients()
-                               ->where('status', MailRecipientStatus::Pending->value)
-                               ->get();
+                ->where('status', MailRecipientStatus::Pending->value)
+                ->get();
         }
 
         $stats = [
@@ -213,8 +276,8 @@ class MailHelper
             '{{shipping_name}}'      => $shippingAddress->name ?? '',
             '{{shipping_phone}}'     => $shippingAddress->phone ?? '',
             '{{shipping_address}}'   => $shippingAddress
-                                        ? "{$shippingAddress->address}, {$shippingAddress->ward}, {$shippingAddress->district}, {$shippingAddress->city}"
-                                        : '',
+                ? "{$shippingAddress->address}, {$shippingAddress->ward}, {$shippingAddress->district}, {$shippingAddress->city}"
+                : '',
             '{{order_url}}'          => route('orders.show', $order->id),
             '{{tracking_url}}'       => '#',
             '{{tracking_number}}'    => 'TBA',

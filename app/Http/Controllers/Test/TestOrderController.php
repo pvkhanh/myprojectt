@@ -56,7 +56,7 @@ class TestOrderController extends Controller
                 [
                     'first_name' => 'Khánh',
                     'last_name' => 'Phan Văn',
-                    'username' => generateUsername('Khánh', 'Phan Văn'), // <-- thêm dòng này
+                    'username' => generateUsername('khanh', 'phanvan'), // <-- thêm dòng này
                     'password' => bcrypt('password123'),
                     'phone' => '0987654321',
                     'email_verified_at' => now(),
