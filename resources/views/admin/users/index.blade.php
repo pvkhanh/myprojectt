@@ -576,6 +576,10 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- <p>Avatar DB: {{ $user->avatar }}</p>
+                                        <p>Avatar URL: {{ $user->avatar_url }}</p>
+                                        <img src="{{ $user->avatar_url }}" alt="Avatar" width="100"> --}}
+
                                     </td>
 
                                     {{-- <td class="px-4">
