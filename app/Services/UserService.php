@@ -335,6 +335,13 @@ class UserService
         }
     }
 
+    // =================== SHOW ===================
+    public function show($id)
+    {
+        $user = $this->userRepository->find($id);
+        abort_if(!$user, 404);
+        return view('admin.users.show', compact('user'));
+    }
     // =================== EDIT ===================
     public function edit($id)
     {
