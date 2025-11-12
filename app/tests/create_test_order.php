@@ -177,7 +177,7 @@
 //             $order->update([
 //                 'total_amount' => $totalAmount,
 //             ]);
-            
+
 
 
 //             echo "✅ Đã tạo địa chỉ giao hàng\n";
@@ -254,7 +254,7 @@ if (!function_exists('createTestOrder')) {
         DB::beginTransaction();
 
         try {
-            // 1. Tìm hoặc tạo user test
+            //1. Tìm hoặc tạo user test
             $user = User::firstOrCreate(
                 ['email' => 'pvkhanh.tech@gmail.com'],
                 [
@@ -265,6 +265,16 @@ if (!function_exists('createTestOrder')) {
                     'email_verified_at' => now(),
                 ]
             );
+            //   $user = User::firstOrCreate(
+            //                 ['email' => 'ledanhhiep2005@gmail.com'],
+            //                 [
+            //                     'first_name' => 'Hiệp',
+            //                     'last_name' => 'Pro',
+            //                     'password' => bcrypt('password123'),
+            //                     'phone' => '0123456789',
+            //                     'email_verified_at' => now(),
+            //                 ]
+            //             );
             echo "✅ User: {$user->email}\n";
 
             // 2. Lấy 2 sản phẩm ngẫu nhiên
@@ -348,7 +358,6 @@ if (!function_exists('createTestOrder')) {
                 'user' => $user,
                 'message' => 'Đơn hàng test đã được tạo thành công!'
             ];
-
         } catch (\Exception $e) {
             DB::rollBack();
             echo "❌ Error: {$e->getMessage()}\n";

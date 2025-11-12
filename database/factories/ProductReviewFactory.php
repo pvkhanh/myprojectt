@@ -50,7 +50,6 @@
 //     }
 // }
 
-<?php
 
 namespace Database\Factories;
 

@@ -111,104 +111,132 @@
 
 
 
+
 namespace App\Services;
 
-use App\Repositories\Contracts\BannerRepositoryInterface;
-use App\Services\ImageService; // service quản lý ảnh chung
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
+use App\Models\Banner;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class BannerService
 {
-    public function __construct(
-        protected BannerRepositoryInterface $bannerRepository,
-        protected ImageService $imageService, // dùng để lưu/ lấy ảnh
-    ) {}
+    protected Banner $banner;
 
-    public function createBanner(array $data)
+    public function __construct(Banner $banner)
     {
-        try {
-            DB::beginTransaction();
-
-            $data['is_active'] = !empty($data['is_active']);
-
-            // Upload image qua ImageService
-            if (!empty($data['image'])) {
-                $image = $this->imageService->upload($data['image'], 'banners'); 
-                $data['image_id'] = $image->id; // lưu liên kết ảnh
-            }
-
-            $banner = $this->bannerRepository->create($data);
-
-            DB::commit();
-            return $banner;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            Log::error("BannerService@createBanner error: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            throw $e;
-        }
+        $this->banner = $banner;
     }
 
-    public function updateBanner(int $id, array $data)
+    /**
+     * Lấy tất cả banners dưới dạng Builder (dễ filter & paginate)
+     */
+    public function getAll(): Builder
     {
-        try {
-            DB::beginTransaction();
-
-            $data['is_active'] = !empty($data['is_active']);
-
-            if (!empty($data['image'])) {
-                $image = $this->imageService->upload($data['image'], 'banners');
-                $data['image_id'] = $image->id;
-            }
-
-            $banner = $this->bannerRepository->update($id, $data);
-
-            DB::commit();
-            return $banner;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            Log::error("BannerService@updateBanner error: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            throw $e;
-        }
+        return $this->banner->query()->whereNull('deleted_at');
     }
 
-    public function deleteBanner(int $id)
+    /**
+     * Lấy tất cả banners đang active
+     */
+    public function getActive(): Builder
     {
-        try {
-            $banner = $this->bannerRepository->findOrFail($id);
-
-            // Xóa ảnh liên kết nếu có
-            if (!empty($banner->image_id)) {
-                $this->imageService->delete($banner->image_id);
-            }
-
-            $this->bannerRepository->delete($id);
-        } catch (\Throwable $e) {
-            Log::error("BannerService@deleteBanner error: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            throw $e;
-        }
+        return $this->banner->query()
+            ->whereNull('deleted_at')
+            ->where('is_active', true);
     }
 
-    public function toggleStatus(int $id)
+    /**
+     * Lấy tất cả banners có start_at/end_at và đang trong khoảng thời gian hiển thị
+     */
+    public function visible(): Builder
     {
-        try {
-            $banner = $this->bannerRepository->findOrFail($id);
-            $newStatus = !$banner->is_active;
-            $this->bannerRepository->update($id, ['is_active' => $newStatus]);
-            return $newStatus;
-        } catch (\Throwable $e) {
-            Log::error("BannerService@toggleStatus error: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            throw $e;
-        }
+        $now = now();
+        return $this->banner->query()
+            ->whereNull('deleted_at')
+            ->where('is_active', true)
+            ->where(function($q) use ($now) {
+                $q->whereNull('start_at')->orWhere('start_at', '<=', $now);
+            })
+            ->where(function($q) use ($now) {
+                $q->whereNull('end_at')->orWhere('end_at', '>=', $now);
+            });
     }
 
-    public function updatePositions(array $positions)
+    /**
+     * Lấy banners đã lên lịch (có start_at trong tương lai hoặc end_at trong tương lai)
+     */
+    public function scheduled(): Builder
     {
-        try {
-            $this->bannerRepository->updatePositions($positions);
-        } catch (\Throwable $e) {
-            Log::error("BannerService@updatePositions error: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            throw $e;
+        $now = now();
+        return $this->banner->query()
+            ->whereNull('deleted_at')
+            ->where(function($q) use ($now) {
+                $q->where('start_at', '>', $now)
+                  ->orWhere('end_at', '>', $now);
+            });
+    }
+
+    /**
+     * Tạo data mặc định cho form (create/edit)
+     */
+    public function create(): array
+    {
+        // Nếu bạn có thư viện hình ảnh hoặc defaults khác
+        return [
+            'images' => [], // ví dụ lấy danh sách images
+        ];
+    }
+
+    /**
+     * Lưu banner mới
+     */
+    public function store(array $data): Banner
+    {
+        $banner = $this->banner->create([
+            'title'     => $data['title'],
+            'url'       => $data['url'] ?? null,
+            'type'      => $data['type'] ?? null,
+            'position'  => $data['position'] ?? 0,
+            'is_active' => $data['is_active'] ?? false,
+            'image_id'  => $data['image_id'] ?? null,
+            'start_at'  => $data['start_at'] ?? null,
+            'end_at'    => $data['end_at'] ?? null,
+            'image_path'=> $data['image_file'] ? $data['image_file']->store('banners', 'public') : null,
+        ]);
+
+        return $banner;
+    }
+
+    /**
+     * Cập nhật banner
+     */
+    public function update(int $id, array $data): Banner
+    {
+        $banner = $this->findOrFail($id);
+
+        if (!empty($data['image_file'])) {
+            $data['image_path'] = $data['image_file']->store('banners', 'public');
         }
+
+        $banner->update($data);
+
+        return $banner;
+    }
+
+    /**
+     * Xóa banner
+     */
+    public function delete(int $id): void
+    {
+        $banner = $this->findOrFail($id);
+        $banner->delete();
+    }
+
+    /**
+     * Tìm banner hoặc fail
+     */
+    public function findOrFail(int $id): Banner
+    {
+        return $this->banner->query()->findOrFail($id);
     }
 }
