@@ -617,6 +617,27 @@ class User extends Authenticatable
         // Ảnh mặc định
         return asset('images/default-avatar.png');
     }
+    //Thêm ngày 6/11/2025 
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            // Tìm template Welcome Email
+            $mail = Mail::where('template_key', 'welcome-email')->first();
+
+            if ($mail) {
+                $recipient = MailRecipient::create([
+                    'mail_id' => $mail->id,
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'name' => trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: 'User',
+                    'status' => \App\Enums\MailRecipientStatus::Pending->value,
+                ]);
+
+                // Gửi luôn
+                \App\Helpers\MailHelper::sendToRecipient($mail, $recipient);
+            }
+        });
+    }
 
     /**
      * Lấy tên đầy đủ của user

@@ -22,14 +22,41 @@ class TestOrderController extends Controller
     public function createOrder()
     {
         DB::beginTransaction();
-        
+
         try {
-            // 1. Tìm hoặc tạo user
+            // // 1. Tìm hoặc tạo user
+            // $user = User::firstOrCreate(
+            //     ['email' => 'pvkhanh.tech@gmail.com'],
+            //     [
+            //         'first_name' => 'Khánh',
+            //         'last_name' => 'Phạm Văn',
+            //         'password' => bcrypt('password123'),
+            //         'phone' => '0987654321',
+            //         'email_verified_at' => now(),
+            //     ]
+            // );
+
+            function generateUsername($firstName, $lastName)
+            {
+                $base = strtolower(preg_replace('/\s+/', '', $firstName . $lastName));
+                $username = $base;
+
+                // Kiểm tra username đã tồn tại chưa, nếu có thì thêm số ngẫu nhiên
+                $i = 1;
+                while (\App\Models\User::where('username', $username)->exists()) {
+                    $username = $base . $i++;
+                }
+
+                return $username;
+            }
+
+            // Sửa phần tạo user:
             $user = User::firstOrCreate(
                 ['email' => 'pvkhanh.tech@gmail.com'],
                 [
                     'first_name' => 'Khánh',
-                    'last_name' => 'Phạm Văn',
+                    'last_name' => 'Phan Văn',
+                    'username' => generateUsername('Khánh', 'Phan Văn'), // <-- thêm dòng này
                     'password' => bcrypt('password123'),
                     'phone' => '0987654321',
                     'email_verified_at' => now(),
@@ -38,7 +65,7 @@ class TestOrderController extends Controller
 
             // 2. Lấy sản phẩm
             $products = Product::where('status', 'active')->take(2)->get();
-            
+
             if ($products->isEmpty()) {
                 return response()->json([
                     'success' => false,
@@ -49,13 +76,13 @@ class TestOrderController extends Controller
             // 3. Tính giá
             $subtotal = 0;
             $orderItems = [];
-            
+
             foreach ($products as $product) {
                 $quantity = rand(1, 3);
                 $price = $product->price;
                 $itemTotal = $price * $quantity;
                 $subtotal += $itemTotal;
-                
+
                 $orderItems[] = [
                     'product' => $product,
                     'quantity' => $quantity,
@@ -63,7 +90,7 @@ class TestOrderController extends Controller
                     'total' => $itemTotal,
                 ];
             }
-            
+
             $shippingFee = 30000;
             $totalAmount = $subtotal + $shippingFee;
 
@@ -92,16 +119,16 @@ class TestOrderController extends Controller
             }
 
             // 6. Tạo địa chỉ
-           ShippingAddress::create([
-    'order_id' => $order->id,
-    'receiver_name' => $user->first_name . ' ' . $user->last_name,
-    'phone' => $user->phone ?? '0987654321',
-    'address' => '123 Nguyễn Huệ',
-    'ward' => 'Phường Bến Nghé',
-    'district' => 'Quận 1',
-    'province' => 'TP. Hồ Chí Minh',
-    'postal_code' => '70000',
-]);
+            ShippingAddress::create([
+                'order_id' => $order->id,
+                'receiver_name' => $user->first_name . ' ' . $user->last_name,
+                'phone' => $user->phone ?? '0987654321',
+                'address' => '123 Nguyễn Huệ',
+                'ward' => 'Phường Bến Nghé',
+                'district' => 'Quận 1',
+                'province' => 'TP. Hồ Chí Minh',
+                'postal_code' => '70000',
+            ]);
 
 
             // 7. Tạo payment
@@ -128,10 +155,9 @@ class TestOrderController extends Controller
                     'note' => '📬 Mail sẽ được gửi sau 5 giây!'
                 ]
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Lỗi: ' . $e->getMessage(),
@@ -148,7 +174,7 @@ class TestOrderController extends Controller
     {
         try {
             $order = Order::findOrFail($orderId);
-            
+
             // Validate status
             $validStatuses = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
             if (!in_array($status, $validStatuses)) {
@@ -175,7 +201,6 @@ class TestOrderController extends Controller
                     'note' => '📬 Mail thông báo sẽ được gửi sau 2 giây!'
                 ]
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -190,7 +215,7 @@ class TestOrderController extends Controller
     public function listOrders()
     {
         $user = User::where('email', 'pvkhanh.tech@gmail.com')->first();
-        
+
         if (!$user) {
             return response()->json([
                 'success' => false,
@@ -207,7 +232,7 @@ class TestOrderController extends Controller
             'success' => true,
             'user_email' => $user->email,
             'total_orders' => $orders->count(),
-            'orders' => $orders->map(function($order) {
+            'orders' => $orders->map(function ($order) {
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
