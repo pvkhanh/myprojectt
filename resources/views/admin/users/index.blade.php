@@ -566,9 +566,11 @@
                                     </td>
                                     <td class="px-4">
                                         <div class="d-flex align-items-center">
-                                            <img src="{{ $user->avatar_url }}" alt="{{ $user->username }}"
+                                            {{-- <img src="{{ $user->avatar_url }}" alt="{{ $user->username }}"
                                                 class="rounded-circle border border-3 border-primary shadow-sm me-3"
-                                                style="width:50px; height:50px; object-fit:cover;">
+                                                style="width:50px; height:50px; object-fit:cover;"> --}}
+                                                <img src="{{ $user->avatar_url }}" alt="{{ $user->username }}" class="rounded-circle" width="60">
+
                                             <div>
                                                 <div class="fw-bold text-dark mb-1">{{ $user->username }}</div>
                                                 <div class="small text-muted">
