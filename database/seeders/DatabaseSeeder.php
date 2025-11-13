@@ -15,14 +15,16 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             ImageSeeder::class,
             CategoryableSeeder::class,
-                // ProductReviewSeeder::class,
+            ProductReviewSeeder::class,
             CartItemSeeder::class,
             WishlistSeeder::class,
             OrderSeeder::class,
-                // NotificationSeeder::class,
+            NotificationSeeder::class,
             MailSeeder::class,
-                // BlogSeeder::class,
+            MailTemplateSeeder::class,
+            BlogSeeder::class,
             BannerSeeder::class,
+            PaymentSeeder::class,
         ]);
     }
 }

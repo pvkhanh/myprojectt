@@ -2,13 +2,13 @@
 
 // /**
 //  * TEST ORDER CREATOR - OPTIMIZED
-//  * 
+//  *
 //  * Cách sử dụng:
-//  * 
+//  *
 //  * 1. Tinker:
 //  *    php artisan tinker
 //  *    include_once base_path('app/tests/create_test_order.php');
-//  * 
+//  *
 //  * 2. Route (web.php):
 //  *    Route::get('/test/create-order', function() {
 //  *        include_once base_path('app/tests/create_test_order.php');
@@ -177,7 +177,7 @@
 //             $order->update([
 //                 'total_amount' => $totalAmount,
 //             ]);
-            
+
 
 
 //             echo "✅ Đã tạo địa chỉ giao hàng\n";
@@ -255,11 +255,21 @@ if (!function_exists('createTestOrder')) {
 
         try {
             // 1. Tìm hoặc tạo user test
-            $user = User::firstOrCreate(
-                ['email' => 'pvkhanh.tech@gmail.com'],
+            // $user = User::firstOrCreate(
+            //     ['email' => 'pvkhanh.tech@gmail.com'],
+            //     [
+            //         'first_name' => 'Khánh',
+            //         'last_name' => 'Phan Văn',
+            //         'password' => bcrypt('password123'),
+            //         'phone' => '0123456789',
+            //         'email_verified_at' => now(),
+            //     ]
+            // );
+             $user = User::firstOrCreate(
+                ['email' => 'huongnht.31b@gmail.com'],
                 [
-                    'first_name' => 'Khánh',
-                    'last_name' => 'Phan Văn',
+                    'first_name' => 'Ngô Hoàng Thanh  ',
+                    'last_name' => 'Hương',
                     'password' => bcrypt('password123'),
                     'phone' => '0123456789',
                     'email_verified_at' => now(),

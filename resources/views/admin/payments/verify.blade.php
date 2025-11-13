@@ -513,8 +513,11 @@
                                     </div>
                                     <div>
                                         <div class="fw-bold">
-                                            {{ $payment->order->user->name ?? 'N/A' }}
+                                            {{ $payment->order->user->username ??
+                                            trim(($payment->order->user->first_name ?? '') . ' ' . ($payment->order->user->last_name ?? '')) ?:
+                                                'N/A' }}
                                         </div>
+
                                         <div class="small text-muted">
                                             <i
                                                 class="fa-solid fa-envelope me-1"></i>{{ $payment->order->user->email ?? 'N/A' }}

@@ -569,7 +569,19 @@
                                             {{-- <img src="{{ $user->avatar_url }}" alt="{{ $user->username }}"
                                                 class="rounded-circle border border-3 border-primary shadow-sm me-3"
                                                 style="width:50px; height:50px; object-fit:cover;"> --}}
-                                                <img src="{{ $user->avatar_url }}" alt="{{ $user->username }}" class="rounded-circle" width="60">
+                                            @if ($user->avatar)
+                                                <img src="{{ $user->avatar_url }}" alt="{{ $user->username }}"
+                                                    class="rounded-circle border border-3 border-primary shadow-sm me-3"
+                                                    style="width: 52px; height: 52px; object-fit: cover;">
+                                            @else
+                                                <div class="rounded-circle border border-3 border-primary bg-gradient-primary text-white
+                fw-semibold d-flex align-items-center justify-content-center shadow-sm me-3"
+                                                    style="width: 52px; height: 52px; font-size: 1.1rem; letter-spacing: 0.5px;">
+                                                    {{ strtoupper($user->initials) }}
+                                                </div>
+                                            @endif
+
+                                            {{-- <img src="{{ $user->avatar_url }}" alt="{{ $user->username }}" class="rounded-circle" width="60"> --}}
 
                                             <div>
                                                 <div class="fw-bold text-dark mb-1">{{ $user->username }}</div>

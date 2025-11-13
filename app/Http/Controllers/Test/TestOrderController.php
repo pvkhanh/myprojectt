@@ -51,18 +51,29 @@ class TestOrderController extends Controller
             }
 
             // Sửa phần tạo user:
-            $user = User::firstOrCreate(
-                ['email' => 'pvkhanh.tech@gmail.com'],
+            // $user = User::firstOrCreate(
+            //     ['email' => 'pvkhanh.tech@gmail.com'],
+            //     [
+            //         'first_name' => 'Khánh',
+            //         'last_name' => 'Phan Văn',
+            //         'username' => generateUsername('khanh', 'phanvan'), // <-- thêm dòng này
+            //         'password' => bcrypt('password123'),
+            //         'phone' => '0987654321',
+            //         'email_verified_at' => now(),
+            //     ]
+            // );
+
+              $user = User::firstOrCreate(
+                ['email' => 'huongnht.31b@gmail.com'],
                 [
-                    'first_name' => 'Khánh',
-                    'last_name' => 'Phan Văn',
-                    'username' => generateUsername('khanh', 'phanvan'), // <-- thêm dòng này
+                    'first_name' => 'Ngô Hoàng Thanh',
+                    'last_name' => 'Hương',
+                    'username' => generateUsername('ngohoangthanh', 'huong'), // <-- thêm dòng này
                     'password' => bcrypt('password123'),
                     'phone' => '0987654321',
                     'email_verified_at' => now(),
                 ]
             );
-
             // 2. Lấy sản phẩm
             $products = Product::where('status', 'active')->take(2)->get();
 

@@ -10,7 +10,7 @@ use App\Models\Scopes\NotificationScopes;
 
 class Notification extends Model
 {
-    use HasFactory, SoftDeletes,NotificationScopes;
+    use HasFactory, SoftDeletes, NotificationScopes;
 
     protected $fillable = [
         'user_id',
@@ -24,11 +24,11 @@ class Notification extends Model
     ];
 
     protected $casts = [
-        'type' => NotificationType::class,
-        'variables' => 'array',
         'is_read' => 'boolean',
         'read_at' => 'datetime',
         'expires_at' => 'datetime',
+        'variables' => 'array', // 🔥 quan trọng
+        'type' => NotificationType::class, // để có thể dùng $notification->type->value
     ];
 
     public function user()

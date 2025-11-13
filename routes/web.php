@@ -15,7 +15,10 @@ use App\Http\Controllers\Admin\{
     BlogController,
     WishlistController,
     PaymentController,
-    MailController
+    NotificationController,
+    MailController,
+    UserAddressController,
+    ShippingAddressController
 };
 use App\Http\Controllers\Test\TestOrderController;
 
@@ -212,6 +215,56 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
         Route::get('/{id}/preview', [MailController::class, 'preview'])->name('preview');
         Route::get('/{id}/analytics', [MailController::class, 'analytics'])->name('analytics');
     });
+    // Notification Management
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('/create', [NotificationController::class, 'create'])->name('create');
+        Route::post('/', [NotificationController::class, 'store'])->name('store');
+        Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
+        Route::get('/{notification}/edit', [NotificationController::class, 'edit'])->name('edit');
+        Route::put('/{notification}', [NotificationController::class, 'update'])->name('update');
+        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+
+        // Bulk actions
+        Route::post('/bulk-send', [NotificationController::class, 'bulkSend'])->name('bulk-send');
+        Route::delete('/bulk-delete', [NotificationController::class, 'bulkDelete'])->name('bulk-delete');
+
+        // Stats
+        Route::get('/stats/dashboard', [NotificationController::class, 'dashboard'])->name('dashboard');
+    });
+    // User Addresses
+    Route::prefix('user-addresses')->name('user-addresses.')->group(function () {
+        Route::get('/', [UserAddressController::class, 'index'])->name('index');
+        Route::get('/create', [UserAddressController::class, 'create'])->name('create');
+        Route::post('/', [UserAddressController::class, 'store'])->name('store');
+        Route::get('/{id}', [UserAddressController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [UserAddressController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [UserAddressController::class, 'update'])->name('update');
+        Route::delete('/{id}', [UserAddressController::class, 'destroy'])->name('destroy');
+
+        // Actions
+        Route::post('/{id}/set-default', [UserAddressController::class, 'setDefault'])->name('set-default');
+        Route::post('/bulk-delete', [UserAddressController::class, 'bulkDelete'])->name('bulk-delete');
+
+        // Trash
+        Route::get('/trash/list', [UserAddressController::class, 'trashed'])->name('trashed');
+        Route::post('/{id}/restore', [UserAddressController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force-delete', [UserAddressController::class, 'forceDelete'])->name('force-delete');
+    });
+
+    // Shipping Addresses
+    Route::prefix('shipping-addresses')->name('shipping-addresses.')->group(function () {
+        Route::get('/', [ShippingAddressController::class, 'index'])->name('index');
+        Route::get('/{id}', [ShippingAddressController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [ShippingAddressController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ShippingAddressController::class, 'update'])->name('update');
+
+        // Statistics & Export
+        Route::get('/stats/dashboard', [ShippingAddressController::class, 'statistics'])->name('statistics');
+        Route::get('/export/csv', [ShippingAddressController::class, 'export'])->name('export');
+        Route::get('/search/ajax', [ShippingAddressController::class, 'search'])->name('search');
+    });
+
 });
 
 /*
@@ -243,4 +296,3 @@ if (app()->environment('local')) {
             ]);
     });
 }
-

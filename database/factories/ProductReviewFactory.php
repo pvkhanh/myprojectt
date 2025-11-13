@@ -50,7 +50,7 @@
 //     }
 // }
 
-<?php
+
 
 namespace Database\Factories;
 
@@ -82,7 +82,7 @@ class ProductReviewFactory extends Factory
      */
     public function pending(): static
     {
-        return $this->state(fn () => ['status' => ReviewStatus::Pending->value]);
+        return $this->state(fn() => ['status' => ReviewStatus::Pending->value]);
     }
 
     /**
@@ -90,7 +90,7 @@ class ProductReviewFactory extends Factory
      */
     public function approved(): static
     {
-        return $this->state(fn () => ['status' => ReviewStatus::Approved->value]);
+        return $this->state(fn() => ['status' => ReviewStatus::Approved->value]);
     }
 
     /**
@@ -98,6 +98,6 @@ class ProductReviewFactory extends Factory
      */
     public function rejected(): static
     {
-        return $this->state(fn () => ['status' => ReviewStatus::Rejected->value]);
+        return $this->state(fn() => ['status' => ReviewStatus::Rejected->value]);
     }
 }

@@ -340,6 +340,7 @@ class UserService
     {
         $user = $this->userRepository->find($id);
         abort_if(!$user, 404);
+
         return view('admin.users.show', compact('user'));
     }
     // =================== EDIT ===================

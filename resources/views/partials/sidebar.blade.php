@@ -58,7 +58,7 @@
             class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
             <i class="fas fa-star me-2"></i> Banner
         </a>
-         <!-- Wishlists -->
+        <!-- Wishlists -->
         <a href="{{ route('admin.wishlists.index') }}"
             class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.wishlists.*') ? 'active' : '' }}">
             <i class="fas fa-star me-2"></i> Wishlist
@@ -66,7 +66,22 @@
         <!-- Payments -->
         <a href="{{ route('admin.payments.index') }}"
             class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
-            <i class="fas fa-star me-2"></i>
+            <i class="fas fa-star me-2"></i>Payment
+        </a>
+        <!-- Notifications -->
+        <a href="{{ route('admin.notifications.index') }}"
+            class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
+            <i class="fas fa-star me-2"></i>Notification
+        </a>
+        <!-- UserAddress -->
+        <a href="{{ route('admin.user-addresses.index') }}"
+            class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.user-addresses.*') ? 'active' : '' }}">
+            <i class="fas fa-star me-2"></i>User Address
+        </a>
+        <!-- ShippingAddress -->
+        <a href="{{ route('admin.shipping-addresses.index') }}"
+            class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.shipping-addresses.*') ? 'active' : '' }}">
+            <i class="fas fa-star me-2"></i>Shipping Address
         </a>
         <!-- Settings -->
         <a href="#" class="sidebar-menu-item nav-link text-light">
