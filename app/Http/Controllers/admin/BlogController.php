@@ -1,402 +1,294 @@
 <?php
 
-// ==========================================
-// 📝 BLOG CONTROLLER
-// ==========================================
-
-// namespace App\Http\Controllers\Admin;
-
-// use App\Http\Controllers\Controller;
-// use App\Repositories\Contracts\BlogRepositoryInterface;
-// use App\Repositories\Contracts\CategoryRepositoryInterface;
-// use App\Enums\BlogStatus;
-// use Illuminate\Http\Request;
-// use Illuminate\Support\Str;
-
-// class BlogController extends Controller
-// {
-//     protected $blogRepository;
-//     protected $categoryRepository;
-
-//     public function __construct(
-//         BlogRepositoryInterface $blogRepository,
-//         CategoryRepositoryInterface $categoryRepository
-//     ) {
-//         $this->blogRepository = $blogRepository;
-//         $this->categoryRepository = $categoryRepository;
-//     }
-
-//     public function index(Request $request)
-//     {
-//         $query = $this->blogRepository->getModel();
-
-//         // Filters
-//         if ($request->filled('status')) {
-//             $query = $query->where('status', $request->status);
-//         }
-
-//         if ($request->filled('category_id')) {
-//             $query = $query->whereHas('categories', function ($q) use ($request) {
-//                 $q->where('categories.id', $request->category_id);
-//             });
-//         }
-
-//         if ($request->filled('author_id')) {
-//             $query = $query->where('author_id', $request->author_id);
-//         }
-
-//         if ($request->filled('keyword')) {
-//             $query = $query->search($request->keyword);
-//         }
-
-//         // Sorting
-//         switch ($request->get('sort_by', 'latest')) {
-//             case 'oldest':
-//                 $query = $query->oldest();
-//                 break;
-//             case 'title':
-//                 $query = $query->orderBy('title', 'asc');
-//                 break;
-//             default:
-//                 $query = $query->latest();
-//         }
-
-//         $blogs = $query->with(['author', 'categories', 'primaryImage'])->paginate(15);
-
-//         // Statistics
-//         $totalBlogs = $this->blogRepository->getModel()->count();
-//         $publishedBlogs = $this->blogRepository->getModel()->published()->count();
-//         $draftBlogs = $this->blogRepository->getModel()->draft()->count();
-//         $totalViews = $this->blogRepository->getModel()->sum('views_count');
-
-//         $statuses = BlogStatus::cases();
-//         $categories = $this->categoryRepository->all();
-//         $authors = \App\Models\User::whereHas('blogs')->get();
-
-//         return view('admin.blogs.index', compact(
-//             'blogs',
-//             'totalBlogs',
-//             'publishedBlogs',
-//             'draftBlogs',
-//             'totalViews',
-//             'statuses',
-//             'categories',
-//             'authors'
-//         ));
-//     }
-
-//     public function create()
-//     {
-//         $categories = $this->categoryRepository->all();
-//         $statuses = BlogStatus::cases();
-
-//         return view('admin.blogs.create', compact('categories', 'statuses'));
-//     }
-
-//     public function store(Request $request)
-//     {
-//         $validated = $request->validate([
-//             'title' => 'required|string|max:255',
-//             'slug' => 'nullable|string|unique:blogs,slug',
-//             'content' => 'required|string',
-//             'status' => 'required|in:' . implode(',', BlogStatus::values()),
-//             'categories' => 'nullable|array',
-//             'categories.*' => 'exists:categories,id',
-//             'primary_image' => 'nullable|image|max:2048',
-//             'meta_title' => 'nullable|string|max:255',
-//             'meta_description' => 'nullable|string|max:500',
-//         ]);
-
-//         $validated['author_id'] = auth()->id();
-//         $validated['slug'] = $validated['slug'] ?? Str::slug($validated['title']);
-
-//         $blog = $this->blogRepository->create($validated);
-
-//         // Attach categories
-//         if ($request->has('categories')) {
-//             $blog->categories()->sync($request->categories);
-//         }
-
-//         // Handle image upload
-//         if ($request->hasFile('primary_image')) {
-//             $path = $request->file('primary_image')->store('blogs', 'public');
-//             $image = \App\Models\Image::create(['path' => $path]);
-//             $blog->images()->attach($image->id, ['is_main' => true]);
-//         }
-
-//         return redirect()
-//             ->route('admin.blogs.index')
-//             ->with('success', 'Blog créé avec succès!');
-//     }
-
-//     public function show($id)
-//     {
-//         $blog = $this->blogRepository->findOrFail($id);
-//         $blog->load(['author', 'categories', 'images']);
-
-//         return view('admin.blogs.show', compact('blog'));
-//     }
-
-//     public function edit($id)
-//     {
-//         $blog = $this->blogRepository->findOrFail($id);
-//         $blog->load(['categories', 'images']);
-        
-//         $categories = $this->categoryRepository->all();
-//         $statuses = BlogStatus::cases();
-
-//         return view('admin.blogs.edit', compact('blog', 'categories', 'statuses'));
-//     }
-
-//     public function update(Request $request, $id)
-//     {
-//         $validated = $request->validate([
-//             'title' => 'required|string|max:255',
-//             'slug' => 'nullable|string|unique:blogs,slug,' . $id,
-//             'content' => 'required|string',
-//             'status' => 'required|in:' . implode(',', BlogStatus::values()),
-//             'categories' => 'nullable|array',
-//             'categories.*' => 'exists:categories,id',
-//             'primary_image' => 'nullable|image|max:2048',
-//         ]);
-
-//         $validated['slug'] = $validated['slug'] ?? Str::slug($validated['title']);
-
-//         $blog = $this->blogRepository->update($id, $validated);
-
-//         // Update categories
-//         if ($request->has('categories')) {
-//             $blog->categories()->sync($request->categories);
-//         }
-
-//         // Handle new image
-//         if ($request->hasFile('primary_image')) {
-//             $path = $request->file('primary_image')->store('blogs', 'public');
-//             $image = \App\Models\Image::create(['path' => $path]);
-            
-//             // Remove old primary image
-//             $blog->images()->updateExistingPivot(
-//                 $blog->images()->wherePivot('is_main', true)->pluck('id')->toArray(),
-//                 ['is_main' => false]
-//             );
-            
-//             $blog->images()->attach($image->id, ['is_main' => true]);
-//         }
-
-//         return redirect()
-//             ->route('admin.blogs.index')
-//             ->with('success', 'Blog mis à jour avec succès!');
-//     }
-
-//     public function destroy($id)
-//     {
-//         $this->blogRepository->delete($id);
-
-//         return redirect()
-//             ->route('admin.blogs.index')
-//             ->with('success', 'Blog supprimé avec succès!');
-//     }
-
-//     public function bulkDelete(Request $request)
-//     {
-//         $request->validate(['ids' => 'required|array']);
-
-//         foreach ($request->ids as $id) {
-//             $this->blogRepository->delete($id);
-//         }
-
-//         return response()->json([
-//             'success' => true,
-//             'message' => count($request->ids) . ' blogs supprimés avec succès!'
-//         ]);
-//     }
-
-//     public function bulkUpdateStatus(Request $request)
-//     {
-//         $request->validate([
-//             'ids' => 'required|array',
-//             'status' => 'required|in:' . implode(',', BlogStatus::values())
-//         ]);
-
-//         foreach ($request->ids as $id) {
-//             $this->blogRepository->update($id, ['status' => $request->status]);
-//         }
-
-//         return response()->json([
-//             'success' => true,
-//             'message' => count($request->ids) . ' blogs mis à jour!'
-//         ]);
-//     }
-// }
-
-
-
-
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Repositories\Contracts\BlogRepositoryInterface;
-use App\Repositories\Contracts\CategoryRepositoryInterface;
-use App\Services\BlogService;
-use App\Http\Requests\BlogRequest;
+use App\Models\Blog;
+use App\Models\Category;
+use App\Models\User;
+use App\Models\Image;
 use App\Enums\BlogStatus;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
-    public function __construct(
-        protected BlogRepositoryInterface $blogRepository,
-        protected CategoryRepositoryInterface $categoryRepository,
-        protected BlogService $blogService
-    ) {}
-
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
-        try {
-            $query = $this->blogRepository->getModel();
+        $query = Blog::with(['author', 'categories', 'images'])->latest();
 
-            if ($request->filled('status')) $query = $query->where('status', $request->status);
-            if ($request->filled('category_id')) $query = $query->whereHas('categories', fn($q) => $q->where('categories.id', $request->category_id));
-            if ($request->filled('author_id')) $query = $query->where('author_id', $request->author_id);
-            if ($request->filled('keyword')) $query = $query->search($request->keyword);
-
-            switch ($request->get('sort_by', 'latest')) {
-                case 'oldest': $query = $query->oldest(); break;
-                case 'title': $query = $query->orderBy('title', 'asc'); break;
-                default: $query = $query->latest();
-            }
-
-            $blogs = $query->with(['author','categories','primaryImage'])->paginate(15);
-            $totalBlogs = $this->blogRepository->getModel()->count();
-            $publishedBlogs = $this->blogRepository->getModel()->published()->count();
-            $draftBlogs = $this->blogRepository->getModel()->draft()->count();
-            $totalViews = $this->blogRepository->getModel()->sum('views_count');
-
-            $statuses = BlogStatus::cases();
-            $categories = $this->categoryRepository->all();
-            $authors = \App\Models\User::whereHas('blogs')->get();
-
-            return view('admin.blogs.index', compact(
-                'blogs','totalBlogs','publishedBlogs','draftBlogs','totalViews','statuses','categories','authors'
-            ));
-        } catch (\Throwable $e) {
-            Log::error("BlogController@index error: ".$e->getMessage(), ['trace'=>$e->getTraceAsString()]);
-            return back()->with('error', 'Erreur lors du chargement des blogs.');
+        // Search filter
+        if ($request->filled('keyword')) {
+            $query->search($request->keyword);
         }
+
+        // Category filter
+        if ($request->filled('category_id')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('categories.id', $request->category_id);
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Author filter
+        if ($request->filled('author_id')) {
+            $query->byAuthor($request->author_id);
+        }
+
+        // Sort
+        switch ($request->get('sort_by', 'latest')) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'title':
+                $query->orderBy('title');
+                break;
+            default:
+                $query->latest();
+        }
+
+        // Pagination
+        $perPage = $request->get('per_page', 15);
+        $blogs = $query->paginate($perPage)->withQueryString();
+
+        // Data for filters
+        $categories = Category::all();
+        $authors = User::whereHas('blogs')->get();
+        $statuses = BlogStatus::cases();
+
+        // Statistics
+        $totalBlogs = Blog::count();
+        $publishedBlogs = Blog::published()->count();
+        $draftBlogs = Blog::draft()->count();
+        $totalViews = Blog::sum('views_count');
+
+        return view('admin.blogs.index', compact(
+            'blogs',
+            'categories',
+            'authors',
+            'statuses',
+            'totalBlogs',
+            'publishedBlogs',
+            'draftBlogs',
+            'totalViews'
+        ));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        try {
-            $categories = $this->categoryRepository->all();
-            $statuses = BlogStatus::cases();
-            return view('admin.blogs.create', compact('categories','statuses'));
-        } catch (\Throwable $e) {
-            Log::error("BlogController@create error: ".$e->getMessage(), ['trace'=>$e->getTraceAsString()]);
-            return back()->with('error', 'Impossible de charger la page de création.');
-        }
+        $categories = Category::all();
+        $statuses = BlogStatus::cases();
+
+        return view('admin.blogs.create', compact('categories', 'statuses'));
     }
 
-    public function store(BlogRequest $request)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
-        try {
-            $data = $request->validated();
-            if ($request->hasFile('primary_image')) $data['primary_image'] = $request->file('primary_image');
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:blogs,slug',
+            'content' => 'required|string',
+            'status' => 'required|in:' . implode(',', array_column(BlogStatus::cases(), 'value')),
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id',
+            'primary_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
 
-            $this->blogService->createBlog($data);
-            return redirect()->route('admin.blogs.index')->with('success','Blog créé avec succès!');
-        } catch (\Throwable $e) {
-            Log::error("BlogController@store error: ".$e->getMessage(), ['trace'=>$e->getTraceAsString()]);
-            return back()->withInput()->with('error','Erreur lors de la création du blog.');
+        // Auto-generate slug if not provided
+        if (empty($validated['slug'])) {
+            $validated['slug'] = Str::slug($validated['title']);
         }
+
+        $validated['author_id'] = Auth::id();
+
+        // Create blog
+        $blog = Blog::create($validated);
+
+        // Attach categories
+        if ($request->has('categories')) {
+            $blog->categories()->sync($request->categories);
+        }
+
+        // Handle primary image
+        if ($request->hasFile('primary_image')) {
+            $this->attachPrimaryImage($blog, $request->file('primary_image'));
+        }
+
+        return redirect()->route('admin.blogs.index')
+            ->with('success', 'Bài viết đã được tạo thành công!');
     }
 
-    public function edit($id)
+    /**
+     * Display the specified resource.
+     */
+    public function show(Blog $blog)
     {
-        try {
-            $blog = $this->blogRepository->findOrFail($id);
-            $blog->load(['categories','images']);
-            $categories = $this->categoryRepository->all();
-            $statuses = BlogStatus::cases();
-            return view('admin.blogs.edit', compact('blog','categories','statuses'));
-        } catch (\Throwable $e) {
-            Log::error("BlogController@edit error: ".$e->getMessage(), ['trace'=>$e->getTraceAsString()]);
-            return back()->with('error','Impossible de charger la page d\'édition.');
-        }
+        $blog->load(['author', 'categories', 'images']);
+        return view('admin.blogs.show', compact('blog'));
     }
 
-    public function update(BlogRequest $request, $id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Blog $blog)
     {
-        try {
-            $data = $request->validated();
-            if ($request->hasFile('primary_image')) $data['primary_image'] = $request->file('primary_image');
+        $blog->load(['author', 'categories', 'images']);
+        $categories = Category::all();
+        $statuses = BlogStatus::cases();
 
-            $this->blogService->updateBlog($id, $data);
-            return redirect()->route('admin.blogs.index')->with('success','Blog mis à jour avec succès!');
-        } catch (\Throwable $e) {
-            Log::error("BlogController@update error: ".$e->getMessage(), ['trace'=>$e->getTraceAsString()]);
-            return back()->withInput()->with('error','Erreur lors de la mise à jour du blog.');
-        }
+        return view('admin.blogs.edit', compact('blog', 'categories', 'statuses'));
     }
 
-    public function show($id)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Blog $blog)
     {
-        try {
-            $blog = $this->blogRepository->findOrFail($id);
-            $blog->load(['author','categories','images']);
-            return view('admin.blogs.show', compact('blog'));
-        } catch (\Throwable $e) {
-            Log::error("BlogController@show error: ".$e->getMessage(), ['trace'=>$e->getTraceAsString()]);
-            return back()->with('error','Impossible de charger le blog.');
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:blogs,slug,' . $blog->id,
+            'content' => 'required|string',
+            'status' => 'required|in:' . implode(',', array_column(BlogStatus::cases(), 'value')),
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id',
+            'primary_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
+
+        // Auto-generate slug if changed
+        if (empty($validated['slug']) || $validated['slug'] !== $blog->slug) {
+            $validated['slug'] = Str::slug($validated['title']);
         }
+
+        $blog->update($validated);
+
+        // Update categories
+        if ($request->has('categories')) {
+            $blog->categories()->sync($request->categories);
+        }
+
+        // Handle new primary image
+        if ($request->hasFile('primary_image')) {
+            // Remove old primary image
+            $oldPrimaryImage = $blog->images()->wherePivot('is_main', true)->first();
+            if ($oldPrimaryImage) {
+                Storage::disk('public')->delete($oldPrimaryImage->path);
+                $blog->images()->detach($oldPrimaryImage->id);
+                $oldPrimaryImage->delete();
+            }
+
+            $this->attachPrimaryImage($blog, $request->file('primary_image'));
+        }
+
+        return redirect()->route('admin.blogs.index')
+            ->with('success', 'Bài viết đã được cập nhật thành công!');
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Blog $blog)
     {
-        try {
-            $this->blogService->deleteBlog($id);
-            return redirect()->route('admin.blogs.index')->with('success','Blog supprimé avec succès!');
-        } catch (\Throwable $e) {
-            Log::error("BlogController@destroy error: ".$e->getMessage(), ['trace'=>$e->getTraceAsString()]);
-            return back()->with('error','Erreur lors de la suppression du blog.');
+        // Delete all associated images
+        foreach ($blog->images as $image) {
+            Storage::disk('public')->delete($image->path);
+            $image->delete();
         }
+
+        $blog->delete();
+
+        return redirect()->route('admin.blogs.index')
+            ->with('success', 'Bài viết đã được xóa thành công!');
     }
 
-    public function bulkDelete(Request $request)
-    {
-        try {
-            $request->validate(['ids'=>'required|array']);
-            $result = $this->blogService->bulkDelete($request->ids);
-            $message = $result['deleted'] > 0
-                ? "Supprimé {$result['deleted']} blogs." . (!empty($result['errors']) ? ' Erreurs: '.implode(', ',$result['errors']):'')
-                : implode(', ',$result['errors']);
-
-            return response()->json(['success'=>$result['deleted']>0,'message'=>$message]);
-        } catch (\Throwable $e) {
-            Log::error("BlogController@bulkDelete error: ".$e->getMessage(), ['trace'=>$e->getTraceAsString()]);
-            return response()->json(['success'=>false,'message'=>'Erreur lors de la suppression en masse.']);
-        }
-    }
-
+    /**
+     * Bulk update status
+     */
     public function bulkUpdateStatus(Request $request)
     {
-        try {
-            $request->validate([
-                'ids'=>'required|array',
-                'status'=>'required|in:'.implode(',',BlogStatus::values())
+        $ids = $request->input('ids', []);
+        $status = $request->input('status');
+
+        if (empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có bài viết nào được chọn!'
             ]);
-
-            $result = $this->blogService->bulkUpdateStatus($request->ids,$request->status);
-            $message = $result['updated'] > 0
-                ? "Mis à jour {$result['updated']} blogs." . (!empty($result['errors']) ? ' Erreurs: '.implode(', ',$result['errors']):'')
-                : implode(', ',$result['errors']);
-
-            return response()->json(['success'=>$result['updated']>0,'message'=>$message]);
-        } catch (\Throwable $e) {
-            Log::error("BlogController@bulkUpdateStatus error: ".$e->getMessage(), ['trace'=>$e->getTraceAsString()]);
-            return response()->json(['success'=>false,'message'=>'Erreur lors de la mise à jour du statut en masse.']);
         }
+
+        Blog::whereIn('id', $ids)->update(['status' => $status]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã cập nhật trạng thái cho ' . count($ids) . ' bài viết!'
+        ]);
+    }
+
+    /**
+     * Bulk delete blogs
+     */
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có bài viết nào được chọn!'
+            ]);
+        }
+
+        $blogs = Blog::whereIn('id', $ids)->get();
+
+        foreach ($blogs as $blog) {
+            foreach ($blog->images as $image) {
+                Storage::disk('public')->delete($image->path);
+                $image->delete();
+            }
+            $blog->delete();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã xóa ' . count($ids) . ' bài viết!'
+        ]);
+    }
+
+    /**
+     * Attach primary image to blog
+     */
+    private function attachPrimaryImage($blog, $file)
+    {
+        $path = $file->store('blogs', 'public');
+
+        $image = Image::create([
+            'path' => $path,
+            'type' => 'blog',
+            'alt_text' => $blog->title,
+            'is_active' => true,
+        ]);
+
+        $blog->images()->attach($image->id, [
+            'is_main' => true,
+            'position' => 1
+        ]);
     }
 }
