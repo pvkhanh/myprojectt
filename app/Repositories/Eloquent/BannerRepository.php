@@ -14,6 +14,11 @@ class BannerRepository extends BaseRepository implements BannerRepositoryInterfa
         return Banner::class;
     }
 
+    public function getAll(): Collection
+    {
+        return $this->getModel()->all();
+    }
+
     public function getActive(): Collection
     {
         return $this->getModel()->active()->orderForDisplay()->get();

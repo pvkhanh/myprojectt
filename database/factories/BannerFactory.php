@@ -17,10 +17,15 @@ class BannerFactory extends Factory
         return [
             'title' => $this->faker->sentence(3),
             'url' => $this->faker->url(),
-            'is_active' => $this->faker->boolean(80), // 80% active
-            'position' => $this->faker->numberBetween(1, 10),
+            'image_id' => null,
+            'type' => $this->faker->randomElement(['hero', 'sidebar', 'popup', 'footer']),
+            'is_active' => $this->faker->boolean(80),
+            'position' => $this->faker->numberBetween(0, 10),
+            'start_at' => $this->faker->dateTimeBetween('-1 month', '+1 month'),
+            'end_at' => $this->faker->dateTimeBetween('+1 month', '+3 months'),
         ];
     }
+
 
     public function active(): static
     {

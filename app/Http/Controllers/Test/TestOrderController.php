@@ -74,6 +74,7 @@ class TestOrderController extends Controller
                     'email_verified_at' => now(),
                 ]
             );
+
             // 2. Lấy sản phẩm
             $products = Product::where('status', 'active')->take(2)->get();
 

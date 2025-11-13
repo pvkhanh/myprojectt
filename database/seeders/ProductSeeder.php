@@ -26,6 +26,7 @@ class ProductSeeder extends Seeder
         });
     }
 }
+
 // namespace Database\Seeders;
 
 // use Illuminate\Database\Seeder;
