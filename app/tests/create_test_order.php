@@ -258,23 +258,14 @@ if (!function_exists('createTestOrder')) {
             $user = User::firstOrCreate(
                 ['email' => 'pvkhanh.tech@gmail.com'],
                 [
-                    'first_name' => 'Ngô Hoàng Thanh  ',
-                    'last_name' => 'Hương',
+                    'first_name' => 'Phan Văn  ',
+                    'last_name' => 'Khánh',
                     'password' => bcrypt('password123'),
                     'phone' => '0123456789',
                     'email_verified_at' => now(),
                 ]
             );
-            //   $user = User::firstOrCreate(
-            //                 ['email' => 'ledanhhiep2005@gmail.com'],
-            //                 [
-            //                     'first_name' => 'Hiệp',
-            //                     'last_name' => 'Pro',
-            //                     'password' => bcrypt('password123'),
-            //                     'phone' => '0123456789',
-            //                     'email_verified_at' => now(),
-            //                 ]
-            //             );
+           
             echo "✅ User: {$user->email}\n";
 
             // 2. Lấy 2 sản phẩm ngẫu nhiên
