@@ -47,7 +47,10 @@ Route::get('/', [DashboardController::class, 'index'])->name('home');
 | ADMIN ROUTES
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
+// Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
+Route::prefix('admin')->name('admin.')
+    ->middleware(['auth:sanctum', \App\Http\Middleware\RoleMiddleware::class . ':admin'])
+    ->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
