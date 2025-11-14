@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+// use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth:sanctum');
 
 
 // use Illuminate\Support\Facades\Route;
@@ -71,44 +71,111 @@ Route::get('/user', function (Request $request) {
 // });
 
 
-use App\Http\Controllers\Api\UserApiController;
-use App\Http\Controllers\Api\AuthApiController;
-Route::get('/test', function() {
-    return ['ok' => true];
-});
-
-// // USERS API
-Route::get('/users', [UserApiController::class, 'index']);
-Route::get('/users/{id}', [UserApiController::class, 'show']);
-Route::post('/users', [UserApiController::class, 'store']);
-Route::put('/users/{id}', [UserApiController::class, 'update']);
-Route::delete('/users/{id}', [UserApiController::class, 'destroy']);
-
-// Route::prefix('users')->group(function () {
-//     Route::get('/', [UserApiController::class, 'index']);          // Danh sách người dùng
-//     Route::get('/{id}', [UserApiController::class, 'show']);       // Chi tiết user
-//     Route::post('/', [UserApiController::class, 'store']);         // Tạo mới user
-//     Route::put('/{id}', [UserApiController::class, 'update']);     // Cập nhật user
-//     Route::delete('/{id}', [UserApiController::class, 'destroy']); // Xóa user
+// use App\Http\Controllers\Api\UserApiController;
+// use App\Http\Controllers\Api\AuthApiController;
+// Route::get('/test', function() {
+//     return ['ok' => true];
 // });
 
-Route::prefix('auth')->group(function () {
+// // // USERS API
+// Route::get('/users', [UserApiController::class, 'index']);
+// Route::get('/users/{id}', [UserApiController::class, 'show']);
+// Route::post('/users', [UserApiController::class, 'store']);
+// Route::put('/users/{id}', [UserApiController::class, 'update']);
+// Route::delete('/users/{id}', [UserApiController::class, 'destroy']);
 
-    // Public routes
-    Route::post('/register', [AuthApiController::class, 'register'])
-        ->name('api.auth.register');
+// // Route::prefix('users')->group(function () {
+// //     Route::get('/', [UserApiController::class, 'index']);          // Danh sách người dùng
+// //     Route::get('/{id}', [UserApiController::class, 'show']);       // Chi tiết user
+// //     Route::post('/', [UserApiController::class, 'store']);         // Tạo mới user
+// //     Route::put('/{id}', [UserApiController::class, 'update']);     // Cập nhật user
+// //     Route::delete('/{id}', [UserApiController::class, 'destroy']); // Xóa user
+// // });
 
-    Route::post('/login', [AuthApiController::class, 'login'])
-        ->name('api.auth.login');
+// Route::prefix('auth')->group(function () {
 
-    // Private routes
-    Route::middleware('auth:sanctum')->group(function () {
+//     // Public routes
+//     Route::post('/register', [AuthApiController::class, 'register'])
+//         ->name('api.auth.register');
 
-        Route::post('/logout', [AuthApiController::class, 'logout'])
-            ->name('api.auth.logout');
+//     Route::post('/login', [AuthApiController::class, 'login'])
+//         ->name('api.auth.login');
 
-        Route::get('/me', [AuthApiController::class, 'me'])
-            ->name('api.auth.me');
-    });
+//     // Private routes
+//     Route::middleware('auth:sanctum')->group(function () {
 
+//         Route::post('/logout', [AuthApiController::class, 'logout'])
+//             ->name('api.auth.logout');
+
+//         Route::get('/me', [AuthApiController::class, 'me'])
+//             ->name('api.auth.me');
+//     });
+
+// });
+
+
+
+
+
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\{
+    AuthApiController,
+    ProductApiController,
+    CategoryApiController,
+    BannerApiController,
+    UserApiController,
+    OrderApiController,
+    PaymentApiController,
+    WishlistApiController
+};
+
+/*
+|--------------------------------------------------------------------------
+| PUBLIC API ROUTES
+|--------------------------------------------------------------------------
+*/
+
+// AUTH
+Route::post('register', [AuthApiController::class, 'register']);
+Route::post('login', [AuthApiController::class, 'login']);
+
+// PRODUCTS
+Route::get('products', [ProductApiController::class, 'index']);
+Route::get('products/{id}', [ProductApiController::class, 'show']);
+
+// CATEGORIES
+Route::get('categories', [CategoryApiController::class, 'index']);
+Route::get('categories/{id}', [CategoryApiController::class, 'show']);
+
+// BANNERS
+Route::get('banners', [BannerApiController::class, 'index']);
+
+// Optional: WISHLIST for guests (read only)
+Route::get('wishlists/product/{productId}', [WishlistApiController::class, 'productWishlists']);
+
+/*
+|--------------------------------------------------------------------------
+| PROTECTED API ROUTES (Require Auth)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')->group(function () {
+
+    // USER PROFILE
+    Route::get('user', [UserApiController::class, 'profile']);
+    Route::put('user', [UserApiController::class, 'updateProfile']);
+
+    // WISHLIST
+    Route::get('wishlists', [WishlistApiController::class, 'index']);
+    Route::post('wishlists', [WishlistApiController::class, 'store']);
+    Route::delete('wishlists/{id}', [WishlistApiController::class, 'destroy']);
+
+    // ORDERS
+    Route::get('orders', [OrderApiController::class, 'index']);
+    Route::get('orders/{id}', [OrderApiController::class, 'show']);
+    Route::post('orders', [OrderApiController::class, 'store']);
+    Route::post('orders/{id}/cancel', [OrderApiController::class, 'cancel']);
+
+    // PAYMENTS
+    Route::post('payments/{id}/confirm', [PaymentApiController::class, 'confirm']);
 });
