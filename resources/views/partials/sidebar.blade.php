@@ -63,17 +63,17 @@
             class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.wishlists.*') ? 'active' : '' }}">
             <i class="fas fa-star me-2"></i> Wishlist
         </a>
-        <!-- Payments -->
+        {{-- <!-- Payments -->
         <a href="{{ route('admin.payments.index') }}"
             class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
             <i class="fas fa-star me-2"></i>Payment
-        </a>
+        </a> --}}
         <!-- Notifications -->
         <a href="{{ route('admin.notifications.index') }}"
             class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
             <i class="fas fa-star me-2"></i>Notification
         </a>
-        <!-- UserAddress -->
+        {{-- <!-- UserAddress -->
         <a href="{{ route('admin.user-addresses.index') }}"
             class="sidebar-menu-item nav-link text-light {{ request()->routeIs('admin.user-addresses.*') ? 'active' : '' }}">
             <i class="fas fa-star me-2"></i>User Address
@@ -86,6 +86,6 @@
         <!-- Settings -->
         <a href="#" class="sidebar-menu-item nav-link text-light">
             <i class="fas fa-cog me-2"></i> Cài đặt
-        </a>
+        </a> --}}
     </nav>
 </div>

@@ -90,7 +90,7 @@
                             <textarea name="content" id="editor" class="@error('content') is-invalid @enderror" required>{{ old('content') }}</textarea>
                             @error('content')
                                 <div class="error-message">{{ $message }}</div>
-                            @enderror>
+                            @enderror
                         </div>
                     </div>
 
