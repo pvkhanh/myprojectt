@@ -50,7 +50,7 @@
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Thay đổi ảnh (Tùy chọn)</label>
                             <div class="border-dashed border-2 rounded p-4 text-center bg-light" id="dropZone">
-                                <input type="file" name="image" class="d-none" accept="image/*" id="imageInput">
+                                <input type="file" name="image_file" class="d-none" accept="image/*" id="imageInput">
                                 <div id="dropZoneContent">
                                     <i class="fas fa-cloud-upload-alt fa-3x text-warning mb-3"></i>
                                     <p class="mb-2 fw-semibold">Kéo thả ảnh mới vào đây hoặc <a href="#" id="browseBtn" class="text-warning">chọn file</a></p>
@@ -191,3 +191,10 @@
 @endpush
 
 @endsection
+
+
+
+
+
+
+

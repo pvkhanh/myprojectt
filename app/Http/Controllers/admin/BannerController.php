@@ -20,9 +20,9 @@ class BannerController extends Controller
 
         // Search filter
         if ($request->filled('keyword')) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('title', 'LIKE', "%{$request->keyword}%")
-                  ->orWhere('url', 'LIKE', "%{$request->keyword}%");
+                    ->orWhere('url', 'LIKE', "%{$request->keyword}%");
             });
         }
 
@@ -66,6 +66,33 @@ class BannerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'title' => 'required|string|max:255',
+    //         'url' => 'nullable|url|max:500',
+    //         'type' => 'nullable|string|in:hero,sidebar,popup,footer',
+    //         'position' => 'nullable|integer|min:0',
+    //         'is_active' => 'nullable|boolean',
+    //         'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+    //         'start_at' => 'nullable|date',
+    //         'end_at' => 'nullable|date|after_or_equal:start_at',
+    //     ]);
+
+    //     $validated['is_active'] = $request->has('is_active');
+
+    //     // Handle image upload
+    //     if ($request->hasFile('image_file')) {
+    //         $image = $this->uploadImage($request->file('image_file'));
+    //         $validated['image_id'] = $image->id;
+    //     }
+
+    //     Banner::create($validated);
+
+    //     return redirect()->route('admin.banners.index')
+    //         ->with('success', 'Banner đã được tạo thành công!');
+    // }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -73,17 +100,26 @@ class BannerController extends Controller
             'url' => 'nullable|url|max:500',
             'type' => 'nullable|string|in:hero,sidebar,popup,footer',
             'position' => 'nullable|integer|min:0',
-            'is_active' => 'nullable|boolean',
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'start_at' => 'nullable|date',
             'end_at' => 'nullable|date|after_or_equal:start_at',
         ]);
 
+        // Chuyển checkbox thành boolean
         $validated['is_active'] = $request->has('is_active');
 
-        // Handle image upload
+        // Upload ảnh nếu có
         if ($request->hasFile('image_file')) {
-            $image = $this->uploadImage($request->file('image_file'));
+            $file = $request->file('image_file');
+            $path = $file->store('banners', 'public');
+
+            $image = Image::create([
+                'path' => $path,
+                'type' => 'banner',
+                'alt_text' => null,
+                'is_active' => true,
+            ]);
+
             $validated['image_id'] = $image->id;
         }
 
@@ -92,6 +128,8 @@ class BannerController extends Controller
         return redirect()->route('admin.banners.index')
             ->with('success', 'Banner đã được tạo thành công!');
     }
+
+
 
     /**
      * Display the specified resource.
@@ -121,26 +159,37 @@ class BannerController extends Controller
             'url' => 'nullable|url|max:500',
             'type' => 'nullable|string|in:hero,sidebar,popup,footer',
             'position' => 'nullable|integer|min:0',
-            'is_active' => 'nullable|boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'start_at' => 'nullable|date',
             'end_at' => 'nullable|date|after_or_equal:start_at',
         ]);
 
+        // Chuyển checkbox thành boolean
         $validated['is_active'] = $request->has('is_active');
 
-        // Handle new image upload
-        if ($request->hasFile('image')) {
-            // Delete old image
+        // Upload ảnh mới nếu có
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $path = $file->store('banners', 'public');
+
+            // Nếu banner đã có ảnh, xóa ảnh cũ
             if ($banner->image) {
                 Storage::disk('public')->delete($banner->image->path);
                 $banner->image->delete();
             }
 
-            $image = $this->uploadImage($request->file('image'));
+            // Lưu ảnh mới vào bảng images
+            $image = Image::create([
+                'path' => $path,
+                'type' => 'banner',
+                'alt_text' => null,
+                'is_active' => true,
+            ]);
+
             $validated['image_id'] = $image->id;
         }
 
+        // Cập nhật banner
         $banner->update($validated);
 
         return redirect()->route('admin.banners.index')
@@ -253,7 +302,7 @@ class BannerController extends Controller
     private function uploadImage($file)
     {
         $path = $file->store('banners', 'public');
-        
+
         return Image::create([
             'path' => $path,
             'type' => 'banner',
