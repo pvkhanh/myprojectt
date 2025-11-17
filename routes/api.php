@@ -1,133 +1,15 @@
 <?php
 
-// use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\Route;
-
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
-
-
-// use Illuminate\Support\Facades\Route;
-// use App\Http\Controllers\api\{
-//     AuthController,
-//     ProductController,
-//     CategoryController,
-//     BannerController,
-//     UserController
-// };
-
-// // -------------------------
-// // AUTH (Không cần middleware)
-// // -------------------------
-// Route::post('/register', [AuthController::class, 'apiRegister']);
-// Route::post('/login', [AuthController::class, 'apiLogin']);
-// Route::post('/logout', [AuthController::class, 'apiLogout']); // Logout vẫn không cần token
-
-// // -------------------------
-// // PRODUCTS
-// // -------------------------
-// Route::prefix('products')->group(function(){
-//     Route::get('/', [ProductController::class, 'apiIndex']);       // GET all
-//     Route::get('/{id}', [ProductController::class, 'apiShow']);    // GET detail
-//     Route::post('/', [ProductController::class, 'apiStore']);      // CREATE
-//     Route::put('/{id}', [ProductController::class, 'apiUpdate']);  // UPDATE
-//     Route::delete('/{id}', [ProductController::class, 'apiDestroy']); // DELETE
-// });
-
-// // -------------------------
-// // CATEGORIES
-// // -------------------------
-// Route::prefix('categories')->group(function(){
-//     Route::get('/', [CategoryController::class, 'apiIndex']);
-//     Route::get('/{id}', [CategoryController::class, 'apiShow']);
-//     Route::post('/', [CategoryController::class, 'apiStore']);
-//     Route::put('/{id}', [CategoryController::class, 'apiUpdate']);
-//     Route::delete('/{id}', [CategoryController::class, 'apiDestroy']);
-// });
-
-// // -------------------------
-// // BANNERS
-// // -------------------------
-// Route::prefix('banners')->group(function(){
-//     Route::get('/', [BannerController::class, 'apiIndex']);
-//     Route::get('/{id}', [BannerController::class, 'apiShow']);
-//     Route::post('/', [BannerController::class, 'apiStore']);
-//     Route::put('/{id}', [BannerController::class, 'apiUpdate']);
-//     Route::delete('/{id}', [BannerController::class, 'apiDestroy']);
-//     Route::post('/{id}/toggle-status', [BannerController::class, 'apiToggleStatus']);
-// });
-
-// // -------------------------
-// // USERS
-// // -------------------------
-// Route::prefix('users')->group(function(){
-//     Route::get('/', [UserController::class, 'apiIndex']);
-//     Route::get('/{id}', [UserController::class, 'apiShow']);
-//     Route::post('/', [UserController::class, 'apiStore']);
-//     Route::put('/{id}', [UserController::class, 'apiUpdate']);
-//     Route::delete('/{id}', [UserController::class, 'apiDestroy']);
-//     Route::post('/{id}/toggle-status', [UserController::class, 'apiToggleStatus']);
-// });
-
-
-// use App\Http\Controllers\Api\UserApiController;
-// use App\Http\Controllers\Api\AuthApiController;
-// Route::get('/test', function() {
-//     return ['ok' => true];
-// });
-
-// // // USERS API
-// Route::get('/users', [UserApiController::class, 'index']);
-// Route::get('/users/{id}', [UserApiController::class, 'show']);
-// Route::post('/users', [UserApiController::class, 'store']);
-// Route::put('/users/{id}', [UserApiController::class, 'update']);
-// Route::delete('/users/{id}', [UserApiController::class, 'destroy']);
-
-// // Route::prefix('users')->group(function () {
-// //     Route::get('/', [UserApiController::class, 'index']);          // Danh sách người dùng
-// //     Route::get('/{id}', [UserApiController::class, 'show']);       // Chi tiết user
-// //     Route::post('/', [UserApiController::class, 'store']);         // Tạo mới user
-// //     Route::put('/{id}', [UserApiController::class, 'update']);     // Cập nhật user
-// //     Route::delete('/{id}', [UserApiController::class, 'destroy']); // Xóa user
-// // });
-
-// Route::prefix('auth')->group(function () {
-
-//     // Public routes
-//     Route::post('/register', [AuthApiController::class, 'register'])
-//         ->name('api.auth.register');
-
-//     Route::post('/login', [AuthApiController::class, 'login'])
-//         ->name('api.auth.login');
-
-//     // Private routes
-//     Route::middleware('auth:sanctum')->group(function () {
-
-//         Route::post('/logout', [AuthApiController::class, 'logout'])
-//             ->name('api.auth.logout');
-
-//         Route::get('/me', [AuthApiController::class, 'me'])
-//             ->name('api.auth.me');
-//     });
-
-// });
-
-
-
-
-
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\{
     AuthApiController,
-    ProductApiController,
-    CategoryApiController,
-    BannerApiController,
-    UserApiController,
-    OrderApiController,
-    PaymentApiController,
-    WishlistApiController
+    ProductController,
+    CategoryController,
+    BannerController,
+    UserController,
+    OrderController,
+    PaymentController,
+    WishlistController
 };
 
 /*
@@ -136,23 +18,36 @@ use App\Http\Controllers\Api\{
 |--------------------------------------------------------------------------
 */
 
-// AUTH
+// -------------------------
+// AUTH (Public)
+// -------------------------
 Route::post('register', [AuthApiController::class, 'register']);
 Route::post('login', [AuthApiController::class, 'login']);
 
-// PRODUCTS
-Route::get('products', [ProductApiController::class, 'index']);
-Route::get('products/{id}', [ProductApiController::class, 'show']);
+// -------------------------
+// PRODUCTS (Public)
+// -------------------------
+Route::prefix('products')->group(function () {
+    Route::get('/', [ProductController::class, 'index']);        // Danh sách
+    Route::get('/{id}', [ProductController::class, 'show']);     // Chi tiết
+});
 
-// CATEGORIES
-Route::get('categories', [CategoryApiController::class, 'index']);
-Route::get('categories/{id}', [CategoryApiController::class, 'show']);
+// -------------------------
+// CATEGORIES (Public)
+// -------------------------
+Route::get('categories', [CategoryController::class, 'index']);
+Route::get('categories/{id}', [CategoryController::class, 'show']);
 
-// BANNERS
-Route::get('banners', [BannerApiController::class, 'index']);
+// -------------------------
+// BANNERS (Public)
+// -------------------------
+Route::get('banners', [BannerController::class, 'index']);
 
-// Optional: WISHLIST for guests (read only)
-Route::get('wishlists/product/{productId}', [WishlistApiController::class, 'productWishlists']);
+// -------------------------
+// WISHLIST (Public - xem số lượt wishlist sản phẩm)
+// -------------------------
+Route::get('wishlists/product/{productId}', [WishlistController::class, 'productWishlists']);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -161,21 +56,91 @@ Route::get('wishlists/product/{productId}', [WishlistApiController::class, 'prod
 */
 Route::middleware('auth:sanctum')->group(function () {
 
-    // USER PROFILE
-    Route::get('user', [UserApiController::class, 'profile']);
-    Route::put('user', [UserApiController::class, 'updateProfile']);
+    // -------------------------
+    // AUTH USER PROFILE
+    // -------------------------
+    Route::post('logout', [AuthApiController::class, 'logout']);
+    Route::get('user', [UserController::class, 'profile']);          // Xem profile
+    Route::put('user', [UserController::class, 'updateProfile']);   // Cập nhật profile
 
-    // WISHLIST
-    Route::get('wishlists', [WishlistApiController::class, 'index']);
-    Route::post('wishlists', [WishlistApiController::class, 'store']);
-    Route::delete('wishlists/{id}', [WishlistApiController::class, 'destroy']);
+    // -------------------------
+    // WISHLIST (Auth user)
+    // -------------------------
+    Route::get('wishlists', [WishlistController::class, 'index']);
+    Route::post('wishlists', [WishlistController::class, 'store']);
+    Route::delete('wishlists/{id}', [WishlistController::class, 'destroy']);
 
+    // -------------------------
     // ORDERS
-    Route::get('orders', [OrderApiController::class, 'index']);
-    Route::get('orders/{id}', [OrderApiController::class, 'show']);
-    Route::post('orders', [OrderApiController::class, 'store']);
-    Route::post('orders/{id}/cancel', [OrderApiController::class, 'cancel']);
+    // -------------------------
+    Route::get('orders', [OrderController::class, 'index']);
+    Route::get('orders/{id}', [OrderController::class, 'show']);
+    Route::post('orders', [OrderController::class, 'store']);
+    Route::post('orders/{id}/cancel', [OrderController::class, 'cancel']);
 
+    // -------------------------
     // PAYMENTS
-    Route::post('payments/{id}/confirm', [PaymentApiController::class, 'confirm']);
+    // -------------------------
+    Route::post('payments/{id}/confirm', [PaymentController::class, 'confirm']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN API ROUTES (Require Auth + role:admin)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+
+    // -------------------------
+    // PRODUCTS (Admin)
+    // -------------------------
+    Route::prefix('products')->group(function () {
+        Route::post('/', [ProductController::class, 'store']);
+        Route::put('/{id}', [ProductController::class, 'update']);
+        Route::delete('/{id}', [ProductController::class, 'destroy']);
+        Route::post('/restore/{id}', [ProductController::class, 'restore']);
+        Route::delete('/force/{id}', [ProductController::class, 'forceDestroy']);
+        Route::post('/bulk-delete', [ProductController::class, 'bulkDelete']);
+        Route::post('/bulk-update-status', [ProductController::class, 'bulkUpdateStatus']);
+    });
+
+    // -------------------------
+    // CATEGORIES (Admin)
+    // -------------------------
+    Route::prefix('categories')->group(function () {
+        Route::post('/', [CategoryController::class, 'store']);
+        Route::put('/{id}', [CategoryController::class, 'update']);
+        Route::delete('/{id}', [CategoryController::class, 'destroy']);
+    });
+
+    // -------------------------
+    // BANNERS (Admin)
+    // -------------------------
+    Route::prefix('banners')->group(function () {
+        Route::post('/', [BannerController::class, 'store']);
+        Route::put('/{id}', [BannerController::class, 'update']);
+        Route::delete('/{id}', [BannerController::class, 'destroy']);
+        Route::post('/{id}/toggle-status', [BannerController::class, 'toggleStatus']);
+    });
+
+    // -------------------------
+    // USERS (Admin)
+    // -------------------------
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::put('/{id}', [UserController::class, 'update']);
+        Route::delete('/{id}', [UserController::class, 'destroy']);
+        Route::post('/{id}/toggle-status', [UserController::class, 'toggleStatus']);
+    });
+
+    // -------------------------
+    // ORDERS (Admin can view all)
+    // -------------------------
+    Route::prefix('orders')->group(function () {
+        Route::get('/', [OrderController::class, 'index']);
+        Route::get('/{id}', [OrderController::class, 'show']);
+        Route::post('/{id}/update-status', [OrderController::class, 'updateStatus']);
+    });
 });

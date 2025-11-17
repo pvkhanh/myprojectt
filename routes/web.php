@@ -172,24 +172,51 @@ Route::prefix('admin')->name('admin.')
 
 
         // Mail Management Routes
-        Route::prefix('mails')
-            ->name('mails.')
-            ->group(function () {
-                Route::get('/dashboard', [MailController::class, 'dashboard'])->name('dashboard');
-                Route::get('/templates', [MailController::class, 'templates'])->name('templates');
-                Route::get('/segments', [MailController::class, 'segments'])->name('segments');
-                Route::get('/', [MailController::class, 'index'])->name('index');
-                Route::get('/create', [MailController::class, 'create'])->name('create');
-                Route::post('/', [MailController::class, 'store'])->name('store');
-                Route::get('/{id}', [MailController::class, 'show'])->name('show');
-                Route::get('/{id}/edit', [MailController::class, 'edit'])->name('edit');
-                Route::put('/{id}', [MailController::class, 'update'])->name('update');
-                Route::delete('/{id}', [MailController::class, 'destroy'])->name('destroy');
-                Route::post('/{id}/send', [MailController::class, 'send'])->name('send');
-                Route::post('/{id}/resend-failed', [MailController::class, 'resendFailed'])->name('resend-failed');
-                Route::get('/{id}/preview', [MailController::class, 'preview'])->name('preview');
-                Route::get('/{id}/analytics', [MailController::class, 'analytics'])->name('analytics');
-            });
+        // Route::prefix('mails')
+        //     ->name('mails.')
+        //     ->group(function () {
+        //         Route::get('/dashboard', [MailController::class, 'dashboard'])->name('dashboard');
+        //         Route::get('/templates', [MailController::class, 'templates'])->name('templates');
+        //         Route::get('/segments', [MailController::class, 'segments'])->name('segments');
+        //         Route::get('/', [MailController::class, 'index'])->name('index');
+        //         Route::get('/create', [MailController::class, 'create'])->name('create');
+        //         Route::post('/', [MailController::class, 'store'])->name('store');
+        //         Route::get('/{id}', [MailController::class, 'show'])->name('show');
+        //         Route::get('/{id}/edit', [MailController::class, 'edit'])->name('edit');
+        //         Route::put('/{id}', [MailController::class, 'update'])->name('update');
+        //         Route::delete('/{id}', [MailController::class, 'destroy'])->name('destroy');
+        //         Route::post('/{id}/send', [MailController::class, 'send'])->name('send');
+        //         Route::post('/{id}/resend-failed', [MailController::class, 'resendFailed'])->name('resend-failed');
+        //         Route::get('/{id}/preview', [MailController::class, 'preview'])->name('preview');
+        //         Route::get('/{id}/analytics', [MailController::class, 'analytics'])->name('analytics');
+        //     });
+
+
+        // Mail Management Routes
+        Route::prefix('mails')->name('mails.')->group(function () {
+            // Dashboard & Overview
+            Route::get('/dashboard', [MailController::class, 'dashboard'])->name('dashboard');
+            Route::get('/templates', [MailController::class, 'templates'])->name('templates');
+            Route::get('/segments', [MailController::class, 'segments'])->name('segments');
+
+            // CRUD Operations
+            Route::get('/', [MailController::class, 'index'])->name('index');
+            Route::get('/create', [MailController::class, 'create'])->name('create');
+            Route::post('/', [MailController::class, 'store'])->name('store');
+            Route::get('/{id}', [MailController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [MailController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [MailController::class, 'update'])->name('update');
+            Route::delete('/{id}', [MailController::class, 'destroy'])->name('destroy');
+
+            // Mail Actions
+            Route::post('/{id}/send', [MailController::class, 'send'])->name('send');
+            Route::post('/{id}/resend-failed', [MailController::class, 'resendFailed'])->name('resend-failed');
+            Route::get('/{id}/preview', [MailController::class, 'preview'])->name('preview');
+            Route::get('/{id}/analytics', [MailController::class, 'analytics'])->name('analytics');
+
+            // Image Upload for CKEditor
+            Route::post('/upload-image', [MailController::class, 'uploadImage'])->name('upload-image');
+        });
         Route::prefix('orders')->name('orders.')->group(function () {
             // Main routes
             Route::get('/', [OrderController::class, 'index'])->name('index');
@@ -268,12 +295,17 @@ Route::prefix('admin')->name('admin.')
             Route::get('/', [NotificationController::class, 'index'])->name('index');
             Route::get('/create', [NotificationController::class, 'create'])->name('create');
             Route::post('/', [NotificationController::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [NotificationController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [NotificationController::class, 'update'])->name('update');
-            Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+            Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
+            Route::get('/{notification}/edit', [NotificationController::class, 'edit'])->name('edit');
+            Route::put('/{notification}', [NotificationController::class, 'update'])->name('update');
+            Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
 
-            // Nếu bạn cần các hành động đặc biệt
-            Route::post('/bulk-action', [NotificationController::class, 'bulkAction'])->name('bulk-action');
+            // Bulk actions
+            Route::post('/bulk-send', [NotificationController::class, 'bulkSend'])->name('bulk-send');
+            Route::delete('/bulk-delete', [NotificationController::class, 'bulkDelete'])->name('bulk-delete');
+
+            // Stats
+            Route::get('/stats/dashboard', [NotificationController::class, 'dashboard'])->name('dashboard');
         });
 
         // Categories, Users, Reviews, Blogs, Banners, Payments, Wishlists, Orders

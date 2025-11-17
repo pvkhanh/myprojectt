@@ -3,14 +3,10 @@
 @section('title', 'Chỉnh Sửa Mail')
 
 @push('styles')
-    <!-- CKEditor 4.25.1 LTS - Latest Secure Version -->
-    <link href="https://cdn.ckeditor.com/4.25.1-lts/full/ckeditor.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
     <style>
         .note-editor.note-frame {
             border-color: #dee2e6;
-        }
-        .cke_contents {
-            min-height: 400px;
         }
     </style>
 @endpush
@@ -30,7 +26,8 @@
                             <ol class="breadcrumb mb-0">
                                 <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('admin.mails.index') }}">Mail</a></li>
-                                <li class="breadcrumb-item"><a href="{{ route('admin.mails.show', $mail->id) }}">Chi tiết</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('admin.mails.show', $mail->id) }}">Chi
+                                        tiết</a></li>
                                 <li class="breadcrumb-item active">Chỉnh sửa</li>
                             </ol>
                         </nav>
@@ -145,10 +142,13 @@
                             <div class="alert alert-info mt-3 mb-0">
                                 <strong><i class="fa-solid fa-lightbulb me-2"></i>Biến động có thể sử dụng:</strong>
                                 <ul class="mb-0 mt-2">
-                                    <li><code>{{'{{username}}'}}</code> - Tên đầy đủ người nhận</li>
-                                    <li><code>{{'{{email}}'}}</code> - Email người nhận</li>
-                                    <li><code>{{'{{first_name}}'}}</code> - Tên</li>
-                                    <li><code>{{'{{last_name}}'}}</code> - Họ</li>
+                                    <li><code>{{ '{{' }}username{{ ' ?>' }}'}}</code> - Tên đầy đủ người
+                                        nhận
+                                    </li>
+                                    <li><code>{{ '{{' }}email{{ ' ?>' }}'}}</code> - Email người nhận
+                                    </li>
+                                    <li><code>{{ '{{' }}first_name{{ ' ?>' }}'}}</code> - Tên</li>
+                                    <li><code>{{ '{{' }}last_name{{ ' ?>' }}'}}</code> - Họ</li>
                                 </ul>
                             </div>
                         </div>
@@ -236,99 +236,45 @@
 
 @push('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- CKEditor 4.25.1 LTS - Latest Secure Version -->
-    <script src="https://cdn.ckeditor.com/4.25.1-lts/full/ckeditor.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
     <script>
         $(document).ready(function() {
-            // CKEditor 4.25.1 LTS với Image Upload
-            CKEDITOR.replace('content', {
+            // Summernote Editor
+            $('#content').summernote({
                 height: 400,
-                
-                // Upload configuration
-                filebrowserImageUploadUrl: "{{ route('admin.mails.upload-image') }}?_token={{ csrf_token() }}",
-                uploadUrl: "{{ route('admin.mails.upload-image') }}?_token={{ csrf_token() }}",
-                
-                // Full toolbar
                 toolbar: [
-                    { name: 'document', items: ['Source', '-', 'Save', 'NewPage', 'Preview', 'Print'] },
-                    { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
-                    { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll', '-', 'Scayt'] },
-                    '/',
-                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'CopyFormatting', 'RemoveFormat'] },
-                    { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
-                    { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
-                    { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'] },
-                    '/',
-                    { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
-                    { name: 'colors', items: ['TextColor', 'BGColor'] },
-                    { name: 'tools', items: ['Maximize', 'ShowBlocks'] }
-                ],
-                
-                extraPlugins: 'uploadimage,image2',
-                removePlugins: 'exportpdf',
-                
-                imageUploadUrl: "{{ route('admin.mails.upload-image') }}?_token={{ csrf_token() }}",
-                
-                allowedContent: true,
-                extraAllowedContent: 'img[*]{*}(*);div[*]{*}(*);table[*]{*}(*)',
-                
-                disallowedContent: 'script; *[on*]',
-                
-                language: 'vi',
-                
-                on: {
-                    instanceReady: function(evt) {
-                        console.log('✅ CKEditor 4.25.1-lts loaded successfully');
-                        evt.editor.resize('100%', 400);
-                    }
-                }
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ]
             });
 
             // Preview Button
-            $('#previewBtn').click(function(e) {
-                e.preventDefault();
-                
-                const content = CKEDITOR.instances.content.getData();
+            $('#previewBtn').click(function() {
+                const content = $('#content').summernote('code');
                 const subject = $('#subject').val();
 
-                const previewWindow = window.open('', '_blank', 'width=800,height=600');
+                const previewWindow = window.open('', '_blank');
                 previewWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>${subject}</title>
-                        <style>
-                            body { 
-                                font-family: Arial, sans-serif; 
-                                padding: 20px;
-                                background: #f4f4f4;
-                            }
-                            .mail-content-scope {
-                                background: white;
-                                padding: 30px;
-                                border-radius: 8px;
-                                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                            }
-                            .mail-content-scope h1 { 
-                                border-bottom: 2px solid #667eea; 
-                                padding-bottom: 10px;
-                                color: #333;
-                            }
-                            .mail-content-scope img {
-                                max-width: 100%;
-                                height: auto;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="mail-content-scope">
-                            <h1>${subject}</h1>
-                            ${content}
-                        </div>
-                    </body>
-                    </html>
-                `);
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>${subject}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    h1 { border-bottom: 2px solid #ccc; padding-bottom: 10px; }
+                </style>
+            </head>
+            <body>
+                <h1>${subject}</h1>
+                ${content}
+            </body>
+            </html>
+        `);
             });
         });
     </script>

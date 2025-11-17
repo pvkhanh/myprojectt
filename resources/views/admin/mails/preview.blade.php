@@ -1,390 +1,271 @@
-{{-- <!DOCTYPE html>
-<html lang="vi">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preview: {{ $mail->subject }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+@section('title', 'Preview Mail')
+
+@push('styles')
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Reset toàn bộ styles cho preview container */
+        .preview-container {
+            background: #f4f4f4;
             min-height: 100vh;
             padding: 20px;
         }
 
-        .preview-container {
+        .preview-wrapper {
             max-width: 800px;
             margin: 0 auto;
-        }
-
-        .email-preview {
             background: white;
             border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
 
-        .email-header {
+        .preview-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            padding: 20px 30px;
+            border-bottom: 3px solid #5568d3;
+        }
+
+        .preview-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .preview-header .meta {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* CRITICAL: Scope CSS chỉ cho mail content */
+        .mail-content-scope {
+            /* Reset tất cả để không bị ảnh hưởng bởi CSS global */
+            all: initial;
+            
+            /* Set lại các styles cơ bản */
+            display: block;
             padding: 30px;
-            text-align: center;
-        }
-
-        .email-body {
-            padding: 40px;
-            line-height: 1.8;
-        }
-
-        .email-footer {
-            background: #f8f9fa;
-            padding: 20px;
-            text-align: center;
-            border-top: 1px solid #dee2e6;
-        }
-
-        .info-bar {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
         }
 
-        .btn-action {
-            margin: 5px;
+        /* Revert lại các styles cho các elements bên trong */
+        .mail-content-scope * {
+            all: revert;
         }
 
-        @media print {
-            body {
-                background: white;
+        /* Styles cho images trong mail */
+        .mail-content-scope img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        /* Styles cho tables trong mail */
+        .mail-content-scope table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .mail-content-scope table td,
+        .mail-content-scope table th {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Styles cho links trong mail */
+        .mail-content-scope a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .mail-content-scope a:hover {
+            text-decoration: underline;
+        }
+
+        /* Styles cho headings trong mail */
+        .mail-content-scope h1,
+        .mail-content-scope h2,
+        .mail-content-scope h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Styles cho paragraphs trong mail */
+        .mail-content-scope p {
+            margin: 10px 0;
+        }
+
+        /* Styles cho lists trong mail */
+        .mail-content-scope ul,
+        .mail-content-scope ol {
+            margin: 10px 0;
+            padding-left: 30px;
+        }
+
+        .mail-content-scope li {
+            margin: 5px 0;
+        }
+
+        /* Preview footer */
+        .preview-footer {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+        }
+
+        /* Action buttons */
+        .preview-actions {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+
+        .preview-actions .btn {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Device preview toggle */
+        .device-toggle {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .device-toggle .btn-group {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Mobile preview */
+        @media (max-width: 600px) {
+            .preview-wrapper {
+                margin: 0;
+                border-radius: 0;
             }
-
-            .info-bar,
-            .btn-action {
-                display: none;
+            
+            .mail-content-scope {
+                padding: 15px;
             }
         }
     </style>
-</head>
+@endpush
 
-<body>
+@section('content')
     <div class="preview-container">
-        <!-- Info Bar -->
-        <div class="info-bar">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <div>
-                    <h5 class="mb-2 fw-bold">
-                        <i class="fa-solid fa-eye text-primary me-2"></i>
-                        Email Preview
+        <!-- Action Buttons -->
+        <div class="preview-actions">
+            <a href="{{ route('admin.mails.edit', $mail->id) }}" class="btn btn-warning">
+                <i class="fa-solid fa-pen me-2"></i> Chỉnh sửa
+            </a>
+            <a href="{{ route('admin.mails.show', $mail->id) }}" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+            </a>
+            <button onclick="window.print()" class="btn btn-info">
+                <i class="fa-solid fa-print me-2"></i> In
+            </button>
+        </div>
+
+        <!-- Device Toggle -->
+        <div class="device-toggle">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary active" onclick="setPreviewWidth('100%')">
+                    <i class="fa-solid fa-desktop me-1"></i> Desktop
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="setPreviewWidth('600px')">
+                    <i class="fa-solid fa-tablet me-1"></i> Tablet
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="setPreviewWidth('375px')">
+                    <i class="fa-solid fa-mobile me-1"></i> Mobile
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview Wrapper -->
+        <div class="preview-wrapper" id="previewWrapper">
+            <!-- Mail Header Info -->
+            <div class="preview-header">
+                <h1>{{ $mail->subject }}</h1>
+                <div class="meta">
+                    <div><strong>Từ:</strong> {{ $mail->sender_email }}</div>
+                    <div><strong>Loại:</strong> {{ ucfirst($mail->type->value) }}</div>
+                    <div><strong>Ngày tạo:</strong> {{ $mail->created_at->format('d/m/Y H:i') }}</div>
+                    @if($mail->template_key)
+                        <div><strong>Template:</strong> {{ $mail->template_key }}</div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Mail Content - SCOPED CSS -->
+            <div class="mail-content-scope">
+                {!! $wrappedContent ?? $content !!}
+            </div>
+
+            <!-- Mail Footer Info -->
+            <div class="preview-footer">
+                <p class="mb-2 text-muted">
+                    <i class="fa-solid fa-info-circle me-1"></i>
+                    Đây là bản preview. Email thực tế có thể hiển thị khác tùy thuộc vào email client.
+                </p>
+                <p class="mb-0">
+                    <small class="text-muted">
+                        Mail ID: #{{ $mail->id }} | 
+                        {{ $mail->recipients->count() }} người nhận
+                    </small>
+                </p>
+            </div>
+        </div>
+
+        <!-- Variables Info (if any) -->
+        @if($mail->variables)
+            <div class="preview-wrapper mt-4">
+                <div class="p-4">
+                    <h5 class="mb-3">
+                        <i class="fa-solid fa-code me-2"></i>Variables được sử dụng
                     </h5>
-                    <div class="small text-muted">
-                        <i class="fa-solid fa-clock me-1"></i>
-                        Tạo lúc: {{ $mail->created_at->format('d/m/Y H:i:s') }}
-                    </div>
-                </div>
-                <div>
-                    <button onclick="window.print()" class="btn btn-primary btn-action">
-                        <i class="fa-solid fa-print me-2"></i> In
-                    </button>
-                    <button onclick="window.close()" class="btn btn-secondary btn-action">
-                        <i class="fa-solid fa-times me-2"></i> Đóng
-                    </button>
+                    <pre class="bg-light p-3 rounded"><code>{{ json_encode($mail->variables, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
                 </div>
             </div>
-        </div>
-
-        <!-- Email Preview -->
-        <div class="email-preview">
-            <!-- Email Header -->
-            <div class="email-header">
-                <div class="mb-3">
-                    <i class="fa-solid fa-envelope fs-1"></i>
-                </div>
-                <h2 class="fw-bold mb-2">{{ $mail->subject }}</h2>
-                <div class="small">
-                    <i class="fa-solid fa-paper-plane me-2"></i>
-                    Từ: {{ $mail->sender_email }}
-                </div>
-            </div>
-
-            <!-- Email Body -->
-            <div class="email-body">
-                {!! $mail->content !!}
-            </div>
-
-            <!-- Email Footer -->
-            <div class="email-footer">
-                <div class="mb-3">
-                    <strong>{{ config('app.name') }}</strong>
-                </div>
-                <div class="small text-muted mb-3">
-                    Email này được gửi từ hệ thống quản lý mail
-                </div>
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="#" class="text-muted"><i class="fa-brands fa-facebook"></i></a>
-                    <a href="#" class="text-muted"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="#" class="text-muted"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" class="text-muted"><i class="fa-brands fa-linkedin"></i></a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mail Info -->
-        <div class="info-bar mt-3">
-            <h6 class="fw-bold mb-3">
-                <i class="fa-solid fa-info-circle text-info me-2"></i>
-                Thông Tin Mail
-            </h6>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="small text-muted">Loại Mail:</label>
-                    <div>
-                        @php
-                            $typeConfig = [
-                                'system' => ['class' => 'primary', 'text' => 'System'],
-                                'user' => ['class' => 'info', 'text' => 'User'],
-                                'marketing' => ['class' => 'success', 'text' => 'Marketing'],
-                            ];
-                            $config = $typeConfig[$mail->type->value] ?? [
-                                'class' => 'secondary',
-                                'text' => $mail->type->value,
-                            ];
-                        @endphp
-                        <span class="badge bg-{{ $config['class'] }}">{{ $config['text'] }}</span>
-                    </div>
-                </div>
-                @if ($mail->template_key)
-                    <div class="col-md-6">
-                        <label class="small text-muted">Template Key:</label>
-                        <div><code>{{ $mail->template_key }}</code></div>
-                    </div>
-                @endif
-                <div class="col-md-6">
-                    <label class="small text-muted">Tổng người nhận:</label>
-                    <div class="fw-bold text-primary">{{ $mail->recipients->count() }} người</div>
-                </div>
-                <div class="col-md-6">
-                    <label class="small text-muted">Đã gửi:</label>
-                    <div class="fw-bold text-success">{{ $mail->recipients->where('status', 'sent')->count() }} mail
-                    </div>
-                </div>
-            </div>
-        </div>
+        @endif
     </div>
+@endsection
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html> --}}
-
-
-
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preview: {{ $mail->subject }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+@push('scripts')
+    <script>
+        function setPreviewWidth(width) {
+            const wrapper = document.getElementById('previewWrapper');
+            wrapper.style.maxWidth = width;
+            wrapper.style.transition = 'all 0.3s ease';
+            
+            // Update active button
+            document.querySelectorAll('.device-toggle .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.btn').classList.add('active');
         }
 
-        .preview-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        // Print styles
+        window.onbeforeprint = function() {
+            document.querySelector('.preview-actions').style.display = 'none';
+            document.querySelector('.device-toggle').style.display = 'none';
+        };
 
-        .email-preview {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
-
-        .email-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .email-body {
-            padding: 40px;
-            line-height: 1.8;
-        }
-
-        .email-footer {
-            background: #f8f9fa;
-            padding: 20px;
-            text-align: center;
-            border-top: 1px solid #dee2e6;
-        }
-
-        .info-bar {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-action {
-            margin: 5px;
-        }
-
-        @media print {
-            body {
-                background: white;
-            }
-
-            .info-bar,
-            .btn-action {
-                display: none;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="preview-container">
-        <!-- Info Bar -->
-        <div class="info-bar">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <div>
-                    <h5 class="mb-2 fw-bold">
-                        <i class="fa-solid fa-eye text-primary me-2"></i>
-                        Email Preview
-                    </h5>
-                    <div class="small text-muted">
-                        <i class="fa-solid fa-clock me-1"></i>
-                        Tạo lúc: {{ $mail->created_at->format('d/m/Y H:i:s') }}
-                    </div>
-                </div>
-                <div>
-                    <button onclick="window.print()" class="btn btn-primary btn-action">
-                        <i class="fa-solid fa-print me-2"></i> In
-                    </button>
-                    <button onclick="window.close()" class="btn btn-secondary btn-action">
-                        <i class="fa-solid fa-times me-2"></i> Đóng
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Email Preview -->
-        <div class="email-preview">
-            <!-- Email Header -->
-            <div class="email-header">
-                <div class="mb-3">
-                    <i class="fa-solid fa-envelope fs-1"></i>
-                </div>
-                <h2 class="fw-bold mb-2">{{ $mail->subject }}</h2>
-                <div class="small">
-                    <i class="fa-solid fa-paper-plane me-2"></i>
-                    Từ: {{ $mail->sender_email }}
-                </div>
-            </div>
-
-            <!-- Email Body -->
-            <div class="email-body">
-                {!! $content !!}
-            </div>
-
-            <!-- Email Footer -->
-            <div class="email-footer">
-                <div class="mb-3">
-                    <strong>{{ config('app.name') }}</strong>
-                </div>
-                <div class="small text-muted mb-3">
-                    Email này được gửi từ hệ thống quản lý mail
-                </div>
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="#" class="text-muted"><i class="fa-brands fa-facebook"></i></a>
-                    <a href="#" class="text-muted"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="#" class="text-muted"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" class="text-muted"><i class="fa-brands fa-linkedin"></i></a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mail Info -->
-        <div class="info-bar mt-3">
-            <h6 class="fw-bold mb-3">
-                <i class="fa-solid fa-info-circle text-info me-2"></i>
-                Thông Tin Mail
-            </h6>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="small text-muted">Loại Mail:</label>
-                    <div>
-                        @php
-                            $typeConfig = [
-                                'system' => ['class' => 'primary', 'text' => 'System'],
-                                'user' => ['class' => 'info', 'text' => 'User'],
-                                'marketing' => ['class' => 'success', 'text' => 'Marketing'],
-                            ];
-                            $config = $typeConfig[$mail->type->value] ?? [
-                                'class' => 'secondary',
-                                'text' => $mail->type->value,
-                            ];
-                        @endphp
-                        <span class="badge bg-{{ $config['class'] }}">{{ $config['text'] }}</span>
-                    </div>
-                </div>
-                @if ($mail->template_key)
-                    <div class="col-md-6">
-                        <label class="small text-muted">Template Key:</label>
-                        <div><code>{{ $mail->template_key }}</code></div>
-                    </div>
-                @endif
-                <div class="col-md-6">
-                    <label class="small text-muted">Tổng người nhận:</label>
-                    <div class="fw-bold text-primary">{{ $mail->recipients->count() }} người</div>
-                </div>
-                <div class="col-md-6">
-                    <label class="small text-muted">Trạng thái người nhận:</label>
-                    <div class="d-flex flex-wrap gap-1">
-                        @foreach ($mail->recipients as $recipient)
-                            @php
-                                // Lấy giá trị string từ Enum nếu là Enum
-                                $statusValue =
-                                    $recipient->status instanceof \App\Enums\MailRecipientStatus
-                                        ? $recipient->status->value
-                                        : $recipient->status ?? 'pending';
-
-                                // Gán màu tương ứng
-                                $statusClass = match ($statusValue) {
-                                    'sent' => 'success',
-                                    'failed' => 'danger',
-                                    'pending' => 'secondary',
-                                    default => 'secondary',
-                                };
-
-                                // Viết hoa chữ cái đầu
-                                $statusText = ucfirst($statusValue);
-                            @endphp
-
-                            <span class="badge bg-{{ $statusClass }}">
-                                {{ $statusText }}
-                            </span>
-                        @endforeach
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>
+        window.onafterprint = function() {
+            document.querySelector('.preview-actions').style.display = 'flex';
+            document.querySelector('.device-toggle').style.display = 'block';
+        };
+    </script>
+@endpush
