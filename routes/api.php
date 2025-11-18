@@ -1,146 +1,226 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\{
-    AuthApiController,
-    ProductController,
-    CategoryController,
-    BannerController,
-    UserController,
-    OrderController,
-    PaymentController,
-    WishlistController
-};
+// use Illuminate\Support\Facades\Route;
+// use App\Http\Controllers\Api\ProductController;
 
+// /*
+// |--------------------------------------------------------------------------
+// | Product API Routes
+// |--------------------------------------------------------------------------
+// */
+
+// Route::prefix('products')->group(function () {
+
+//     // Trash routes (đặt trước resource routes để tránh conflict)
+//     Route::get('trash', [ProductController::class, 'trash']);
+//     Route::post('restore-all', [ProductController::class, 'restoreAll']);
+//     Route::delete('force-delete-all', [ProductController::class, 'forceDeleteAll']);
+
+//     // Bulk actions
+//     Route::post('bulk-delete', [ProductController::class, 'bulkDelete']);
+//     Route::post('bulk-update-status', [ProductController::class, 'bulkUpdateStatus']);
+
+//     // Single item actions
+//     Route::post('{id}/restore', [ProductController::class, 'restore']);
+//     Route::delete('{id}/force', [ProductController::class, 'forceDestroy']);
+
+//     // Standard REST routes
+//     Route::get('/', [ProductController::class, 'index']);
+//     Route::post('/', [ProductController::class, 'store']);
+//     Route::get('{id}', [ProductController::class, 'show']);
+//     Route::put('{id}', [ProductController::class, 'update']);
+//     Route::patch('{id}', [ProductController::class, 'update']);
+//     Route::delete('{id}', [ProductController::class, 'destroy']);
+// });
+
+// Hoặc sử dụng apiResource (cách ngắn gọn hơn)
 /*
-|--------------------------------------------------------------------------
-| PUBLIC API ROUTES
-|--------------------------------------------------------------------------
-*/
+Route::apiResource('products', ProductApiController::class);
 
-// -------------------------
-// AUTH (Public)
-// -------------------------
-Route::post('register', [AuthApiController::class, 'register']);
-Route::post('login', [AuthApiController::class, 'login']);
-
-// -------------------------
-// PRODUCTS (Public)
-// -------------------------
+// Thêm các routes bổ sung
 Route::prefix('products')->group(function () {
-    Route::get('/', [ProductController::class, 'index']);        // Danh sách
-    Route::get('/{id}', [ProductController::class, 'show']);     // Chi tiết
+    Route::get('trash', [ProductApiController::class, 'trash']);
+    Route::post('{id}/restore', [ProductApiController::class, 'restore']);
+    Route::delete('{id}/force', [ProductApiController::class, 'forceDestroy']);
+    Route::post('bulk-delete', [ProductApiController::class, 'bulkDelete']);
+    Route::post('bulk-update-status', [ProductApiController::class, 'bulkUpdateStatus']);
+    Route::post('restore-all', [ProductApiController::class, 'restoreAll']);
+    Route::delete('force-delete-all', [ProductApiController::class, 'forceDeleteAll']);
 });
+*/
 
-// -------------------------
-// CATEGORIES (Public)
-// -------------------------
-Route::get('categories', [CategoryController::class, 'index']);
-Route::get('categories/{id}', [CategoryController::class, 'show']);
 
-// -------------------------
-// BANNERS (Public)
-// -------------------------
-Route::get('banners', [BannerController::class, 'index']);
 
-// -------------------------
-// WISHLIST (Public - xem số lượt wishlist sản phẩm)
-// -------------------------
-Route::get('wishlists/product/{productId}', [WishlistController::class, 'productWishlists']);
 
+//customer API routes
+
+// use Illuminate\Support\Facades\Route;
+// use App\Http\Controllers\Api\Customer\ProductController;
+// use App\Http\Controllers\Api\Customer\CartController;
+// use App\Http\Controllers\Api\Customer\ReviewController;
+// use App\Http\Controllers\Api\Customer\WishlistController;
+
+// /*
+// |--------------------------------------------------------------------------
+// | Customer API Routes (Public & Authenticated)
+// |--------------------------------------------------------------------------
+// */
+
+// Route::prefix('customer')->name('customer.')->group(function () {
+
+//     // ==================== PRODUCTS (Public) ====================
+//     Route::prefix('products')->name('products.')->group(function () {
+
+//         // Listing & Search
+//         Route::get('/', [ProductController::class, 'index'])->name('index');
+//         Route::get('/quick-search', [ProductController::class, 'quickSearch'])->name('quick-search');
+//         Route::get('/featured', [ProductController::class, 'featured'])->name('featured');
+//         Route::get('/new-arrivals', [ProductController::class, 'newArrivals'])->name('new-arrivals');
+//         Route::get('/on-sale', [ProductController::class, 'onSale'])->name('on-sale');
+//         Route::get('/best-sellers', [ProductController::class, 'bestSellers'])->name('best-sellers');
+//         Route::get('/top-rated', [ProductController::class, 'topRated'])->name('top-rated');
+
+//         // Product detail & related
+//         Route::get('/{slug}', [ProductController::class, 'show'])->name('show');
+//         Route::get('/{id}/check-stock', [ProductController::class, 'checkStock'])->name('check-stock');
+//         Route::post('/compare', [ProductController::class, 'compare'])->name('compare');
+
+//         // Reviews (Public)
+//         Route::get('/{slug}/reviews', [ReviewController::class, 'index'])->name('reviews');
+//     });
+
+//     // ==================== CATEGORIES (Public) ====================
+//     Route::get('/categories/{slug}/products', [ProductController::class, 'byCategory'])->name('categories.show');
+
+//     // ==================== CART (Guest & Authenticated) ====================
+//     Route::prefix('cart')->name('cart.')->group(function () {
+//         Route::get('/', [CartController::class, 'index'])->name('index');
+//         Route::post('/add', [CartController::class, 'add'])->name('add');
+//         Route::put('/items/{itemId}', [CartController::class, 'update'])->name('update');
+//         Route::delete('/items/{itemId}', [CartController::class, 'remove'])->name('remove');
+//         Route::delete('/clear', [CartController::class, 'clear'])->name('clear');
+//         Route::post('/apply-coupon', [CartController::class, 'applyCoupon'])->name('apply-coupon');
+//         Route::post('/calculate-shipping', [CartController::class, 'calculateShipping'])->name('calculate-shipping');
+//     });
+
+//     // ==================== AUTHENTICATED ROUTES ====================
+//     Route::middleware('auth:sanctum')->group(function () {
+
+//         // ==================== REVIEWS ====================
+//         Route::prefix('reviews')->name('reviews.')->group(function () {
+//             Route::post('/', [ReviewController::class, 'store'])->name('store');
+//             Route::put('/{id}', [ReviewController::class, 'update'])->name('update');
+//             Route::delete('/{id}', [ReviewController::class, 'destroy'])->name('destroy');
+//             Route::post('/{id}/helpful', [ReviewController::class, 'markHelpful'])->name('helpful');
+//             Route::get('/my-reviews', [ReviewController::class, 'myReviews'])->name('my-reviews');
+//         });
+
+//         // Check can review
+//         Route::get('/products/{id}/can-review', [ReviewController::class, 'canReview'])->name('products.can-review');
+
+//         // ==================== WISHLIST ====================
+//         Route::prefix('wishlist')->name('wishlist.')->group(function () {
+//             Route::get('/', [WishlistController::class, 'index'])->name('index');
+//             Route::post('/', [WishlistController::class, 'store'])->name('store');
+//             Route::post('/toggle', [WishlistController::class, 'toggle'])->name('toggle');
+//             Route::delete('/{id}', [WishlistController::class, 'destroy'])->name('destroy');
+//             Route::delete('/product/{productId}', [WishlistController::class, 'removeByProduct'])->name('remove-by-product');
+//             Route::delete('/clear', [WishlistController::class, 'clear'])->name('clear');
+//             Route::get('/check/{productId}', [WishlistController::class, 'check'])->name('check');
+//             Route::post('/{id}/move-to-cart', [WishlistController::class, 'moveToCart'])->name('move-to-cart');
+//         });
+//     });
+// });
+
+// /*
+// |--------------------------------------------------------------------------
+// | Alternative Structure (Shorter)
+// |--------------------------------------------------------------------------
+// */
+
+// // Route::prefix('customer')->middleware(['api'])->group(function () {
+// //     // Public routes
+// //     Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+// //     Route::get('categories/{slug}/products', [ProductController::class, 'byCategory']);
+
+// //     // Cart (guest & auth)
+// //     Route::apiResource('cart', CartController::class)->only(['index', 'store', 'update', 'destroy']);
+
+// //     // Authenticated routes
+// //     Route::middleware('auth:sanctum')->group(function () {
+// //         Route::apiResource('reviews', ReviewController::class);
+// //         Route::apiResource('wishlist', WishlistController::class);
+// //     });
+// // });
+
+
+
+
+
+
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ProductController;
 
 /*
 |--------------------------------------------------------------------------
-| PROTECTED API ROUTES (Require Auth)
+| Product API Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth:sanctum')->group(function () {
 
-    // -------------------------
-    // AUTH USER PROFILE
-    // -------------------------
-    Route::post('logout', [AuthApiController::class, 'logout']);
-    Route::get('user', [UserController::class, 'profile']);          // Xem profile
-    Route::put('user', [UserController::class, 'updateProfile']);   // Cập nhật profile
+// Danh sách sản phẩm với filter, search, pagination
+Route::get('/products', [ProductController::class, 'index']);
 
-    // -------------------------
-    // WISHLIST (Auth user)
-    // -------------------------
-    Route::get('wishlists', [WishlistController::class, 'index']);
-    Route::post('wishlists', [WishlistController::class, 'store']);
-    Route::delete('wishlists/{id}', [WishlistController::class, 'destroy']);
+// Tìm kiếm sản phẩm
+Route::get('/products/search', [ProductController::class, 'search']);
 
-    // -------------------------
-    // ORDERS
-    // -------------------------
-    Route::get('orders', [OrderController::class, 'index']);
-    Route::get('orders/{id}', [OrderController::class, 'show']);
-    Route::post('orders', [OrderController::class, 'store']);
-    Route::post('orders/{id}/cancel', [OrderController::class, 'cancel']);
+// Sản phẩm nổi bật
+Route::get('/products/featured', [ProductController::class, 'featured']);
 
-    // -------------------------
-    // PAYMENTS
-    // -------------------------
-    Route::post('payments/{id}/confirm', [PaymentController::class, 'confirm']);
-});
+// Sản phẩm mới nhất
+Route::get('/products/latest', [ProductController::class, 'latest']);
+
+// Sản phẩm bán chạy
+Route::get('/products/bestseller', [ProductController::class, 'bestseller']);
+
+// Chi tiết sản phẩm theo slug (đặt trước {id} để tránh conflict)
+Route::get('/products/slug/{slug}', [ProductController::class, 'showBySlug']);
+
+// Chi tiết sản phẩm theo ID
+Route::get('/products/{id}', [ProductController::class, 'show']);
+
+// Sản phẩm liên quan
+Route::get('/products/{id}/related', [ProductController::class, 'related']);
+
+// Đánh giá sản phẩm
+Route::get('/products/{id}/reviews', [ProductController::class, 'reviews']);
+
+// Sản phẩm theo danh mục
+Route::get('/categories/{categoryId}/products', [ProductController::class, 'getByCategory']);
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN API ROUTES (Require Auth + role:admin)
+| Ví dụ sử dụng:
 |--------------------------------------------------------------------------
+|
+| GET /api/products                              - Danh sách sản phẩm
+| GET /api/products?keyword=iphone               - Tìm kiếm theo keyword
+| GET /api/products?category_id=5                - Lọc theo danh mục
+| GET /api/products?price_range=0-1000000        - Lọc theo giá
+| GET /api/products?sort_by=price_asc            - Sắp xếp (newest, price_asc, price_desc, name_asc)
+| GET /api/products?per_page=20                  - Số sản phẩm mỗi trang
+|
+| GET /api/products/search?keyword=laptop        - Tìm kiếm
+| GET /api/products/featured?limit=10            - Top 10 sản phẩm nổi bật
+| GET /api/products/latest?limit=12              - 12 sản phẩm mới nhất
+| GET /api/products/bestseller?limit=8           - 8 sản phẩm bán chạy
+|
+| GET /api/products/123                          - Chi tiết sản phẩm theo ID
+| GET /api/products/slug/iphone-15-pro-max       - Chi tiết sản phẩm theo slug
+| GET /api/products/123/related?limit=8          - Sản phẩm liên quan
+| GET /api/products/123/reviews?per_page=10      - Đánh giá sản phẩm
+|
+| GET /api/categories/5/products                 - Sản phẩm theo danh mục
+| GET /api/categories/5/products?sort_by=price_asc - Sản phẩm danh mục có sắp xếp
+|
 */
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
-
-    // -------------------------
-    // PRODUCTS (Admin)
-    // -------------------------
-    Route::prefix('products')->group(function () {
-        Route::post('/', [ProductController::class, 'store']);
-        Route::put('/{id}', [ProductController::class, 'update']);
-        Route::delete('/{id}', [ProductController::class, 'destroy']);
-        Route::post('/restore/{id}', [ProductController::class, 'restore']);
-        Route::delete('/force/{id}', [ProductController::class, 'forceDestroy']);
-        Route::post('/bulk-delete', [ProductController::class, 'bulkDelete']);
-        Route::post('/bulk-update-status', [ProductController::class, 'bulkUpdateStatus']);
-    });
-
-    // -------------------------
-    // CATEGORIES (Admin)
-    // -------------------------
-    Route::prefix('categories')->group(function () {
-        Route::post('/', [CategoryController::class, 'store']);
-        Route::put('/{id}', [CategoryController::class, 'update']);
-        Route::delete('/{id}', [CategoryController::class, 'destroy']);
-    });
-
-    // -------------------------
-    // BANNERS (Admin)
-    // -------------------------
-    Route::prefix('banners')->group(function () {
-        Route::post('/', [BannerController::class, 'store']);
-        Route::put('/{id}', [BannerController::class, 'update']);
-        Route::delete('/{id}', [BannerController::class, 'destroy']);
-        Route::post('/{id}/toggle-status', [BannerController::class, 'toggleStatus']);
-    });
-
-    // -------------------------
-    // USERS (Admin)
-    // -------------------------
-    Route::prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'index']);
-        Route::get('/{id}', [UserController::class, 'show']);
-        Route::post('/', [UserController::class, 'store']);
-        Route::put('/{id}', [UserController::class, 'update']);
-        Route::delete('/{id}', [UserController::class, 'destroy']);
-        Route::post('/{id}/toggle-status', [UserController::class, 'toggleStatus']);
-    });
-
-    // -------------------------
-    // ORDERS (Admin can view all)
-    // -------------------------
-    Route::prefix('orders')->group(function () {
-        Route::get('/', [OrderController::class, 'index']);
-        Route::get('/{id}', [OrderController::class, 'show']);
-        Route::post('/{id}/update-status', [OrderController::class, 'updateStatus']);
-    });
-});
