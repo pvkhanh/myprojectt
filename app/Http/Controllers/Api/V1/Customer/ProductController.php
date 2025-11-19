@@ -432,6 +432,138 @@
 
 
 //Bản thứ 2 đơn giản hơn, chỉ lấy danh sách sản phẩm với eager loading và pagination
+// namespace App\Http\Controllers\Api\V1\Customer;
+
+// use App\Http\Controllers\Controller;
+// use App\Models\Product;
+// use App\Http\Resources\Api\ProductResource;
+// use Illuminate\Http\Request;
+// use App\Enums\ProductStatus;
+
+// class ProductController extends Controller
+// {
+//     public function index(Request $request)
+//     {
+//         // Lấy products với eager loading để tránh N+1
+//         $query = Product::with([
+//             'variants.stockItems', // lấy variants kèm stockItems
+//             'categories',          // lấy categories
+//             'images',              // lấy images
+//             'reviews',             // lấy reviews
+//         ])
+//           /  ->where('status', 1) // chỉ lấy Active, hoặc ProductStatus::Active nếu dùng enum
+//             ->orderBy('created_at', 'desc');
+
+//         // Paginate theo yêu cầu, mặc định 15 sản phẩm/trang
+//         $products = $query->paginate($request->get('per_page', 15));
+
+//         // Trả về ProductResource
+//         return response()->json([
+//             'success' => true,
+//             'data' => ProductResource::collection($products),
+//             'meta' => [
+//                 'current_page' => $products->currentPage(),
+//                 'last_page' => $products->lastPage(),
+//                 'per_page' => $products->perPage(),
+//                 'total' => $products->total(),
+//                 'from' => $products->firstItem(),
+//                 'to' => $products->lastItem(),
+//             ],
+//         ]);
+//     }
+
+//     /**
+//      * Chi tiết sản phẩm theo ID
+//      */
+//     public function show($id)
+//     {
+//         try {
+//             $product = Product::with([
+//                 'categories',
+//                 'images',
+//                 'variants.stockItems',
+//                 'reviews' => function ($q) {
+//                     $q->where('status', 'approved')
+//                         ->with('user')
+//                         ->latest()
+//                         ->limit(10);
+//                 }
+//             ])->findOrFail($id);
+
+//             if ($product->status !== ProductStatus::Active) {
+//                 return response()->json([
+//                     'success' => false,
+//                     'message' => 'Sản phẩm không khả dụng'
+//                 ], 404);
+//             }
+
+//             return response()->json([
+//                 'success' => true,
+//                 'data' => new ProductResource($product)
+//             ]);
+//         } catch (\Exception $e) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'Không tìm thấy sản phẩm',
+//                 'error' => $e->getMessage()
+//             ], 404);
+//         }
+//     }
+
+//     /**
+//      * Tìm kiếm sản phẩm
+//      */
+//     public function search(Request $request)
+//     {
+//         try {
+//             $keyword = $request->get('keyword', '');
+//             $limit = $request->get('limit', 10);
+
+//             // $products = Product::where('status', ProductStatus::Active)
+//             //     ->where('stock_quantity', '>', 0)
+//             //     ->where(function ($q) use ($keyword) {
+//             //         $q->where('name', 'like', "%{$keyword}%")
+//             //             ->orWhere('sku', 'like', "%{$keyword}%")
+//             //             ->orWhere('description', 'like', "%{$keyword}%");
+//             //     })
+//             //     ->with(['categories', 'images'])
+//             //     ->limit($limit)
+//             //     ->get();
+//             $products = Product::with(['variants.stockItems', 'categories', 'images', 'reviews'])
+//                 ->where('status', ProductStatus::Active)
+//                 ->whereHas('variants.stockItems', function ($q) {
+//                     $q->where('quantity', '>', 0);
+//                 })
+//                 ->where(function ($q) use ($keyword) {
+//                     $q->where('name', 'like', "%{$keyword}%")
+//                         ->orWhere('description', 'like', "%{$keyword}%")
+//                         ->orWhereHas('variants', function ($q) use ($keyword) {
+//                             $q->where('sku', 'like', "%{$keyword}%");
+//                         });
+//                 })
+//                 ->limit($limit)
+//                 ->get();
+
+//             return response()->json([
+//                 'success' => true,
+//                 'data' => ProductResource::collection($products),
+//                 'count' => $products->count()
+//             ]);
+//         } catch (\Exception $e) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'Tìm kiếm thất bại',
+//                 'error' => $e->getMessage()
+//             ], 500);
+//         }
+//     }
+
+// }
+
+
+
+//bản 3
+
 namespace App\Http\Controllers\Api\V1\Customer;
 
 use App\Http\Controllers\Controller;
@@ -442,33 +574,46 @@ use App\Enums\ProductStatus;
 
 class ProductController extends Controller
 {
+    /**
+     * Lấy danh sách sản phẩm
+     * Hỗ trợ: paginate hoặc limit, rating trung bình, số review
+     */
     public function index(Request $request)
     {
-        // Lấy products với eager loading để tránh N+1
+        $perPage = $request->get('per_page', 20);
+        $limit = $request->get('limit', null);
+
         $query = Product::with([
-            'variants.stockItems', // lấy variants kèm stockItems
-            'categories',          // lấy categories
-            'images',              // lấy images
-            'reviews',             // lấy reviews
-        ])
-            ->where('status', 1) // chỉ lấy Active, hoặc ProductStatus::Active nếu dùng enum
-            ->orderBy('created_at', 'desc');
+            'variants.stockItems',
+            'categories',
+            'images',
+            'reviews'
+        ])->where('status', ProductStatus::Active->value);
 
-        // Paginate theo yêu cầu, mặc định 15 sản phẩm/trang
-        $products = $query->paginate($request->get('per_page', 15));
+        if ($limit) {
+            $products = $query->take($limit)->get();
+        } else {
+            $products = $query->paginate($perPage);
+        }
 
-        // Trả về ProductResource
+        $products->transform(function($product) {
+            $product->average_rating = round($product->reviews->avg('rating'), 2);
+            $product->review_count = $product->reviews->count();
+            return $product;
+        });
+
         return response()->json([
             'success' => true,
+            'message' => 'Lấy danh sách sản phẩm thành công',
             'data' => ProductResource::collection($products),
-            'meta' => [
+            'meta' => $limit ? null : [
                 'current_page' => $products->currentPage(),
                 'last_page' => $products->lastPage(),
                 'per_page' => $products->perPage(),
                 'total' => $products->total(),
                 'from' => $products->firstItem(),
                 'to' => $products->lastItem(),
-            ],
+            ]
         ]);
     }
 
@@ -479,23 +624,22 @@ class ProductController extends Controller
     {
         try {
             $product = Product::with([
+                'variants.stockItems',
                 'categories',
                 'images',
-                'variants.stockItems',
-                'reviews' => function ($q) {
-                    $q->where('status', 'approved')
-                        ->with('user')
-                        ->latest()
-                        ->limit(10);
-                }
+                'reviews.user'
             ])->findOrFail($id);
 
-            if ($product->status !== ProductStatus::Active) {
+            if ($product->status !== ProductStatus::Active->value) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Sản phẩm không khả dụng'
                 ], 404);
             }
+
+            // Tính rating + review count
+            $product->average_rating = round($product->reviews->avg('rating'), 2);
+            $product->review_count = $product->reviews->count();
 
             return response()->json([
                 'success' => true,
@@ -510,4 +654,67 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Tìm kiếm sản phẩm
+     */
+    public function search(Request $request)
+    {
+        try {
+            $keyword = $request->get('keyword', '');
+            $limit = $request->get('limit', null);
+            $perPage = $request->get('per_page', 20);
+
+            $query = Product::with([
+                'variants.stockItems',
+                'categories',
+                'images',
+                'reviews'
+            ])
+            ->where('status', ProductStatus::Active->value)
+            ->whereHas('variants.stockItems', function($q){
+                $q->where('quantity', '>', 0);
+            })
+            ->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                  ->orWhere('description', 'like', "%{$keyword}%")
+                  ->orWhereHas('variants', function($q) use ($keyword) {
+                      $q->where('sku', 'like', "%{$keyword}%");
+                  });
+            });
+
+            if ($limit) {
+                $products = $query->take($limit)->get();
+            } else {
+                $products = $query->paginate($perPage);
+            }
+
+            $products->transform(function($product){
+                $product->average_rating = round($product->reviews->avg('rating'), 2);
+                $product->review_count = $product->reviews->count();
+                return $product;
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tìm kiếm sản phẩm thành công',
+                'data' => ProductResource::collection($products),
+                'count' => $products->count(),
+                'meta' => $limit ? null : [
+                    'current_page' => $products->currentPage(),
+                    'last_page' => $products->lastPage(),
+                    'per_page' => $products->perPage(),
+                    'total' => $products->total(),
+                    'from' => $products->firstItem(),
+                    'to' => $products->lastItem(),
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tìm kiếm thất bại',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -64,7 +64,6 @@ class AuthController extends Controller
         $login = $credentials['login'];
         $password = $credentials['password'];
 
-        // Tìm user bằng email hoặc username
         $user = User::where('email', $login)
             ->orWhere('username', $login)
             ->first();
@@ -76,7 +75,6 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Kiểm tra mật khẩu
         if (!Hash::check($password, $user->password)) {
             return response()->json([
                 'success' => false,
@@ -84,7 +82,6 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Kiểm tra tài khoản có active không
         if (!$user->is_active) {
             return response()->json([
                 'success' => false,
@@ -93,7 +90,6 @@ class AuthController extends Controller
         }
 
         try {
-            // Tạo token
             $token = JWTAuth::fromUser($user);
 
             return response()->json([
@@ -190,7 +186,6 @@ class AuthController extends Controller
         try {
             $user = auth('api')->user();
 
-            // Kiểm tra mật khẩu cũ
             if (!Hash::check($request->current_password, $user->password)) {
                 return response()->json([
                     'success' => false,
@@ -198,7 +193,6 @@ class AuthController extends Controller
                 ], 400);
             }
 
-            // Cập nhật mật khẩu mới
             $user->update([
                 'password' => Hash::make($request->new_password)
             ]);
