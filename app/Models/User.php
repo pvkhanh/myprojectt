@@ -496,8 +496,8 @@ use Laravel\Sanctum\HasApiTokens; // <- Thêm để dùng API token
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
-
-class User extends Authenticatable
+use Tymon\JWTAuth\Contracts\JWTSubject;
+class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable, SoftDeletes, UserScopes;
 
@@ -526,6 +526,27 @@ class User extends Authenticatable
         'birthday' => 'date',
         'is_active' => 'boolean',
     ];
+   // =================== JWT METHODS ===================
+    
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     */
+    public function getJWTCustomClaims()
+    {
+        return [
+            'email' => $this->email,
+            'role' => $this->role,
+            'username' => $this->username,
+        ];
+    }
 
     // =================== RELATIONSHIPS ===================
     

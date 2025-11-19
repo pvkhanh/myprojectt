@@ -7,8 +7,14 @@ return [
         'private' => env('JWT_PRIVATE_KEY'),
         'passphrase' => env('JWT_PASSPHRASE'),
     ],
-    'ttl' => env('JWT_TTL', 60), // Token expire time (minutes)
-    'refresh_ttl' => env('JWT_REFRESH_TTL', 20160), // Refresh token expire time (minutes) - 14 days
+    // config/jwt.php
+'ttl' => (int) env('JWT_TTL', 60),
+'refresh_ttl' => (int) env('JWT_REFRESH_TTL', 20160),
+'leeway' => (int) env('JWT_LEEWAY', 0),
+
+    
+    // 'ttl' => env('JWT_TTL', 60), // Token expire time (minutes)
+    // 'refresh_ttl' => env('JWT_REFRESH_TTL', 20160), // Refresh token expire time (minutes) - 14 days
     'algo' => env('JWT_ALGO', 'HS256'),
     'required_claims' => [
         'iss',
@@ -20,7 +26,7 @@ return [
     ],
     'persistent_claims' => [],
     'lock_subject' => true,
-    'leeway' => env('JWT_LEEWAY', 0),
+    // 'leeway' => env('JWT_LEEWAY', 0),
     'blacklist_enabled' => env('JWT_BLACKLIST_ENABLED', true),
     'blacklist_grace_period' => env('JWT_BLACKLIST_GRACE_PERIOD', 0),
     'decrypt_cookies' => false,

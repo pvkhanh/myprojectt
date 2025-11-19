@@ -468,4 +468,15 @@ class Product extends Model
         $count = self::where('slug', 'like', "{$slug}%")->count();
         return $count ? "{$slug}-{$count}" : $slug;
     }
+
+    // Trong Product Model
+    public function getStockQuantityAttribute()
+    {
+        // Tổng tồn kho tất cả biến thể
+        return $this->variants->sum(function ($variant) {
+            return $variant->stockItems->sum('quantity');
+        });
+    }
+
+
 }

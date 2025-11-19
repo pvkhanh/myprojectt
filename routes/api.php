@@ -159,44 +159,44 @@ Route::prefix('products')->group(function () {
 
 
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\ProductController;
+// use Illuminate\Support\Facades\Route;
+// use App\Http\Controllers\Api\ProductController;
 
-/*
-|--------------------------------------------------------------------------
-| Product API Routes
-|--------------------------------------------------------------------------
-*/
+// /*
+// |--------------------------------------------------------------------------
+// | Product API Routes
+// |--------------------------------------------------------------------------
+// */
 
-// Danh sách sản phẩm với filter, search, pagination
-Route::get('/products', [ProductController::class, 'index']);
+// // Danh sách sản phẩm với filter, search, pagination
+// Route::get('/products', [ProductController::class, 'index']);
 
-// Tìm kiếm sản phẩm
-Route::get('/products/search', [ProductController::class, 'search']);
+// // Tìm kiếm sản phẩm
+// Route::get('/products/search', [ProductController::class, 'search']);
 
-// Sản phẩm nổi bật
-Route::get('/products/featured', [ProductController::class, 'featured']);
+// // Sản phẩm nổi bật
+// Route::get('/products/featured', [ProductController::class, 'featured']);
 
-// Sản phẩm mới nhất
-Route::get('/products/latest', [ProductController::class, 'latest']);
+// // Sản phẩm mới nhất
+// Route::get('/products/latest', [ProductController::class, 'latest']);
 
-// Sản phẩm bán chạy
-Route::get('/products/bestseller', [ProductController::class, 'bestseller']);
+// // Sản phẩm bán chạy
+// Route::get('/products/bestseller', [ProductController::class, 'bestseller']);
 
-// Chi tiết sản phẩm theo slug (đặt trước {id} để tránh conflict)
-Route::get('/products/slug/{slug}', [ProductController::class, 'showBySlug']);
+// // Chi tiết sản phẩm theo slug (đặt trước {id} để tránh conflict)
+// Route::get('/products/slug/{slug}', [ProductController::class, 'showBySlug']);
 
-// Chi tiết sản phẩm theo ID
-Route::get('/products/{id}', [ProductController::class, 'show']);
+// // Chi tiết sản phẩm theo ID
+// Route::get('/products/{id}', [ProductController::class, 'show']);
 
-// Sản phẩm liên quan
-Route::get('/products/{id}/related', [ProductController::class, 'related']);
+// // Sản phẩm liên quan
+// Route::get('/products/{id}/related', [ProductController::class, 'related']);
 
-// Đánh giá sản phẩm
-Route::get('/products/{id}/reviews', [ProductController::class, 'reviews']);
+// // Đánh giá sản phẩm
+// Route::get('/products/{id}/reviews', [ProductController::class, 'reviews']);
 
-// Sản phẩm theo danh mục
-Route::get('/categories/{categoryId}/products', [ProductController::class, 'getByCategory']);
+// // Sản phẩm theo danh mục
+// Route::get('/categories/{categoryId}/products', [ProductController::class, 'getByCategory']);
 
 /*
 |--------------------------------------------------------------------------
@@ -224,3 +224,145 @@ Route::get('/categories/{categoryId}/products', [ProductController::class, 'getB
 | GET /api/categories/5/products?sort_by=price_asc - Sản phẩm danh mục có sắp xếp
 |
 */
+
+
+
+
+
+
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\Auth\AuthController;
+use App\Http\Controllers\Api\V1\Auth\ProfileController;
+use App\Http\Controllers\Api\V1\Customer\{
+    ProductController,
+    CartController,
+    OrderController,
+    WishlistController,
+    ReviewController,
+    AddressController
+};
+use App\Http\Controllers\Api\V1\CategoryController;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes V1
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('v1')->group(function () {
+
+    // ==================== PUBLIC ROUTES ====================
+    
+    // Authentication
+    Route::prefix('auth')->group(function () {
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
+        
+        // Protected Auth Routes
+        Route::middleware('auth:api')->group(function () {
+            Route::post('/logout', [AuthController::class, 'logout']);
+            Route::post('/refresh', [AuthController::class, 'refresh']);
+            Route::get('/me', [AuthController::class, 'me']);
+            Route::post('/change-password', [AuthController::class, 'changePassword']);
+        });
+    });
+
+    // Products (Public)
+    Route::prefix('products')->group(function () {
+        Route::get('/', [ProductController::class, 'index']);
+        Route::get('/search', [ProductController::class, 'search']);
+        Route::get('/featured', [ProductController::class, 'featured']);
+        Route::get('/latest', [ProductController::class, 'latest']);
+        Route::get('/bestseller', [ProductController::class, 'bestseller']);
+        Route::get('/on-sale', [ProductController::class, 'onSale']);
+        Route::get('/{id}', [ProductController::class, 'show']);
+        Route::get('/slug/{slug}', [ProductController::class, 'showBySlug']);
+        Route::get('/{id}/related', [ProductController::class, 'related']);
+        Route::get('/{id}/reviews', [ProductController::class, 'productReviews']);
+    });
+
+    // Categories (Public)
+    Route::prefix('categories')->group(function () {
+        Route::get('/', [CategoryController::class, 'index']);
+        Route::get('/{id}', [CategoryController::class, 'show']);
+        Route::get('/{id}/products', [CategoryController::class, 'products']);
+    });
+
+    // ==================== PROTECTED ROUTES ====================
+    
+    Route::middleware('auth:api')->group(function () {
+        
+        // Profile Management
+        Route::prefix('profile')->group(function () {
+            Route::get('/', [ProfileController::class, 'show']);
+            Route::put('/', [ProfileController::class, 'update']);
+            Route::post('/avatar', [ProfileController::class, 'updateAvatar']);
+            Route::delete('/avatar', [ProfileController::class, 'removeAvatar']);
+        });
+
+        // Cart Management
+        Route::prefix('cart')->group(function () {
+            Route::get('/', [CartController::class, 'index']);
+            Route::post('/add', [CartController::class, 'add']);
+            Route::put('/items/{id}', [CartController::class, 'update']);
+            Route::delete('/items/{id}', [CartController::class, 'remove']);
+            Route::delete('/clear', [CartController::class, 'clear']);
+            Route::post('/sync', [CartController::class, 'sync']); // Sync from guest to user
+        });
+
+        // Wishlist Management
+        Route::prefix('wishlist')->group(function () {
+            Route::get('/', [WishlistController::class, 'index']);
+            Route::post('/toggle', [WishlistController::class, 'toggle']);
+            Route::post('/add', [WishlistController::class, 'add']);
+            Route::delete('/{id}', [WishlistController::class, 'remove']);
+            Route::delete('/clear', [WishlistController::class, 'clear']);
+            Route::get('/check/{productId}', [WishlistController::class, 'check']);
+        });
+
+        // Order Management
+        Route::prefix('orders')->group(function () {
+            Route::get('/', [OrderController::class, 'index']);
+            Route::post('/', [OrderController::class, 'store']);
+            Route::get('/{id}', [OrderController::class, 'show']);
+            Route::post('/{id}/cancel', [OrderController::class, 'cancel']);
+            Route::post('/{id}/confirm-received', [OrderController::class, 'confirmReceived']);
+            Route::get('/{id}/track', [OrderController::class, 'track']);
+        });
+
+        // Review Management
+        Route::prefix('reviews')->group(function () {
+            Route::get('/my-reviews', [ReviewController::class, 'myReviews']);
+            Route::post('/', [ReviewController::class, 'store']);
+            Route::put('/{id}', [ReviewController::class, 'update']);
+            Route::delete('/{id}', [ReviewController::class, 'destroy']);
+            Route::post('/{id}/helpful', [ReviewController::class, 'markHelpful']);
+            Route::get('/can-review/{productId}', [ReviewController::class, 'canReview']);
+        });
+
+        // Address Management
+        Route::prefix('addresses')->group(function () {
+            Route::get('/', [AddressController::class, 'index']);
+            Route::post('/', [AddressController::class, 'store']);
+            Route::get('/{id}', [AddressController::class, 'show']);
+            Route::put('/{id}', [AddressController::class, 'update']);
+            Route::delete('/{id}', [AddressController::class, 'destroy']);
+            Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+        });
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| API Health Check
+|--------------------------------------------------------------------------
+*/
+Route::get('/health', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'API is running',
+        'version' => '1.0.0',
+        'timestamp' => now()->toDateTimeString()
+    ]);
+});
