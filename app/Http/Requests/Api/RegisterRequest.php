@@ -18,11 +18,11 @@ class RegisterRequest extends ApiRequest
     public function rules(): array
     {
         return [
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
+            'first_name' => 'nullable|string|max:50',
+            'last_name' => 'nullable|string|max:50',
             'username' => 'required|string|max:50|unique:users,username',
-            'email' => 'required|email|max:100|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|max:15',
         ];
     }
@@ -30,16 +30,14 @@ class RegisterRequest extends ApiRequest
     public function messages(): array
     {
         return [
-            'first_name.required' => 'Họ là bắt buộc',
-            'last_name.required' => 'Tên là bắt buộc',
-            'username.required' => 'Username là bắt buộc',
-            'username.unique' => 'Username đã tồn tại',
-            'email.required' => 'Email là bắt buộc',
-            'email.email' => 'Email không hợp lệ',
-            'email.unique' => 'Email đã được sử dụng',
-            'password.required' => 'Mật khẩu là bắt buộc',
-            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
-            'password.confirmed' => 'Xác nhận mật khẩu không khớp',
+            'username.required' => 'Please enter a username.',
+            'username.unique' => 'This username is already taken.',
+            'email.required' => 'Please enter your email.',
+            'email.email' => 'Invalid email format.',
+            'email.unique' => 'This email is already registered.',
+            'password.required' => 'Please enter a password.',
+            'password.min' => 'Password must be at least 8 characters.',
+            'password.confirmed' => 'Password confirmation does not match.',
         ];
     }
 }

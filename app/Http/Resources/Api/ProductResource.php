@@ -52,7 +52,7 @@
 
 
 
-//Bản thứ 2 đầy đủ hơn 
+//Bản thứ 2 đầy đủ hơn
 // namespace App\Http\Resources\Api;
 
 // use Illuminate\Http\Resources\Json\JsonResource;
@@ -126,7 +126,7 @@ class ProductResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'sku' => $this->sku,
+            'sku' => $this->variants->first()?->sku,
             'description' => $this->description,
             'short_description' => $this->short_description,
             'price' => $this->price,
@@ -137,14 +137,14 @@ class ProductResource extends JsonResource
             'stock_quantity' => $this->stock_quantity,
             'in_stock' => $this->in_stock,
             'is_low_stock' => $this->is_low_stock,
-            'is_active' => $this->is_active,
-            'is_featured' => $this->is_featured,
+            'is_active' => $this->status === \App\Enums\ProductStatus::Active,
+            'is_featured' => $this->is_featured ?? false,
             'status_label' => $this->status_label,
             'status_color' => $this->status_color,
-            'category' => $this->category ? [
-                'id' => $this->category->id,
-                'name' => $this->category->name,
-                'slug' => $this->category->slug,
+            'category' => $this->categories->first() ? [
+                'id' => $this->categories->first()->id,
+                'name' => $this->categories->first()->name,
+                'slug' => $this->categories->first()->slug,
             ] : null,
             'category_names' => $this->category_names,
             'images' => $this->images->map(fn($img) => [
@@ -155,7 +155,7 @@ class ProductResource extends JsonResource
             ]),
             'primary_image_url' => $this->main_image_url,
             'average_rating' => $this->average_rating,
-            'reviews_count' => $this->reviews_count,
+            'reviews_count' => $this->reviews()->count(),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'price_range' => $this->price_range,
             'related_products' => $this->getRelatedProducts()->map(function ($p) {

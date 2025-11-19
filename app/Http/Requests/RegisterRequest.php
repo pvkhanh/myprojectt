@@ -38,7 +38,7 @@ class RegisterRequest extends FormRequest
             'email.email' => 'Invalid email format.',
             'email.unique' => 'This email is already registered.',
             'password.required' => 'Please enter a password.',
-            'password.min' => 'Password must be at least 6 characters.',
+            'password.min' => 'Password must be at least 8 characters.',
             'password.confirmed' => 'Password confirmation does not match.',
         ];
     }

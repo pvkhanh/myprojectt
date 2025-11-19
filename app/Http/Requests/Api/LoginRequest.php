@@ -18,16 +18,16 @@ class LoginRequest extends ApiRequest
     {
         return [
             'login' => 'required|string',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'login.required' => 'Email/Username là bắt buộc',
-            'password.required' => 'Mật khẩu là bắt buộc',
-            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
+            'login.required' => 'Please enter your email or username.',
+            'password.required' => 'Please enter your password.',
+            'password.min' => 'Password must be at least 8 characters long.',
         ];
     }
 }

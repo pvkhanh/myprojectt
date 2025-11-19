@@ -438,6 +438,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Http\Resources\Api\ProductResource;
 use Illuminate\Http\Request;
+use App\Enums\ProductStatus;
 
 class ProductController extends Controller
 {
@@ -470,4 +471,43 @@ class ProductController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Chi tiết sản phẩm theo ID
+     */
+    public function show($id)
+    {
+        try {
+            $product = Product::with([
+                'categories',
+                'images',
+                'variants.stockItems',
+                'reviews' => function ($q) {
+                    $q->where('status', 'approved')
+                        ->with('user')
+                        ->latest()
+                        ->limit(10);
+                }
+            ])->findOrFail($id);
+
+            if ($product->status !== ProductStatus::Active) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sản phẩm không khả dụng'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => new ProductResource($product)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy sản phẩm',
+                'error' => $e->getMessage()
+            ], 404);
+        }
+    }
+
 }
