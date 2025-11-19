@@ -105,7 +105,7 @@ class WishlistController extends Controller
             if ($exists) {
                 // Xóa khỏi wishlist
                 $this->wishlistRepo->removeFromWishlist($userId, $productId, $variantId);
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Đã xóa khỏi danh sách yêu thích',
@@ -114,7 +114,7 @@ class WishlistController extends Controller
             } else {
                 // Thêm vào wishlist
                 $wishlist = $this->wishlistRepo->addToWishlist($userId, $productId, $variantId);
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Đã thêm vào danh sách yêu thích',
@@ -134,17 +134,54 @@ class WishlistController extends Controller
     /**
      * Xóa sản phẩm khỏi wishlist
      */
+    // public function remove($id)
+    // {
+    //     try {
+    //         $userId = auth('api')->id();
+    //         $id = (int) $id; // Ép kiểu từ string sang int
+    //         $wishlist = $this->wishlistRepo->find($id);
+
+    //         if (!$wishlist || $wishlist->user_id !== $userId) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Không tìm thấy sản phẩm trong wishlist'
+    //             ], 404);
+    //         }
+
+    //         $this->wishlistRepo->delete($id);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Đã xóa khỏi danh sách yêu thích'
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Không thể xóa',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function remove($id)
     {
         try {
             $userId = auth('api')->id();
+            $id = (int) $id; // ép kiểu int
             $wishlist = $this->wishlistRepo->find($id);
 
-            if (!$wishlist || $wishlist->user_id !== $userId) {
+            if (!$wishlist) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không tìm thấy sản phẩm trong wishlist'
+                    'message' => 'Không tìm thấy wishlist này'
                 ], 404);
+            }
+
+            if ($wishlist->user_id !== $userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền xóa wishlist này'
+                ], 403);
             }
 
             $this->wishlistRepo->delete($id);
@@ -162,31 +199,60 @@ class WishlistController extends Controller
         }
     }
 
+
     /**
      * Xóa toàn bộ wishlist
      */
-    public function clear()
-    {
-        try {
-            $userId = auth('api')->id();
-            $wishlists = $this->wishlistRepo->getByUser($userId);
+    // public function clear()
+    // {
+    //     try {
+    //         $userId = auth('api')->id();
+    //         $wishlists = $this->wishlistRepo->getByUser($userId);
 
-            foreach ($wishlists as $wishlist) {
-                $this->wishlistRepo->delete($wishlist->id);
-            }
+    //         foreach ($wishlists as $wishlist) {
+    //             $this->wishlistRepo->delete($wishlist->id);
+    //         }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Đã xóa toàn bộ danh sách yêu thích'
-            ]);
-        } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Đã xóa toàn bộ danh sách yêu thích'
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Không thể xóa',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+public function clear()
+{
+    try {
+        $userId = auth('api')->id();
+        $wishlists = $this->wishlistRepo->getByUser($userId);
+
+        if ($wishlists->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể xóa',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Bạn không có sản phẩm yêu thích nào để xóa'
+            ], 404);
         }
+
+        // Xóa tất cả wishlist của user bằng query duy nhất (nếu repository hỗ trợ)
+        $this->wishlistRepo->deleteByUser($userId);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã xóa toàn bộ danh sách yêu thích'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Không thể xóa',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * Kiểm tra sản phẩm có trong wishlist không
