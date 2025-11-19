@@ -218,7 +218,7 @@ class OrderController extends Controller
     {
         try {
             $userId = auth('api')->id();
-
+            
             $order = Order::where('id', $id)
                 ->where('user_id', $userId)
                 ->with(['orderItems.product', 'orderItems.variant', 'payments'])
@@ -250,7 +250,7 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             $userId = auth('api')->id();
-
+            
             $order = Order::where('id', $id)
                 ->where('user_id', $userId)
                 ->with(['orderItems', 'payments'])
@@ -311,7 +311,7 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             $userId = auth('api')->id();
-
+            
             $order = Order::where('id', $id)
                 ->where('user_id', $userId)
                 ->firstOrFail();
@@ -352,7 +352,7 @@ class OrderController extends Controller
     {
         try {
             $userId = auth('api')->id();
-
+            
             $order = Order::where('id', $id)
                 ->where('user_id', $userId)
                 ->firstOrFail();
@@ -390,7 +390,7 @@ class OrderController extends Controller
                     'order_number' => $order->order_number,
                     'current_status' => $order->status->value,
                     'timeline' => $timeline,
-                    'estimated_delivery' => $order->shipped_at ?
+                    'estimated_delivery' => $order->shipped_at ? 
                         $order->shipped_at->addDays(3)->format('d/m/Y') : null
                 ]
             ]);

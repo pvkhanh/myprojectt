@@ -51,7 +51,9 @@ class Order extends Model
 
     public function shippingAddress()
     {
-        return $this->hasOne(ShippingAddress::class);
+        // return $this->hasOne(ShippingAddress::class);
+        //Sửa 19/11/2025
+        return $this->hasOne(ShippingAddress::class, 'order_id', 'id');
     }
 
    // Cách 2: Thêm alias items() trong model Order Thêm ngày 13/11 để chạy cho show shipping do đang gọi đến item mà item nằm trong bảng OrderItem
