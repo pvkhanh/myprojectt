@@ -38,16 +38,14 @@ class ProfileController extends Controller
     {
         try {
             $user = auth('api')->user();
-            
+
             $data = $request->except(['avatar']);
 
-            // Xử lý avatar nếu có
             if ($request->hasFile('avatar')) {
-                // Xóa avatar cũ nếu có
                 if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                     Storage::disk('public')->delete($user->avatar);
                 }
-                
+
                 // Upload avatar mới
                 $path = $request->file('avatar')->store('avatars', 'public');
                 $data['avatar'] = $path;

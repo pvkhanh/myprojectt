@@ -12,12 +12,12 @@ class AuthApiService
     {
         return User::create([
             'first_name' => $data['first_name'],
-            'last_name'  => $data['last_name'],
-            'username'   => $data['username'],
-            'email'      => $data['email'],
-            'password'   => Hash::make($data['password']),
-            'role'       => 'buyer',
-            'is_active'  => true,
+            'last_name' => $data['last_name'],
+            'username' => $data['username'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role' => 'buyer',
+            'is_active' => true,
         ]);
     }
 

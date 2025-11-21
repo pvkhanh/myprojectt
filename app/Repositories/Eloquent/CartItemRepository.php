@@ -11,6 +11,17 @@ use Illuminate\Database\Eloquent\Model;
 class CartItemRepository extends BaseRepository implements CartItemRepositoryInterface
 {
     /**
+ * Lấy item theo user để tránh thao tác sai người dùng.
+ */
+public function findByUser(int $itemId, int $userId): ?Model
+{
+    return $this->model
+        ->where('id', $itemId)
+        ->where('user_id', $userId)
+        ->first();
+}
+
+    /**
      * Xác định model tương ứng với repository này.
      */
     protected function model(): string

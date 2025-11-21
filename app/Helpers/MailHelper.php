@@ -29,12 +29,12 @@ class MailHelper
 
         return [
             '{{customer_name}}' => $recipient->name,
-            '{{username}}'      => $recipient->name,
-            '{{email}}'         => $recipient->email,
-            '{{first_name}}'    => $user->first_name ?? '',
-            '{{last_name}}'     => $user->last_name ?? '',
-            '{{app_name}}'      => config('app.name'),
-            '{{app_url}}'       => config('app.url'),
+            '{{username}}' => $recipient->name,
+            '{{email}}' => $recipient->email,
+            '{{first_name}}' => $user->first_name ?? '',
+            '{{last_name}}' => $user->last_name ?? '',
+            '{{app_name}}' => config('app.name'),
+            '{{app_url}}' => config('app.url'),
         ];
     }
 
@@ -153,14 +153,14 @@ class MailHelper
 
             // Update recipient status
             $recipient->update([
-                'status'    => MailRecipientStatus::Sent->value,
+                'status' => MailRecipientStatus::Sent->value,
                 'error_log' => null,
             ]);
 
             return true;
         } catch (\Exception $e) {
             $recipient->update([
-                'status'    => MailRecipientStatus::Failed->value,
+                'status' => MailRecipientStatus::Failed->value,
                 'error_log' => $e->getMessage(),
             ]);
 
@@ -182,9 +182,9 @@ class MailHelper
         }
 
         $stats = [
-            'total'   => $recipients->count(),
+            'total' => $recipients->count(),
             'success' => 0,
-            'failed'  => 0,
+            'failed' => 0,
         ];
 
         foreach ($recipients as $recipient) {
@@ -247,9 +247,9 @@ class MailHelper
         $recipient = MailRecipient::create([
             'mail_id' => $mailTemplate->id,
             'user_id' => $user->id,
-            'email'   => $user->email,
-            'name'    => trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')),
-            'status'  => MailRecipientStatus::Pending->value,
+            'email' => $user->email,
+            'name' => trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')),
+            'status' => MailRecipientStatus::Pending->value,
         ]);
 
         $variables = self::prepareOrderVariables($order, $shippingAddress);
@@ -265,33 +265,36 @@ class MailHelper
         $itemsHtml = self::formatOrderItems($order->orderItems);
 
         return [
-            '{{order_number}}'       => $order->order_number,
-            '{{order_date}}'         => $order->created_at->format('d/m/Y H:i'),
-            '{{payment_method}}'     => $order->payment_method_label, // string
-            '{{payment_status}}'     => $order->payment_label,        // string
-            '{{order_items}}'        => $itemsHtml,
-            '{{subtotal}}'           => number_format($order->subtotal, 0, ',', '.') . 'đ',
-            '{{shipping_fee}}'       => number_format($order->shipping_fee ?? 0, 0, ',', '.') . 'đ',
-            '{{total_amount}}'       => number_format($order->total_amount, 0, ',', '.') . 'đ',
-            '{{shipping_name}}'      => $shippingAddress->name ?? '',
-            '{{shipping_phone}}'     => $shippingAddress->phone ?? '',
-            '{{shipping_address}}'   => $shippingAddress
+            '{{order_number}}' => $order->order_number,
+            '{{order_date}}' => $order->created_at->format('d/m/Y H:i'),
+            '{{payment_method}}' => $order->payment_method_label, // string
+            '{{payment_status}}' => $order->payment_label,        // string
+            '{{order_items}}' => $itemsHtml,
+            '{{subtotal}}' => number_format($order->subtotal, 0, ',', '.') . 'đ',
+            '{{shipping_fee}}' => number_format($order->shipping_fee ?? 0, 0, ',', '.') . 'đ',
+            '{{total_amount}}' => number_format($order->total_amount, 0, ',', '.') . 'đ',
+            '{{shipping_name}}' => $shippingAddress->name ?? '',
+            '{{shipping_phone}}' => $shippingAddress->phone ?? '',
+            '{{shipping_address}}' => $shippingAddress
                 ? "{$shippingAddress->address}, {$shippingAddress->ward}, {$shippingAddress->district}, {$shippingAddress->city}"
                 : '',
-            '{{order_url}}'          => route('orders.show', $order->id),
-            '{{tracking_url}}'       => '#',
-            '{{tracking_number}}'    => 'TBA',
+            //'{{order_url}}'          => route('orders.show', $order->id),
+            '{{order_url}}' => url('/orders/' . $order->id),
+            '{{tracking_url}}' => '#',
+            '{{tracking_number}}' => 'TBA',
             '{{estimated_delivery}}' => now()->addDays(3)->format('d/m/Y'),
-            '{{payment_time}}'       => $order->paid_at?->format('d/m/Y H:i') ?? '',
-            '{{delivery_time}}'      => $order->delivered_at?->format('d/m/Y H:i') ?? '',
-            '{{cancel_reason}}'      => $order->admin_note ?? 'Không có lý do cụ thể',
-            '{{cancel_time}}'        => $order->cancelled_at?->format('d/m/Y H:i') ?? '',
-            '{{review_url}}'         => route('orders.show', $order->id) . '#review',
-            '{{shop_url}}'           => route('home'),
-            '{{shop_name}}'          => config('app.name'),
-            '{{discount_code}}'      => 'THANKS10',
-            '{{discount_value}}'     => '10%',
-            '{{discount_expiry}}'    => now()->addDays(30)->format('d/m/Y'),
+            '{{payment_time}}' => $order->paid_at?->format('d/m/Y H:i') ?? '',
+            '{{delivery_time}}' => $order->delivered_at?->format('d/m/Y H:i') ?? '',
+            '{{cancel_reason}}' => $order->admin_note ?? 'Không có lý do cụ thể',
+            '{{cancel_time}}' => $order->cancelled_at?->format('d/m/Y H:i') ?? '',
+            // '{{review_url}}'         => route('orders.show', $order->id) . '#review',
+            '{{review_url}}' => url('/orders/' . $order->id . '#review'),
+            //'{{shop_url}}'           => route('home'),
+            '{{shop_url}}' => url('/'),
+            '{{shop_name}}' => config('app.name'),
+            '{{discount_code}}' => 'THANKS10',
+            '{{discount_value}}' => '10%',
+            '{{discount_expiry}}' => now()->addDays(30)->format('d/m/Y'),
         ];
     }
 
@@ -303,9 +306,10 @@ class MailHelper
         $html = '';
         foreach ($items as $item) {
             $productName = $item->product->name;
-            if ($item->variant) $productName .= " - {$item->variant->name}";
+            if ($item->variant)
+                $productName .= " - {$item->variant->name}";
 
-            $unitPrice  = number_format($item->price, 0, ',', '.');
+            $unitPrice = number_format($item->price, 0, ',', '.');
             $totalPrice = number_format($item->price * $item->quantity, 0, ',', '.');
 
             $html .= <<<HTML

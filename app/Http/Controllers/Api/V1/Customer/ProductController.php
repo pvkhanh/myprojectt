@@ -588,7 +588,7 @@ class ProductController extends Controller
             'categories',
             'images',
             'reviews'
-        ])->where('status', ProductStatus::Active->value);
+        ]);//->where('status', ProductStatus::Active->value);
 
         if ($limit) {
             $products = $query->take($limit)->get();
@@ -596,7 +596,7 @@ class ProductController extends Controller
             $products = $query->paginate($perPage);
         }
 
-        $products->transform(function($product) {
+        $products->transform(function ($product) {
             $product->average_rating = round($product->reviews->avg('rating'), 2);
             $product->review_count = $product->reviews->count();
             return $product;
@@ -670,17 +670,17 @@ class ProductController extends Controller
                 'images',
                 'reviews'
             ])
-            ->where('status', ProductStatus::Active->value)
-            ->whereHas('variants.stockItems', function($q){
-                $q->where('quantity', '>', 0);
-            })
-            ->where(function ($q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%")
-                  ->orWhere('description', 'like', "%{$keyword}%")
-                  ->orWhereHas('variants', function($q) use ($keyword) {
-                      $q->where('sku', 'like', "%{$keyword}%");
-                  });
-            });
+                ->where('status', ProductStatus::Active->value)
+                ->whereHas('variants.stockItems', function ($q) {
+                    $q->where('quantity', '>', 0);
+                })
+                ->where(function ($q) use ($keyword) {
+                    $q->where('name', 'like', "%{$keyword}%")
+                        ->orWhere('description', 'like', "%{$keyword}%")
+                        ->orWhereHas('variants', function ($q) use ($keyword) {
+                            $q->where('sku', 'like', "%{$keyword}%");
+                        });
+                });
 
             if ($limit) {
                 $products = $query->take($limit)->get();
@@ -688,7 +688,7 @@ class ProductController extends Controller
                 $products = $query->paginate($perPage);
             }
 
-            $products->transform(function($product){
+            $products->transform(function ($product) {
                 $product->average_rating = round($product->reviews->avg('rating'), 2);
                 $product->review_count = $product->reviews->count();
                 return $product;

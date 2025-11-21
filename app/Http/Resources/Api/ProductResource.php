@@ -128,7 +128,7 @@ class ProductResource extends JsonResource
             'slug' => $this->slug,
             'sku' => $this->variants->first()?->sku,
             'description' => $this->description,
-            'short_description' => $this->short_description,
+            // 'short_description' => $this->short_description,
             'price' => $this->price,
             'min_price' => $this->min_price,
             'max_price' => $this->max_price,
