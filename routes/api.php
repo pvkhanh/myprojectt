@@ -443,6 +443,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('cart')->group(function () {
             Route::get('/', [CartController::class, 'index']);
             Route::post('/add', [CartController::class, 'add']);
+            // Route::post('/add', [CartController::class, 'store']);
             Route::put('/items/{id}', [CartController::class, 'update']);
             Route::delete('/items/{id}', [CartController::class, 'remove']);
             Route::delete('/clear', [CartController::class, 'clear']);
@@ -454,6 +455,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [WishlistController::class, 'index']);
             Route::post('/toggle', [WishlistController::class, 'toggle']);
             Route::post('/add', [WishlistController::class, 'add']);
+            //  Route::post('/add', [WishlistController::class, 'store']);
             Route::delete('/{id}', [WishlistController::class, 'remove']);
             Route::delete('/clear', [WishlistController::class, 'clear']);
             Route::get('/check/{productId}', [WishlistController::class, 'check']);

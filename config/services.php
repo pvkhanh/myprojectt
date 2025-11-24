@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    #thêm ngày 24/11/2025 cho stripe
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
 ];
