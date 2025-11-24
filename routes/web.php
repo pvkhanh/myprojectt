@@ -370,7 +370,12 @@ use App\Http\Controllers\Admin\{
     ShippingAddressController
 };
 use App\Http\Controllers\Test\TestOrderController;
-
+use App\Http\Controllers\Client\HomeController;
+//use App\Http\Controllers\Client\ProductController;
+use App\Http\Controllers\Client\CartController;
+//use App\Http\Controllers\Client\WishlistController;
+//use App\Http\Controllers\Client\OrderController;
+//use App\Http\Controllers\Client\ProfileController;
 /*
 |--------------------------------------------------------------------------
 | AUTH ROUTES (WEB ONLY)
@@ -390,6 +395,7 @@ Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 | HOME
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('admin.dashboard');
@@ -599,3 +605,50 @@ if (app()->environment('local')) {
             ]);
     });
 }
+
+
+
+
+//Client Routes
+
+
+
+
+Route::prefix('client')->name('client.')->group(function () {
+
+    // Public Routes
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/category/{slug}', [ProductController::class, 'category'])->name('category.show');
+    Route::get('/search', [ProductController::class, 'search'])->name('products.search');
+
+    // Protected Routes
+    Route::middleware('auth')->group(function () {
+        Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+        Route::get('/cart', [CartController::class, 'index'])->name('cart');
+        Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+        Route::patch('/cart/update/{cartItem}', [CartController::class, 'update'])->name('cart.update');
+        Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
+        Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.coupon');
+        Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+        Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
+        Route::post('/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+        Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+        Route::post('/wishlist/add-all-to-cart', [WishlistController::class, 'addAllToCart'])->name('wishlist.addAllToCart');
+        Route::delete('/wishlist/clear', [WishlistController::class, 'clear'])->name('wishlist.clear');
+
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
+
+        Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+        Route::post('/checkout', [OrderController::class, 'placeOrder'])->name('checkout.place');
+    });
+
+});

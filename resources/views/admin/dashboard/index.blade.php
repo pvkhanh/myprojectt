@@ -39,7 +39,176 @@
     </div>
 @endsection --}}
 
+
 @extends('layouts.admin')
+@section('title', 'Dashboard')
+
+@section('content')
+    <div class="container-fluid py-4">
+        <h2 class="mb-4 text-dark fw-bold" style="font-family: 'Inter', sans-serif;">Dashboard</h2>
+
+        <!-- Tổng quan -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm rounded-3 p-3 text-center">
+                    <h6 class="text-muted mb-2">Sản phẩm</h6>
+                    <h3 class="fw-bold">{{ $productsCount }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm rounded-3 p-3 text-center">
+                    <h6 class="text-muted mb-2">Danh mục</h6>
+                    <h3 class="fw-bold">{{ $categoriesCount }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm rounded-3 p-3 text-center">
+                    <h6 class="text-muted mb-2">Đơn hàng</h6>
+                    <h3 class="fw-bold">{{ $ordersCount }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm rounded-3 p-3 text-center">
+                    <h6 class="text-muted mb-2">Người dùng</h6>
+                    <h3 class="fw-bold">{{ $usersCount }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đơn hàng theo trạng thái -->
+        <div class="row g-3 mb-4">
+            @php
+                $statuses = [
+                    'Pending' => ['count' => $pendingOrders, 'color' => 'warning', 'icon' => 'fa-clock'],
+                    'Paid' => ['count' => $paidOrders, 'color' => 'info', 'icon' => 'fa-credit-card'],
+                    'Shipped' => ['count' => $shippedOrders, 'color' => 'primary', 'icon' => 'fa-truck'],
+                    'Completed' => ['count' => $completedOrders, 'color' => 'success', 'icon' => 'fa-check-circle'],
+                    'Cancelled' => ['count' => $cancelledOrders, 'color' => 'danger', 'icon' => 'fa-times-circle'],
+                ];
+            @endphp
+
+            @foreach ($statuses as $name => $status)
+                <div class="col-md-2">
+                    <div class="card shadow-sm rounded-3 p-3 text-center border-0" style="transition: transform 0.2s;">
+                        <div class="text-{{ $status['color'] }}">
+                            <i class="fas {{ $status['icon'] }} fa-2x mb-2"></i>
+                        </div>
+                        <h6 class="text-muted mb-1">{{ $name }}</h6>
+                        <h4 class="fw-bold">{{ $status['count'] }}</h4>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- Doanh thu -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm rounded-3 p-3 text-center">
+                    <h6 class="text-muted mb-2">Tổng doanh thu</h6>
+                    <h3 class="fw-bold">{{ number_format($totalRevenue) }} đ</h3>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm rounded-3 p-3 text-center">
+                    <h6 class="text-muted mb-2">Doanh thu tháng {{ now()->month }}</h6>
+                    <h3 class="fw-bold">{{ number_format($monthlyRevenue) }} đ</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ doanh thu -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm rounded-3 p-3">
+                    <h6 class="text-muted mb-3">Biểu đồ doanh thu năm {{ now()->year }}</h6>
+                    <canvas id="revenueChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đơn hàng gần đây -->
+        <div class="row g-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm rounded-3 p-3">
+                    <h6 class="text-muted mb-3">Đơn hàng gần đây</h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Mã</th>
+                                    <th>Khách hàng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($recentOrders as $order)
+                                    <tr>
+                                        <td>{{ $order->id }}</td>
+                                        <td>{{ $order->user->name ?? 'N/A' }}</td>
+                                        <td>{{ number_format($order->total_amount) }} đ</td>
+                                        <td>{!! $order->status instanceof \App\Enums\OrderStatus ? $order->status->badge() : $order->status !!}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('revenueChart');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {!! json_encode(array_keys($revenueChart)) !!},
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: {!! json_encode(array_values($revenueChart)) !!},
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#4f46e5'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    intersect: false
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+@endsection
+
+{{-- @extends('layouts.admin')
 @section('title', 'Dashboard')
 
 @section('content')
@@ -400,4 +569,4 @@
             }
         });
     </script>
-@endpush
+@endpush --}}
