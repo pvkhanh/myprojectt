@@ -30,11 +30,7 @@ class ProductController extends Controller
         $filters = $request->only(['keyword', 'category_id', 'status', 'price_range', 'sort_by']);
         $perPage = $request->input('per_page', 15);
 
-        // CRITICAL: Ensure images relationship is loaded
         $products = $this->productRepo->searchPaginated($filters, $perPage);
-
-        // Load relationships if not already loaded by repository
-        $products->load(['images', 'categories', 'stockItems']);
 
         $totalProducts = $this->productRepo->countByStatus(ProductStatus::Active->value)
             + $this->productRepo->countByStatus(ProductStatus::Draft->value)
@@ -69,7 +65,7 @@ class ProductController extends Controller
     {
         $validated = $request->validated();
 
-        // Tạo slug nếu chưa có
+        // --- Tạo slug nếu chưa có ---
         if (empty($validated['slug']) && isset($validated['name'])) {
             $slug = strtolower($validated['name']);
             $slug = preg_replace('/[\s]+/', '-', $slug);
@@ -77,7 +73,7 @@ class ProductController extends Controller
             $validated['slug'] = trim($slug, '-');
         }
 
-        // Kiểm tra trùng
+        // --- Kiểm tra trùng ---
         $existing = Product::where('name', $validated['name'])
             ->orWhere('slug', $validated['slug'])
             ->first();
@@ -88,13 +84,13 @@ class ProductController extends Controller
                 : back()->withInput()->with('error', 'Sản phẩm đã tồn tại (tên hoặc slug trùng)!');
         }
 
-        // Xử lý image_ids
+        // --- Xử lý image_ids ---
         $imageIds = $validated['image_ids'] ?? [];
         if (is_string($imageIds)) $imageIds = array_filter(explode(',', $imageIds));
         $validated['image_ids'] = $imageIds;
         $validated['primary_image_id'] = $validated['primary_image_id'] ?? ($imageIds[0] ?? null);
 
-        // Tạo sản phẩm
+        // --- Tạo sản phẩm ---
         $product = $this->productRepo->create($validated);
 
         return $request->ajax()
@@ -131,7 +127,7 @@ class ProductController extends Controller
     {
         $validated = $request->validated();
 
-        // Xử lý image_ids
+        // --- Xử lý image_ids ---
         $imageIds = $validated['image_ids'] ?? [];
         if (is_string($imageIds)) $imageIds = array_filter(explode(',', $imageIds));
         $validated['image_ids'] = $imageIds;
@@ -147,7 +143,7 @@ class ProductController extends Controller
     // ================== TRASH ==================
     public function trash()
     {
-        $products = Product::onlyTrashed()->with(['categories', 'images'])->paginate(10);
+        $products = Product::onlyTrashed()->with('categories')->paginate(10);
         return view('admin.products.trash', compact('products'));
     }
 
@@ -241,3 +237,112 @@ class ProductController extends Controller
             : redirect()->route('admin.products.trash')->with('success', "Xóa vĩnh viễn {$deletedCount} sản phẩm thành công!");
     }
 }
+
+
+// namespace App\Http\Controllers\Admin;
+
+// use App\Http\Controllers\Controller;
+// use App\Http\Requests\ProductRequest;
+// use App\Services\ProductService;
+// use Illuminate\Http\Request;
+
+// class ProductController extends Controller
+// {
+//     protected ProductService $service;
+
+//     public function __construct(ProductService $service)
+//     {
+//         $this->service = $service;
+//     }
+
+//     public function index(Request $request)
+//     {
+//         $filters = $request->only(['keyword', 'category_id', 'status', 'price_range', 'sort_by']);
+//         $perPage = $request->input('per_page', 15);
+//         $data = $this->service->index($filters, $perPage);
+//         return view('admin.products.index', $data);
+//     }
+
+//     public function create(Request $request)
+//     {
+//         $data = $this->service->create($request->query('category_id'));
+//         return view('admin.products.create', $data);
+//     }
+
+//     public function store(ProductRequest $request)
+//     {
+//         $this->service->store($request->validated());
+//         return redirect()->route('admin.products.index')->with('success', 'Tạo sản phẩm thành công!');
+//     }
+
+//     public function show(int $id)
+//     {
+//         $product = $this->service->show($id);
+//         return view('admin.products.show', compact('product'));
+//     }
+
+//     public function edit(int $id)
+//     {
+//         $data = $this->service->edit($id);
+//         return view('admin.products.edit', $data);
+//     }
+
+//     public function update(ProductRequest $request, int $id)
+//     {
+//         $this->service->update($id, $request->validated());
+//         return redirect()->route('admin.products.index')->with('success', 'Cập nhật sản phẩm thành công!');
+//     }
+
+//     public function trash()
+//     {
+//         $products = $this->service->trash();
+//         return view('admin.products.trash', compact('products'));
+//     }
+
+//     public function destroy(int $id)
+//     {
+//         $this->service->destroy($id);
+//         return redirect()->route('admin.products.index')->with('success', 'Đã xóa mềm sản phẩm!');
+//     }
+
+//     public function forceDestroy(int $id)
+//     {
+//         $this->service->forceDestroy($id);
+//         return redirect()->route('admin.products.trash')->with('success', 'Xóa vĩnh viễn sản phẩm thành công!');
+//     }
+
+//     public function restore(int $id)
+//     {
+//         $this->service->restore($id);
+//         return redirect()->route('admin.products.trash')->with('success', 'Khôi phục sản phẩm thành công!');
+//     }
+
+//     public function bulkDelete(Request $request)
+//     {
+//         $ids = $request->validate(['ids' => 'required|array'])['ids'];
+//         $this->service->bulkDelete($ids);
+//         return back()->with('success', 'Xóa nhiều sản phẩm thành công!');
+//     }
+
+//     public function bulkUpdateStatus(Request $request)
+//     {
+//         $data = $request->validate([
+//             'ids' => 'required|array',
+//             'status' => 'required|string',
+//         ]);
+//         $this->service->bulkUpdateStatus($data['ids'], $data['status']);
+//         return back()->with('success', 'Cập nhật trạng thái sản phẩm thành công!');
+//     }
+
+//     public function restoreAll()
+//     {
+//         $this->service->restoreAll();
+//         return redirect()->route('admin.products.trash')->with('success', 'Khôi phục tất cả sản phẩm thành công!');
+//     }
+
+//     public function forceDeleteAll()
+//     {
+//         $this->service->forceDeleteAll();
+//         return redirect()->route('admin.products.trash')->with('success', 'Xóa vĩnh viễn tất cả sản phẩm thành công!');
+//     }
+// }

@@ -142,8 +142,16 @@
                                     style="height: 200px; overflow: hidden;">
                                     {{-- <img src="{{ asset('storage/' . $banner->image_path) }}" class="w-100 h-100 object-fit-cover" alt="{{ $banner->title }}"> --}}
                                     {{-- <img src="{{ asset('storage/' . ($banner->image->path ?? 'default.jpg')) }}" alt="{{ $banner->title }}"> --}}
-                                    <img src="{{ asset('storage/' . ($banner->image->path ?? 'default.jpg')) }}"
-                                        alt="{{ $banner->title }}" class="w-100 h-100 object-fit-cover">
+                                    {{-- <img src="{{ asset('storage/' . ($banner->image->path ?? 'default.jpg')) }}"
+                                        alt="{{ $banner->title }}" class="w-100 h-100 object-fit-cover"> --}}
+                                    @if ($banner->image)
+                                        <img src="{{ asset('storage/' . $banner->image->path) }}"
+                                            alt="{{ $banner->title }}" class="w-100 h-100 object-fit-cover"
+                                            onerror="this.src='{{ asset('images/default-banner.png') }}'">
+                                    @else
+                                        <img src="{{ asset('images/default-banner.png') }}" alt="No image"
+                                            class="w-100 h-100 object-fit-cover">
+                                    @endif
 
                                     {{-- Status Badge --}}
                                     <div class="position-absolute top-0 end-0 m-3">
@@ -404,7 +412,7 @@
             // Bulk actions
             bulkActionsBtn.addEventListener('click', function() {
                 const checkedIds = Array.from(document.querySelectorAll('.banner-checkbox:checked')).map(cb => cb
-                .value);
+                    .value);
                 document.getElementById('bulkIds').value = checkedIds.join(',');
                 document.getElementById('deleteCount').textContent = checkedIds.length;
                 const modal = new bootstrap.Modal(document.getElementById('bulkActionsModal'));

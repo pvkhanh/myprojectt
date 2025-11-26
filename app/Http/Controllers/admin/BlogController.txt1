@@ -15,11 +15,9 @@ use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
+        // CRITICAL: Load images relationship với pivot data
         $query = Blog::with(['author', 'categories', 'images'])->latest();
 
         // Search filter
@@ -83,9 +81,6 @@ class BlogController extends Controller
         ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $categories = Category::all();
@@ -94,9 +89,6 @@ class BlogController extends Controller
         return view('admin.blogs.create', compact('categories', 'statuses'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -111,7 +103,7 @@ class BlogController extends Controller
             'primary_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // Auto-generate slug if not provided
+        // Auto-generate slug
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['title']);
         }
@@ -135,18 +127,12 @@ class BlogController extends Controller
             ->with('success', 'Bài viết đã được tạo thành công!');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Blog $blog)
     {
         $blog->load(['author', 'categories', 'images']);
         return view('admin.blogs.show', compact('blog'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Blog $blog)
     {
         $blog->load(['author', 'categories', 'images']);
@@ -156,9 +142,6 @@ class BlogController extends Controller
         return view('admin.blogs.edit', compact('blog', 'categories', 'statuses'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Blog $blog)
     {
         $validated = $request->validate([
@@ -202,9 +185,6 @@ class BlogController extends Controller
             ->with('success', 'Bài viết đã được cập nhật thành công!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Blog $blog)
     {
         // Delete all associated images
@@ -219,9 +199,6 @@ class BlogController extends Controller
             ->with('success', 'Bài viết đã được xóa thành công!');
     }
 
-    /**
-     * Bulk update status
-     */
     public function bulkUpdateStatus(Request $request)
     {
         $ids = $request->input('ids', []);
@@ -242,9 +219,6 @@ class BlogController extends Controller
         ]);
     }
 
-    /**
-     * Bulk delete blogs
-     */
     public function bulkDelete(Request $request)
     {
         $ids = $request->input('ids', []);
@@ -256,7 +230,7 @@ class BlogController extends Controller
             ]);
         }
 
-        $blogs = Blog::whereIn('id', $ids)->get();
+        $blogs = Blog::whereIn('id', $ids)->with('images')->get();
 
         foreach ($blogs as $blog) {
             foreach ($blog->images as $image) {
@@ -277,15 +251,18 @@ class BlogController extends Controller
      */
     private function attachPrimaryImage($blog, $file)
     {
+        // Lưu file vào storage/app/public/blogs
         $path = $file->store('blogs', 'public');
 
+        // Tạo record trong bảng images
         $image = Image::create([
-            'path' => $path,
+            'path' => $path, // VD: blogs/abc123.jpg
             'type' => 'blog',
             'alt_text' => $blog->title,
             'is_active' => true,
         ]);
 
+        // Gắn vào blog qua pivot table với is_main = true
         $blog->images()->attach($image->id, [
             'is_main' => true,
             'position' => 1

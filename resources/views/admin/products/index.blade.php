@@ -399,6 +399,22 @@
                                     Điểm mấu chốt:
                                     Nếu bạn dùng pivot field is_main thì phải check pivot.is_main.
                                     Nếu bạn dùng primary_image_id lưu trực tiếp ở bảng products thì check id của collection. --}}
+                                    {{-- @php
+                                        // Lấy ảnh chính dựa vào bảng pivot
+                                        $primaryImage = $product->images->firstWhere('pivot.is_main', true);
+
+                                        // Nếu không có, lấy ảnh đầu tiên
+                                        if (!$primaryImage) {
+                                            $primaryImage = $product->images->first();
+                                        }
+
+                                        // Nếu vẫn không có ảnh, dùng ảnh mặc định
+                                        $imgPath = $primaryImage->path ?? 'images/default-product.png';
+                                    @endphp
+
+                                    <img src="{{ asset('storage/' . $imgPath) }}" class="rounded shadow-sm"
+                                        style="width:70px; height:70px; object-fit:cover;"> --}}
+
                                     @php
                                         // Lấy ảnh chính dựa vào bảng pivot
                                         $primaryImage = $product->images->firstWhere('pivot.is_main', true);
@@ -413,9 +429,8 @@
                                     @endphp
 
                                     <img src="{{ asset('storage/' . $imgPath) }}" class="rounded shadow-sm"
-                                        style="width:70px; height:70px; object-fit:cover;">
-
-
+                                        style="width:70px; height:70px; object-fit:cover;"
+                                        onerror="this.src='{{ asset('images/default-product.png') }}'">
                                     {{-- @php
                                         $img =
                                             $product->images->where('id', $product->primary_image_id)->first() ??
@@ -1073,16 +1088,16 @@
             }
 
             /* Responsive
-                                                                                                                                                    @media (max-width: 768px) {
-                                                                                                                                                        .table {
-                                                                                                                                                            font-size: 0.85rem;
-                                                                                                                                                        }
+                                                                                                                                                                    @media (max-width: 768px) {
+                                                                                                                                                                        .table {
+                                                                                                                                                                            font-size: 0.85rem;
+                                                                                                                                                                        }
 
-                                                                                                                                                        thead th,
-                                                                                                                                                        tbody td {
-                                                                                                                                                            padding: 10px 12px;
-                                                                                                                                                        }
-                                                                                                                                                    } */
+                                                                                                                                                                        thead th,
+                                                                                                                                                                        tbody td {
+                                                                                                                                                                            padding: 10px 12px;
+                                                                                                                                                                        }
+                                                                                                                                                                    } */
         </style>
     @endpush
 @endsection

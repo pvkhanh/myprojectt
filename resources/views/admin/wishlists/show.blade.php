@@ -72,7 +72,7 @@
             <!-- User Information -->
             <div class="col-lg-4">
                 <div class="card border-0 shadow-sm info-card">
-                    <div class="card-header bg-gradient text-white py-3" 
+                    <div class="card-header bg-gradient text-white py-3"
                         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                         <h5 class="mb-0 fw-semibold">
                             <i class="fa-solid fa-user me-2"></i>Thông tin người dùng
@@ -80,8 +80,8 @@
                     </div>
                     <div class="card-body">
                         <div class="text-center mb-4">
-                            <img src="{{ $wishlist->user->avatar_url }}" 
-                                alt="Avatar" 
+                            <img src="{{ $wishlist->user->avatar_url }}"
+                                alt="Avatar"
                                 class="rounded-circle mb-3"
                                 style="width: 120px; height: 120px; object-fit: cover;">
                             <h5 class="fw-bold mb-1">
@@ -116,11 +116,11 @@
                         <hr>
 
                         <div class="d-grid gap-2">
-                            <a href="{{ route('admin.wishlists.user', $wishlist->user_id) }}" 
+                            <a href="{{ route('admin.wishlists.user', $wishlist->user_id) }}"
                                 class="btn btn-outline-primary">
                                 <i class="fa-solid fa-list me-2"></i>Xem tất cả wishlist
                             </a>
-                            <a href="{{ route('admin.users.show', $wishlist->user_id) }}" 
+                            <a href="{{ route('admin.users.show', $wishlist->user_id) }}"
                                 class="btn btn-outline-secondary">
                                 <i class="fa-solid fa-user me-2"></i>Xem hồ sơ
                             </a>
@@ -141,14 +141,14 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-5">
-                                <img src="{{ $wishlist->product->main_image_url }}" 
+                                <img src="{{ $wishlist->product->main_image_url }}"
                                     alt="{{ $wishlist->product->name }}"
                                     class="main-image mb-3">
 
-                                @if($wishlist->product->images->count() > 1)
+                                @if ($wishlist->product->images->count() > 1)
                                     <div class="product-gallery">
                                         <div class="row g-2">
-                                            @foreach($wishlist->product->images->take(4) as $image)
+                                            @foreach ($wishlist->product->images->take(4) as $image)
                                                 <div class="col-3">
                                                     <img src="{{ $image->url }}" alt="Product">
                                                 </div>
@@ -165,7 +165,7 @@
                                     <span class="badge bg-{{ $wishlist->product->status_color }} fs-6 px-3 py-2">
                                         {{ $wishlist->product->status_label }}
                                     </span>
-                                    @if($wishlist->product->in_stock)
+                                    @if ($wishlist->product->in_stock)
                                         <span class="badge bg-success fs-6 px-3 py-2 ms-2">
                                             <i class="fa-solid fa-check me-1"></i>Còn hàng
                                         </span>
@@ -187,7 +187,7 @@
                                     <p class="text-muted">{{ $wishlist->product->description ?? 'Không có mô tả' }}</p>
                                 </div>
 
-                                @if($wishlist->variant)
+                                @if ($wishlist->variant)
                                     <div class="mb-3">
                                         <h6 class="fw-semibold mb-2">
                                             <i class="fa-solid fa-layer-group me-2"></i>Biến thể:
@@ -224,7 +224,7 @@
                                                 <i class="fa-solid fa-star text-warning fs-4 mb-2"></i>
                                                 <div class="small text-muted">Đánh giá</div>
                                                 <div class="fw-bold fs-5">
-                                                    {{ $wishlist->product->average_rating }} 
+                                                    {{ $wishlist->product->average_rating }}
                                                     <span class="small text-muted">({{ $wishlist->product->review_count }})</span>
                                                 </div>
                                             </div>
@@ -233,11 +233,11 @@
                                 </div>
 
                                 <div class="d-grid gap-2">
-                                    <a href="{{ route('admin.products.show', $wishlist->product_id) }}" 
+                                    <a href="{{ route('admin.products.show', $wishlist->product_id) }}"
                                         class="btn btn-primary btn-lg">
                                         <i class="fa-solid fa-eye me-2"></i>Xem chi tiết sản phẩm
                                     </a>
-                                    <a href="{{ route('admin.products.edit', $wishlist->product_id) }}" 
+                                    <a href="{{ route('admin.products.edit', $wishlist->product_id) }}"
                                         class="btn btn-outline-secondary">
                                         <i class="fa-solid fa-pen me-2"></i>Chỉnh sửa sản phẩm
                                     </a>
@@ -295,7 +295,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Delete confirmation
             const deleteBtn = document.querySelector('.btn-delete');
-            
+
             deleteBtn?.addEventListener('click', function() {
                 const deleteUrl = this.dataset.action;
                 const productName = this.dataset.product;
@@ -565,6 +565,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -614,9 +615,7 @@
                 <div class="card border-0 shadow-sm detail-card animate-slide-up" style="animation-delay: 0.1s;">
                     <div class="user-card-header text-white position-relative">
                         <div class="text-center position-relative z-1">
-                            <img src="{{ $wishlist->user->avatar_url }}" 
-                                alt="Avatar" 
-                                class="user-avatar mb-3">
+                            <img src="{{ $wishlist->user->avatar_url }}" alt="Avatar" class="user-avatar mb-3">
                             <h4 class="fw-bold mb-1">
                                 {{ trim(($wishlist->user->first_name ?? '') . ' ' . ($wishlist->user->last_name ?? '')) ?: 'N/A' }}
                             </h4>
@@ -638,7 +637,8 @@
                                 <span class="text-muted">
                                     <i class="fa-solid fa-user-tag me-2" style="color: var(--tiktok-red);"></i>Role
                                 </span>
-                                <span class="badge" style="background: linear-gradient(135deg, var(--tiktok-red) 0%, #FF6B9D 100%);">
+                                <span class="badge"
+                                    style="background: linear-gradient(135deg, var(--tiktok-red) 0%, #FF6B9D 100%);">
                                     {{ ucfirst($wishlist->user->role) }}
                                 </span>
                             </div>
@@ -656,11 +656,11 @@
                         <hr class="my-4">
 
                         <div class="d-grid gap-2">
-                            <a href="{{ route('admin.wishlists.user', $wishlist->user_id) }}" 
+                            <a href="{{ route('admin.wishlists.user', $wishlist->user_id) }}"
                                 class="btn btn-outline-primary action-button">
                                 <i class="fa-solid fa-heart me-2"></i>All Wishlists
                             </a>
-                            <a href="{{ route('admin.users.show', $wishlist->user_id) }}" 
+                            <a href="{{ route('admin.users.show', $wishlist->user_id) }}"
                                 class="btn btn-outline-secondary action-button">
                                 <i class="fa-solid fa-user me-2"></i>View Profile
                             </a>
@@ -680,16 +680,49 @@
                     <div class="card-body p-4">
                         <div class="row">
                             <div class="col-md-5">
-                                <img src="{{ $wishlist->product->main_image_url }}" 
+                                {{-- <img src="{{ $wishlist->product->main_image_url }}"
                                     alt="{{ $wishlist->product->name }}"
                                     class="main-image mb-3">
 
-                                @if($wishlist->product->images->count() > 1)
+                                @if ($wishlist->product->images->count() > 1)
                                     <div class="product-gallery">
                                         <div class="row g-2">
-                                            @foreach($wishlist->product->images->take(4) as $image)
+                                            @foreach ($wishlist->product->images->take(4) as $image)
                                                 <div class="col-3">
                                                     <img src="{{ $image->url }}" alt="Product">
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif --}}
+                                @php
+                                    // Lấy ảnh chính
+                                    $primaryImage =
+                                        $wishlist->product->images->firstWhere('pivot.is_main', true) ??
+                                        $wishlist->product->images->first();
+
+                                    $primaryImageUrl = $primaryImage
+                                        ? asset('storage/' . $primaryImage->path)
+                                        : asset('images/default-product.png');
+
+                                    // Lấy gallery (tối đa 4 ảnh, loại bỏ ảnh chính)
+                                    $galleryImages = $wishlist->product->images
+                                        ->reject(fn($img) => $primaryImage && $img->id == $primaryImage->id)
+                                        ->take(4);
+                                @endphp
+
+                                <!-- Ảnh chính -->
+                                <img src="{{ $primaryImageUrl }}" alt="{{ $wishlist->product->name }}"
+                                    class="main-image mb-3" loading="lazy">
+
+                                <!-- Gallery ảnh -->
+                                @if ($galleryImages->count())
+                                    <div class="product-gallery">
+                                        <div class="row g-2">
+                                            @foreach ($galleryImages as $image)
+                                                <div class="col-3">
+                                                    <img src="{{ asset('storage/' . $image->path) }}"
+                                                        alt="{{ $wishlist->product->name }}" loading="lazy">
                                                 </div>
                                             @endforeach
                                         </div>
@@ -701,11 +734,12 @@
                                 <h3 class="fw-bold mb-3">{{ $wishlist->product->name }}</h3>
 
                                 <div class="mb-4">
-                                    <span class="badge badge-status" style="background-color: {{ $wishlist->product->status === 'active' ? '#10b981' : '#ef4444' }};">
+                                    <span class="badge badge-status"
+                                        style="background-color: {{ $wishlist->product->status === 'active' ? '#10b981' : '#ef4444' }};">
                                         <i class="fa-solid fa-circle me-1" style="font-size: 0.5rem;"></i>
                                         {{ $wishlist->product->status_label }}
                                     </span>
-                                    @if($wishlist->product->in_stock)
+                                    @if ($wishlist->product->in_stock)
                                         <span class="badge badge-status bg-success ms-2">
                                             <i class="fa-solid fa-check me-1"></i>In Stock
                                         </span>
@@ -724,10 +758,11 @@
                                     <h6 class="fw-semibold mb-2 text-muted">
                                         <i class="fa-solid fa-align-left me-2"></i>Description
                                     </h6>
-                                    <p class="text-muted">{{ $wishlist->product->description ?? 'No description available' }}</p>
+                                    <p class="text-muted">
+                                        {{ $wishlist->product->description ?? 'No description available' }}</p>
                                 </div>
 
-                                @if($wishlist->variant)
+                                @if ($wishlist->variant)
                                     <div class="info-card-modern mb-4">
                                         <h6 class="fw-semibold mb-3">
                                             <i class="fa-solid fa-layer-group me-2" style="color: var(--tiktok-red);"></i>
@@ -748,16 +783,19 @@
                                 <div class="row g-3 mb-4">
                                     <div class="col-4">
                                         <div class="stat-box">
-                                            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                            <div class="stat-icon"
+                                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                                                 <i class="fa-solid fa-box"></i>
                                             </div>
                                             <div class="small text-muted mb-1">Stock</div>
-                                            <div class="fw-bold fs-4">{{ number_format($wishlist->product->total_stock) }}</div>
+                                            <div class="fw-bold fs-4">{{ number_format($wishlist->product->total_stock) }}
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-4">
                                         <div class="stat-box">
-                                            <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                                            <div class="stat-icon"
+                                                style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
                                                 <i class="fa-solid fa-star"></i>
                                             </div>
                                             <div class="small text-muted mb-1">Rating</div>
@@ -766,7 +804,8 @@
                                     </div>
                                     <div class="col-4">
                                         <div class="stat-box">
-                                            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                                            <div class="stat-icon"
+                                                style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
                                                 <i class="fa-solid fa-comment"></i>
                                             </div>
                                             <div class="small text-muted mb-1">Reviews</div>
@@ -776,19 +815,20 @@
                                 </div>
 
                                 <div class="d-grid gap-2">
-                                    <a href="{{ route('admin.products.show', $wishlist->product_id) }}" 
-                                        class="btn action-button" style="background: linear-gradient(135deg, var(--tiktok-red) 0%, #FF6B9D 100%); color: white; border: none;">
+                                    <a href="{{ route('admin.products.show', $wishlist->product_id) }}"
+                                        class="btn action-button"
+                                        style="background: linear-gradient(135deg, var(--tiktok-red) 0%, #FF6B9D 100%); color: white; border: none;">
                                         <i class="fa-solid fa-eye me-2"></i>View Product Details
                                     </a>
                                     <div class="row g-2">
                                         <div class="col-6">
-                                            <a href="{{ route('admin.products.edit', $wishlist->product_id) }}" 
+                                            <a href="{{ route('admin.products.edit', $wishlist->product_id) }}"
                                                 class="btn btn-outline-secondary action-button w-100">
                                                 <i class="fa-solid fa-pen me-2"></i>Edit Product
                                             </a>
                                         </div>
                                         <div class="col-6">
-                                            <a href="{{ route('admin.wishlists.product', $wishlist->product_id) }}" 
+                                            <a href="{{ route('admin.wishlists.product', $wishlist->product_id) }}"
                                                 class="btn btn-outline-info action-button w-100">
                                                 <i class="fa-solid fa-users me-2"></i>All Fans
                                             </a>
@@ -812,7 +852,8 @@
                         <div class="row g-4">
                             <div class="col-md-4">
                                 <div class="stat-box h-100">
-                                    <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                                    <div class="stat-icon"
+                                        style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
                                         <i class="fa-solid fa-calendar-plus"></i>
                                     </div>
                                     <h6 class="text-muted mb-2">Added On</h6>
@@ -823,7 +864,8 @@
 
                             <div class="col-md-4">
                                 <div class="stat-box h-100">
-                                    <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+                                    <div class="stat-icon"
+                                        style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
                                         <i class="fa-solid fa-clock"></i>
                                     </div>
                                     <h6 class="text-muted mb-2">Time Active</h6>
@@ -833,7 +875,8 @@
 
                             <div class="col-md-4">
                                 <div class="stat-box h-100">
-                                    <div class="stat-icon" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: white;">
+                                    <div class="stat-icon"
+                                        style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: white;">
                                         <i class="fa-solid fa-hashtag"></i>
                                     </div>
                                     <h6 class="text-muted mb-2">Wishlist ID</h6>
@@ -854,7 +897,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Delete confirmation
             const deleteBtn = document.querySelector('.btn-delete');
-            
+
             deleteBtn?.addEventListener('click', function() {
                 const deleteUrl = this.dataset.action;
                 const productName = this.dataset.product;

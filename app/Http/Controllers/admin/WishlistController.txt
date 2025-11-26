@@ -25,11 +25,13 @@ class WishlistController extends Controller
         $this->productRepo = $productRepo;
     }
 
+    /**
+     * Display a listing of wishlists
+     */
     public function index(Request $request)
     {
-        // CRITICAL: Load product.images relationship để hiển thị ảnh
         $query = $this->wishlistRepo->getModel()
-            ->with(['user', 'product.images', 'variant']);
+            ->with(['user', 'product', 'variant']);
 
         // Search filter
         if ($search = $request->input('search')) {
@@ -39,9 +41,9 @@ class WishlistController extends Controller
                         ->orWhere('first_name', 'like', "%{$search}%")
                         ->orWhere('last_name', 'like', "%{$search}%");
                 })
-                    ->orWhereHas('product', function ($qq) use ($search) {
-                        $qq->where('name', 'like', "%{$search}%");
-                    });
+                ->orWhereHas('product', function ($qq) use ($search) {
+                    $qq->where('name', 'like', "%{$search}%");
+                });
             });
         }
 
@@ -91,6 +93,9 @@ class WishlistController extends Controller
         return view('admin.wishlists.index', compact('wishlists', 'stats', 'topProducts'));
     }
 
+    /**
+     * Display wishlist details for a specific user
+     */
     public function show($id)
     {
         $wishlist = $this->wishlistRepo->getModel()
@@ -100,45 +105,48 @@ class WishlistController extends Controller
         return view('admin.wishlists.show', compact('wishlist'));
     }
 
+    /**
+     * Show wishlists by user
+     */
     public function userWishlists($userId)
     {
         $user = $this->userRepo->find($userId);
-
+        
         if (!$user) {
             return redirect()->route('admin.wishlists.index')
                 ->with('error', 'Không tìm thấy người dùng');
         }
 
-        $wishlists = $this->wishlistRepo->getModel()
-            ->where('user_id', $userId)
-            ->with(['product.images', 'variant'])
-            ->paginate(20);
+        $wishlists = $this->wishlistRepo->getByUser($userId);
 
         return view('admin.wishlists.user', compact('user', 'wishlists'));
     }
 
+    /**
+     * Show wishlists by product
+     */
     public function productWishlists($productId)
     {
         $product = $this->productRepo->find($productId);
-
+        
         if (!$product) {
             return redirect()->route('admin.wishlists.index')
                 ->with('error', 'Không tìm thấy sản phẩm');
         }
 
-        $wishlists = $this->wishlistRepo->getModel()
-            ->where('product_id', $productId)
-            ->with(['user', 'variant'])
-            ->paginate(20);
+        $wishlists = $this->wishlistRepo->forProduct($productId);
 
         return view('admin.wishlists.product', compact('product', 'wishlists'));
     }
 
+    /**
+     * Remove wishlist entry
+     */
     public function destroy($id)
     {
         try {
             $wishlist = $this->wishlistRepo->find($id);
-
+            
             if (!$wishlist) {
                 return redirect()->back()->with('error', 'Không tìm thấy mục yêu thích');
             }
@@ -151,6 +159,9 @@ class WishlistController extends Controller
         }
     }
 
+    /**
+     * Bulk delete wishlists
+     */
     public function bulkDestroy(Request $request)
     {
         $request->validate([
@@ -180,12 +191,19 @@ class WishlistController extends Controller
         }
     }
 
+    /**
+     * Export wishlists to Excel
+     */
     public function export(Request $request)
     {
         // Implement export logic here using Laravel Excel
+        // This is a placeholder
         return response()->download('path/to/export.xlsx');
     }
 
+    /**
+     * Get statistics
+     */
     public function statistics()
     {
         $stats = [

@@ -102,27 +102,27 @@ class Product extends Model
     /**
      * Ảnh chính (is_main = true)
      */
-    public function getPrimaryImageAttribute()
-    {
-        return $this->images()
-            ->wherePivot('is_main', true)
-            ->first();
-    }
+    // public function getPrimaryImageAttribute()
+    // {
+    //     return $this->images()
+    //         ->wherePivot('is_main', true)
+    //         ->first();
+    // }
 
     /**
      * URL ảnh chính
      */
-    public function getMainImageUrlAttribute(): string
-    {
-        $primaryImage = $this->primary_image;
+    // public function getMainImageUrlAttribute(): string
+    // {
+    //     $primaryImage = $this->primary_image;
 
-        if ($primaryImage) {
-            return $primaryImage->url ?? asset('images/no-image.png');
-        }
+    //     if ($primaryImage) {
+    //         return $primaryImage->url ?? asset('images/no-image.png');
+    //     }
 
-        $firstImage = $this->images()->first();
-        return $firstImage?->url ?? asset('images/no-image.png');
-    }
+    //     $firstImage = $this->images()->first();
+    //     return $firstImage?->url ?? asset('images/no-image.png');
+    // }
 
     /**
      * Giá thấp nhất trong các biến thể
@@ -487,5 +487,60 @@ class Product extends Model
         return $this->belongsToMany(Product::class, 'wishlists', 'user_id', 'product_id')
             ->withTimestamps();
     }
+    /**
+     * Get main image URL
+     * Accessor để dễ dàng lấy ảnh chính trong blade
+     */
+    public function getMainImageUrlAttribute()
+    {
+        // Cách 1: Nếu dùng primary_image_id
+        if ($this->primary_image_id) {
+            $primaryImage = $this->images->firstWhere('id', $this->primary_image_id);
+            if ($primaryImage) {
+                return asset('storage/' . $primaryImage->path);
+            }
+        }
 
+        // Cách 2: Nếu dùng pivot is_main
+        $mainImage = $this->images->firstWhere('pivot.is_main', true);
+        if ($mainImage) {
+            return asset('storage/' . $mainImage->path);
+        }
+
+        // Fallback: Lấy ảnh đầu tiên
+        $firstImage = $this->images->first();
+        if ($firstImage) {
+            return asset('storage/' . $firstImage->path);
+        }
+
+        // Default image nếu không có ảnh nào
+        return asset('images/default-product.png');
+    }
+
+    /**
+     * Get primary image object
+     */
+    public function getPrimaryImageAttribute()
+    {
+        // Nếu dùng primary_image_id
+        if ($this->primary_image_id) {
+            return $this->images->firstWhere('id', $this->primary_image_id);
+        }
+
+        // Nếu dùng pivot is_main
+        return $this->images->firstWhere('pivot.is_main', true)
+            ?? $this->images->first();
+    }
+
+    /**
+     * Get gallery images (không bao gồm ảnh chính)
+     */
+    public function getGalleryImagesAttribute()
+    {
+        if ($this->primary_image_id) {
+            return $this->images->where('id', '!=', $this->primary_image_id);
+        }
+
+        return $this->images->where('pivot.is_main', false);
+    }
 }
