@@ -497,6 +497,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\Product;
 class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable, SoftDeletes, UserScopes;
@@ -526,8 +527,8 @@ class User extends Authenticatable implements JWTSubject
         'birthday' => 'date',
         'is_active' => 'boolean',
     ];
-   // =================== JWT METHODS ===================
-    
+    // =================== JWT METHODS ===================
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      */
@@ -549,7 +550,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     // =================== RELATIONSHIPS ===================
-    
+
     // public function addresses(): HasMany
     // {
     //     return $this->hasMany(UserAddress::class);
@@ -629,7 +630,7 @@ class User extends Authenticatable implements JWTSubject
             if (str_starts_with($this->avatar, 'http')) {
                 return $this->avatar;
             }
-            
+
             // Nếu avatar là đường dẫn tương đối trong storage
             if (Storage::disk('public')->exists($this->avatar)) {
                 return asset('storage/' . $this->avatar);
@@ -706,5 +707,10 @@ class User extends Authenticatable implements JWTSubject
             Storage::disk('public')->delete($this->avatar);
         }
         return $this->update(['avatar' => null]);
+    }
+    public function wishlistItems(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'wishlists', 'user_id', 'product_id')
+            ->withTimestamps();
     }
 }

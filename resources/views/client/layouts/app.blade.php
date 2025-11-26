@@ -197,13 +197,13 @@
                         </li>
                     @else
                         <li class="nav-item">
-                            <a class="nav-link position-relative" href="{{ route('wishlist') }}">
+                            <a class="nav-link position-relative" href="{{ route('client.wishlist') }}">
                                 <i class="bi bi-heart fs-5"></i>
                                 <span class="badge bg-danger badge-cart">{{ $wishlistCount ?? 0 }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link position-relative" href="{{ route('cart') }}">
+                            <a class="nav-link position-relative" href="{{ route('client.cart') }}">
                                 <i class="bi bi-cart3 fs-5"></i>
                                 <span class="badge bg-danger badge-cart">{{ $cartCount ?? 0 }}</span>
                             </a>
@@ -216,12 +216,12 @@
                                 <li>
                                     <h6 class="dropdown-header">Xin chào, {{ Auth::user()->name ?? 'User' }}</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="{{ route('profile') }}"><i
+                                <li><a class="dropdown-item" href="{{ route('client.profile') }}"><i
                                             class="bi bi-person me-2"></i>Tài khoản</a></li>
-                                <li><a class="dropdown-item" href="{{ route('orders') }}"><i
+                                <li><a class="dropdown-item" href="{{ route('client.orders') }}"><i
                                             class="bi bi-receipt me-2"></i>Lịch sử đơn hàng</a></li>
-                                <li><a class="dropdown-item" href="{{ route('wishlist') }}"><i
-                                            class="bi bi-heart me-2"></i>Yêu thích</a></li>
+                                {{-- <li><a class="dropdown-item" href="{{ route('client.wishlist') }}"><i
+                                            class="bi bi-heart me-2"></i>Yêu thích</a></li> --}}
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>

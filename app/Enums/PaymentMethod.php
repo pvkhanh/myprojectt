@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+// CẬP NHẬT PaymentMethod.php ĐÃ CÓ SẴN - THÊM METHOD
+
 enum PaymentMethod: string
 {
     case Card = 'card';
@@ -17,7 +19,7 @@ enum PaymentMethod: string
     public function label(): string
     {
         return match ($this) {
-            self::Card => 'Thẻ tín dụng',
+            self::Card => 'Thẻ tín dụng/Ghi nợ (Stripe)',
             self::Bank => 'Chuyển khoản ngân hàng',
             self::COD => 'Thanh toán khi nhận hàng',
             self::Wallet => 'Ví điện tử',
@@ -31,6 +33,37 @@ enum PaymentMethod: string
             self::Bank => 'university',
             self::COD => 'money-bill-wave',
             self::Wallet => 'wallet',
+        };
+    }
+
+    // ✅ THÊM: Check xem có cần xác minh thủ công không
+    public function requiresVerification(): bool
+    {
+        return match ($this) {
+            self::COD => true,
+            self::Bank => true,
+            self::Card => false,  // Stripe tự động verify
+            self::Wallet => false,
+        };
+    }
+
+    // ✅ THÊM: Check xem có phải thanh toán online không
+    public function isOnline(): bool
+    {
+        return match ($this) {
+            self::Card => true,
+            self::Wallet => true,
+            default => false,
+        };
+    }
+
+    // ✅ THÊM: Gateway name cho Stripe
+    public function gateway(): ?string
+    {
+        return match ($this) {
+            self::Card => 'stripe',
+            self::Wallet => 'momo', // Nếu có tích hợp
+            default => null,
         };
     }
 }

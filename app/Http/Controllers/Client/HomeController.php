@@ -3,36 +3,36 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\Banner;
-use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Models\Category;
+use App\Models\Product;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        // Load banners hiển thị ở trang chủ
-        $banners = Banner::where('is_active', 1)
-            ->orderBy('position', 'asc')
+        // Lấy danh mục, có thể đếm số sản phẩm mỗi danh mục
+        $categories = Category::withCount('products')
+            ->orderBy('name', 'asc')
             ->get();
 
-        // Load danh mục nổi bật (tuỳ app của bạn)
-        $categories = Category::orderBy('name')
-            ->take(10)
+        // Lấy sản phẩm nổi bật (featured), ví dụ: status = 'active' và is_featured = 1
+        $featuredProducts = Product::where('status', 'active')
+            ->orderByDesc('created_at') // hoặc orderByDesc('id')
+            ->limit(12)
             ->get();
 
 
-        // Load sản phẩm mới nhất
-        $latestProducts = Product::latest()
-            ->where('status', 'active')
-            ->take(12)
-            ->get();
+
+        // Lấy số lượng wishlist & cart của user đang đăng nhập
+        $wishlistCount = auth()->check() ? auth()->user()->wishlistItems()->count() : 0;
+        $cartCount = auth()->check() ? auth()->user()->cartItems()->count() : 0;
 
         return view('client.home', compact(
-            'banners',
             'categories',
-            'latestProducts'
+            'featuredProducts',
+            'wishlistCount',
+            'cartCount'
         ));
     }
 }

@@ -371,9 +371,10 @@ use App\Http\Controllers\Admin\{
 };
 use App\Http\Controllers\Test\TestOrderController;
 use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\CheckoutController;
 //use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\CartController;
-//use App\Http\Controllers\Client\WishlistController;
+use App\Http\Controllers\Client\WishlistController as ClientWishlistController;
 //use App\Http\Controllers\Client\OrderController;
 //use App\Http\Controllers\Client\ProfileController;
 /*
@@ -625,10 +626,13 @@ Route::prefix('client')->name('client.')->group(function () {
 
     // Protected Routes
     Route::middleware('auth')->group(function () {
+
+        // Profile
         Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
+        // Cart
         Route::get('/cart', [CartController::class, 'index'])->name('cart');
         Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
         Route::patch('/cart/update/{cartItem}', [CartController::class, 'update'])->name('cart.update');
@@ -636,19 +640,26 @@ Route::prefix('client')->name('client.')->group(function () {
         Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.coupon');
         Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
-        Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
-        Route::post('/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
-        Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'remove'])->name('wishlist.remove');
-        Route::post('/wishlist/add-all-to-cart', [WishlistController::class, 'addAllToCart'])->name('wishlist.addAllToCart');
-        Route::delete('/wishlist/clear', [WishlistController::class, 'clear'])->name('wishlist.clear');
+        // Wishlist
+        Route::get('/wishlist', [ClientWishlistController::class, 'index'])->name('wishlist');
+        Route::post('/wishlist/toggle/{product}', [ClientWishlistController::class, 'toggle'])->name('wishlist.toggle');
+        Route::delete('/wishlist/remove/{product}', [ClientWishlistController::class, 'remove'])->name('wishlist.remove');
+        Route::post('/wishlist/add-all-to-cart', [ClientWishlistController::class, 'addAllToCart'])->name('wishlist.addAllToCart');
+        Route::delete('/wishlist/clear', [ClientWishlistController::class, 'clear'])->name('wishlist.clear');
 
+        // Checkout
+        Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+        Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+        Route::get('/checkout/payment/{order}', [CheckoutController::class, 'payment'])->name('checkout.payment');
+        Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+        Route::post('/checkout/calculate-shipping', [CheckoutController::class, 'calculateShipping'])->name('checkout.calculate-shipping');
+
+        // Orders
         Route::get('/orders', [OrderController::class, 'index'])->name('orders');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('orders.confirm-received');
         Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
-
-        Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
-        Route::post('/checkout', [OrderController::class, 'placeOrder'])->name('checkout.place');
+        Route::get('/orders/{order}/track', [OrderController::class, 'track'])->name('orders.track');
     });
-
 });

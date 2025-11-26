@@ -66,25 +66,36 @@ return [
             'name' => 'Tất cả người dùng',
             'icon' => 'users',
             'color' => 'primary',
-            'query' => function () {
-                return \App\Models\User::query();
-            }
+            // 'query' => function () {
+            //     return \App\Models\User::query();
+            // }
+            // Define model class
+            'model' => \App\Models\User::class,
+            'conditions' => [],
         ],
         'verified_users' => [
             'name' => 'Người dùng đã xác thực',
             'icon' => 'user-check',
             'color' => 'success',
-            'query' => function () {
-                return \App\Models\User::whereNotNull('email_verified_at');
-            }
+            // 'query' => function () {
+            //     return \App\Models\User::whereNotNull('email_verified_at');
+            // }
+            'model' => \App\Models\User::class,
+            'conditions' => [
+                ['email_verified_at', '!=', null],
+            ],
         ],
         'active_users' => [
             'name' => 'Người dùng đang hoạt động',
             'icon' => 'user-clock',
             'color' => 'info',
-            'query' => function () {
-                return \App\Models\User::where('status', 'active');
-            }
+            // 'query' => function () {
+            //     return \App\Models\User::where('status', 'active');
+            // }
+            'model' => \App\Models\User::class,
+            'conditions' => [
+                ['status', '=', 'active'],
+            ],
         ],
     ],
 

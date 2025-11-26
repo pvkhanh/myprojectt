@@ -81,38 +81,19 @@
                 <p class="text-muted">Khám phá các danh mục phổ biến</p>
             </div>
             <div class="row g-4">
-                @foreach ($categories ?? [] as $category)
+                @forelse ($categories as $category)
                     <div class="col-6 col-md-3">
-                        {{-- <a href="{{ route('category.show', $category->slug) }}" class="text-decoration-none">
-                            <div class="card category-card h-100">
-                                <i class="bi bi-{{ $category->icon ?? 'grid' }}"></i>
+                        <a href="{{ route('client.category.show', $category->slug) }}" class="text-decoration-none">
+                            <div class="card category-card h-100 text-center py-4">
+                                <i class="bi bi-{{ $category->icon ?? 'grid' }} fs-1 text-primary"></i>
                                 <h6 class="mt-3 text-dark">{{ $category->name }}</h6>
                                 <small class="text-muted">{{ $category->products_count ?? 0 }} sản phẩm</small>
                             </div>
-                        </a> --}}
+                        </a>
                     </div>
-                @endforeach
-                <!-- Sample categories if no data -->
-                <div class="col-6 col-md-3">
-                    <div class="card category-card h-100"><i class="bi bi-phone"></i>
-                        <h6 class="mt-3">Điện thoại</h6><small class="text-muted">150 sản phẩm</small>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="card category-card h-100"><i class="bi bi-laptop"></i>
-                        <h6 class="mt-3">Laptop</h6><small class="text-muted">89 sản phẩm</small>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="card category-card h-100"><i class="bi bi-headphones"></i>
-                        <h6 class="mt-3">Phụ kiện</h6><small class="text-muted">234 sản phẩm</small>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="card category-card h-100"><i class="bi bi-watch"></i>
-                        <h6 class="mt-3">Đồng hồ</h6><small class="text-muted">67 sản phẩm</small>
-                    </div>
-                </div>
+                @empty
+                    <p class="text-center">Chưa có danh mục nào.</p>
+                @endforelse
             </div>
         </div>
     </section>
@@ -125,53 +106,18 @@
                     <h2 class="fw-bold mb-0">Sản phẩm nổi bật</h2>
                     <p class="text-muted mb-0">Được yêu thích nhất tuần này</p>
                 </div>
-                {{-- <a href="{{ route('products.index') }}" class="btn btn-outline-primary">Xem tất cả <i
-                        class="bi bi-arrow-right"></i></a> --}}
+                <a href="{{ route('client.products.index') }}" class="btn btn-outline-primary">Xem tất cả <i
+                        class="bi bi-arrow-right"></i></a>
             </div>
-            <div class="row g-4">
-                @foreach ($featuredProducts ?? [] as $product)
+            {{-- <div class="row g-4">
+                @forelse ($featuredProducts as $product)
                     <div class="col-6 col-md-4 col-lg-3">
                         @include('components.product-card', ['product' => $product])
                     </div>
-                @endforeach
-                <!-- Sample products -->
-                @for ($i = 1; $i <= 8; $i++)
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <div class="card h-100 position-relative">
-                            <button class="wishlist-btn" onclick="toggleWishlist({{ $i }})"
-                                id="wishlist-{{ $i }}">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                            @if ($i % 3 == 0)
-                                <span class="badge bg-danger position-absolute" style="top:10px;left:10px;">-20%</span>
-                            @endif
-                            <img src="https://via.placeholder.com/300x200?text=Product+{{ $i }}"
-                                class="card-img-top product-img" alt="Product">
-                            <div class="card-body">
-                                <small class="text-muted">Thương hiệu</small>
-                                <h6 class="card-title">Sản phẩm mẫu {{ $i }}</h6>
-                                <div class="rating mb-2">
-                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
-                                        class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
-                                        class="bi bi-star-half"></i>
-                                    <small class="text-muted">(125)</small>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    @if ($i % 3 == 0)
-                                        <span class="price-old">2.500.000₫</span>
-                                    @endif
-                                    <span class="price-new">{{ number_format(1990000 + $i * 100000) }}₫</span>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-white border-0 pt-0">
-                                <button class="btn btn-primary w-100" onclick="addToCart({{ $i }})">
-                                    <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                @endfor
-            </div>
+                @empty
+                    <p class="text-center">Chưa có sản phẩm nổi bật.</p>
+                @endforelse
+            </div> --}}
         </div>
     </section>
 
@@ -184,7 +130,8 @@
                     <p class="lead mb-0">Chỉ còn 24 giờ! Nhanh tay săn deal hot ngay hôm nay.</p>
                 </div>
                 <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                    <a href="#" class="btn btn-light btn-lg px-4">Xem ngay <i class="bi bi-arrow-right"></i></a>
+                    <a href="{{ route('client.products.index') }}" class="btn btn-light btn-lg px-4">Xem ngay <i
+                            class="bi bi-arrow-right"></i></a>
                 </div>
             </div>
         </div>
@@ -198,32 +145,18 @@
                     <h2 class="fw-bold mb-0">Sản phẩm mới</h2>
                     <p class="text-muted mb-0">Vừa cập nhật trong tuần</p>
                 </div>
-                <a href="#" class="btn btn-outline-primary">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+                <a href="{{ route('client.products.index') }}" class="btn btn-outline-primary">Xem tất cả <i
+                        class="bi bi-arrow-right"></i></a>
             </div>
-            <div class="row g-4">
-                @for ($i = 1; $i <= 4; $i++)
+            {{-- <div class="row g-4">
+                @forelse ($newProducts ?? [] as $product)
                     <div class="col-6 col-md-3">
-                        <div class="card h-100 position-relative">
-                            <button class="wishlist-btn"><i class="bi bi-heart"></i></button>
-                            <span class="badge bg-success position-absolute" style="top:10px;left:10px;">Mới</span>
-                            <img src="https://via.placeholder.com/300x200?text=New+{{ $i }}"
-                                class="card-img-top product-img" alt="Product">
-                            <div class="card-body">
-                                <small class="text-muted">Thương hiệu</small>
-                                <h6 class="card-title">Sản phẩm mới {{ $i }}</h6>
-                                <div class="rating mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
-                                        class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
-                                        class="bi bi-star"></i></div>
-                                <span class="price-new">{{ number_format(2990000 + $i * 200000) }}₫</span>
-                            </div>
-                            <div class="card-footer bg-white border-0 pt-0">
-                                <button class="btn btn-primary w-100"><i class="bi bi-cart-plus me-1"></i>Thêm vào
-                                    giỏ</button>
-                            </div>
-                        </div>
+                        <x-product-card :product="$product" />
                     </div>
-                @endfor
-            </div>
+                @empty
+                    <p class="text-center">Chưa có sản phẩm mới.</p>
+                @endforelse
+            </div> --}}
         </div>
     </section>
 @endsection
@@ -236,33 +169,29 @@
             btn.classList.toggle('active');
             icon.classList.toggle('bi-heart');
             icon.classList.toggle('bi-heart-fill');
-            // AJAX call to toggle wishlist
+
             fetch('/wishlist/toggle/' + id, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message) console.log(data.message);
-                });
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json()).then(data => {
+                if (data.message) console.log(data.message);
+            });
         }
 
         function addToCart(id) {
             fetch('/cart/add/' + id, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Đã thêm vào giỏ hàng!');
-                    location.reload();
-                });
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json()).then(data => {
+                alert('Đã thêm vào giỏ hàng!');
+                location.reload();
+            });
         }
     </script>
 @endpush

@@ -478,5 +478,14 @@ class Product extends Model
         });
     }
 
+    /**
+     * Sản phẩm mà user đã thêm vào wishlist
+     */
+    public function wishlistItems()
+    {
+        // Giả sử bảng trung gian wishlist có cột user_id và product_id
+        return $this->belongsToMany(Product::class, 'wishlists', 'user_id', 'product_id')
+            ->withTimestamps();
+    }
 
 }

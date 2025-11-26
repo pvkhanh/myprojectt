@@ -390,6 +390,11 @@ use App\Http\Controllers\Api\V1\CategoryController;
 
 Route::prefix('v1')->group(function () {
 
+
+    // Stripe Webhook (NO AUTH)
+    Route::post('/webhooks/stripe', [\App\Http\Controllers\Api\V1\StripeWebhookController::class, 'handle'])
+        ->name('webhooks.stripe');
+
     // ==================== PUBLIC ROUTES (KHÔNG CẦN TOKEN) ====================
 
     // Authentication
