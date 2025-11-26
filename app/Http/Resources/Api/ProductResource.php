@@ -202,8 +202,8 @@ class ProductResource extends JsonResource
             'price' => $this->price,
             'min_price' => $this->min_price,
             'max_price' => $this->max_price,
-            'sale_price' => $this->sale_price,
-            'discount_percentage' => $this->discount_percentage,
+            // 'sale_price' => $this->sale_price,
+            // 'discount_percentage' => $this->discount_percentage,
             'stock_quantity' => $this->stock_quantity,
             'in_stock' => $this->in_stock,
             'is_low_stock' => $this->is_low_stock,
@@ -217,27 +217,27 @@ class ProductResource extends JsonResource
                 'slug' => $this->categories->first()->slug,
             ] : null,
             'category_names' => $this->category_names,
-            'images' => $this->images->map(fn($img) => [
-                'id' => $img->id,
-                'url' => asset('storage/' . $img->path),
-                'is_main' => $img->pivot->is_main ?? false,
-                'position' => $img->pivot->position ?? 0,
-            ]),
+            // 'images' => $this->images->map(fn($img) => [
+            //     'id' => $img->id,
+            //     'url' => asset('storage/' . $img->path),
+            //     'is_main' => $img->pivot->is_main ?? false,
+            //     'position' => $img->pivot->position ?? 0,
+            // ]),
             'primary_image_url' => $this->main_image_url,
             'average_rating' => $this->average_rating,
             'reviews_count' => $this->reviews()->count(),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'price_range' => $this->price_range,
-            'related_products' => $this->getRelatedProducts()->map(function ($p) {
-                return [
-                    'id' => $p->id,
-                    'name' => $p->name,
-                    'slug' => $p->slug,
-                    'price' => $p->price,
-                    'stock_quantity' => $p->stock_quantity,
-                    'primary_image_url' => $p->main_image_url,
-                ];
-            }),
+            // 'related_products' => $this->getRelatedProducts()->map(function ($p) {
+            //     return [
+            //         'id' => $p->id,
+            //         'name' => $p->name,
+            //         'slug' => $p->slug,
+            //         'price' => $p->price,
+            //         'stock_quantity' => $p->stock_quantity,
+            //         'primary_image_url' => $p->main_image_url,
+            //     ];
+            // }),
         ];
     }
 }

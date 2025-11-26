@@ -24,15 +24,15 @@ class CategoryController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $categories->map(function($category) {
+                'data' => $categories->map(function ($category) {
                     return [
                         'id' => $category->id,
                         'name' => $category->name,
                         'slug' => $category->slug,
                         'description' => $category->description,
-                        'image' => $category->image ? asset('storage/' . $category->image) : null,
+                        // 'image' => $category->image ? asset('storage/' . $category->image) : null,
                         'position' => $category->position,
-                        'children' => $category->children->map(function($child) {
+                        'children' => $category->children->map(function ($child) {
                             return [
                                 'id' => $child->id,
                                 'name' => $child->name,
@@ -67,14 +67,14 @@ class CategoryController extends Controller
                     'name' => $category->name,
                     'slug' => $category->slug,
                     'description' => $category->description,
-                    'image' => $category->image ? asset('storage/' . $category->image) : null,
+                    //'image' => $category->image ? asset('storage/' . $category->image) : null,
                     'position' => $category->position,
                     'parent' => $category->parent ? [
                         'id' => $category->parent->id,
                         'name' => $category->parent->name,
                         'slug' => $category->parent->slug,
                     ] : null,
-                    'children' => $category->children->map(function($child) {
+                    'children' => $category->children->map(function ($child) {
                         return [
                             'id' => $child->id,
                             'name' => $child->name,
@@ -104,11 +104,14 @@ class CategoryController extends Controller
             $category = Category::findOrFail($id);
             $perPage = $request->get('per_page', 15);
 
-            $query = Product::whereHas('categories', function($q) use ($id) {
-                    $q->where('categories.id', $id);
-                })
+            $query = Product::whereHas('categories', function ($q) use ($id) {
+                $q->where('categories.id', $id);
+            })
                 ->where('status', ProductStatus::Active)
-                ->where('stock_quantity', '>', 0)
+                // ->where('stock_quantity', '>', 0)
+                ->whereHas('variants.stockItems', function ($q) {
+                    $q->where('quantity', '>', 0);
+                })
                 ->with(['categories', 'images', 'reviews']);
 
             // Filter by price
