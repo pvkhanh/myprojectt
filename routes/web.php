@@ -539,13 +539,43 @@ Route::prefix('admin')->name('admin.')
             Route::get('/export', [OrderController::class, 'export'])->name('export');
             Route::patch('/{id}/status', [OrderController::class, 'updateStatus'])->name('update-status');
             Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+            Route::post('/{id}/confirm-order', [OrderController::class, 'confirmOrder'])->name('confirm');
             Route::get('/pending-payments', [OrderController::class, 'pendingPayments'])->name('pending-payments');
             Route::post('/{id}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('confirm-payment');
             Route::post('/{id}/reject-payment', [OrderController::class, 'rejectPayment'])->name('reject-payment');
+            Route::patch('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
             Route::get('/trashed/list', [OrderController::class, 'trashed'])->name('trashed');
             Route::post('/{id}/restore', [OrderController::class, 'restore'])->name('restore');
             Route::delete('/{id}/force-delete', [OrderController::class, 'forceDelete'])->name('force-delete');
         });
+        // Route::prefix('orders')->name('orders.')->group(function () {
+        //     // Các routes cố định - ĐẶT TRƯỚC
+        //     Route::get('/', [OrderController::class, 'index'])->name('index');
+        //     Route::get('/pending/payments', [OrderController::class, 'pendingPayments'])->name('pending-payments');
+        //     Route::get('/trashed/list', [OrderController::class, 'trashed'])->name('trashed');
+        //     Route::get('/export/csv', [OrderController::class, 'export'])->name('export');
+
+        //     // Actions với {id}
+        //     Route::post('/{id}/confirm-order', [OrderController::class, 'confirmOrder'])->name('confirm');
+        //     Route::post('/{id}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('confirm-payment');
+        //     Route::patch('/{id}/reject-payment', [OrderController::class, 'rejectPayment'])->name('reject-payment');
+        //     Route::patch('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
+        //     Route::patch('/{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+
+        //     // Other actions
+        //     Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('edit');
+        //     Route::put('/{id}', [OrderController::class, 'update'])->name('update');
+        //     Route::get('/{id}/invoice', [OrderController::class, 'invoice'])->name('invoice');
+        //     Route::get('/{orderId}/customer', [OrderController::class, 'customerDetails'])->name('customer-details');
+
+        //     // Trash
+        //     Route::post('/{id}/restore', [OrderController::class, 'restore'])->name('restore');
+        //     Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
+        //     Route::delete('/{id}/force', [OrderController::class, 'forceDelete'])->name('force-delete');
+
+        //     // Detail - PHẢI ĐẶT CUỐI CÙNG
+        //     Route::get('/{id}', [OrderController::class, 'show'])->name('show');
+        // });
 
         // Payments
         Route::prefix('payments')->name('payments.')->group(function () {
