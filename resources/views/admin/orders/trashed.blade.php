@@ -152,7 +152,10 @@
                                         </div>
                                     </td>
                                     <td class="px-4">
-                                        <div class="fw-semibold text-dark">{{ $order->user->name ?? 'N/A' }}</div>
+                                        <div class="fw-semibold text-dark">
+                                            {{ optional($order->user)->first_name ?? 'N/A' }}
+                                            {{ optional($order->user)->last_name }}
+                                        </div>
                                         <div class="small text-muted">
                                             <i class="fa-solid fa-envelope me-1"></i>{{ $order->user->email ?? 'N/A' }}
                                         </div>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Đơn hàng đang chuẩn bị</title>
+        <style>
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+            }
+            .container {
+                max-width: 600px;
+                margin: 20px auto;
+                background: white;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }
+            .header h1 {
+                margin: 0;
+                font-size: 28px;
+            }
+            .success-icon {
+                font-size: 60px;
+                margin-bottom: 10px;
+                animation: bounceIn 1s ease;
+            }
+            @keyframes bounceIn {
+                0% {
+                    transform: scale(0);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+            .content {
+                padding: 30px;
+            }
+            .order-confirmed-box {
+                background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+                padding: 25px;
+                border-radius: 10px;
+                border-left: 5px solid #3b82f6;
+                margin: 20px 0;
+            }
+            .order-confirmed-box h3 {
+                margin-top: 0;
+                color: #1e40af;
+                font-size: 18px;
+            }
+            .info-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 10px 0;
+                border-bottom: 1px dashed #cbd5e1;
+            }
+            .info-row:last-child {
+                border-bottom: none;
+            }
+            .info-label {
+                font-weight: 600;
+                color: #475569;
+            }
+            .info-value {
+                color: #1e293b;
+                font-weight: 600;
+            }
+            .next-steps-card {
+                background: #fef3c7;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #f59e0b;
+                margin: 20px 0;
+            }
+            .next-steps-card h3 {
+                margin-top: 0;
+                color: #92400e;
+                font-size: 16px;
+            }
+            .step-list {
+                margin: 15px 0;
+                padding-left: 0;
+                list-style: none;
+            }
+            .step-list li {
+                padding: 10px 0 10px 35px;
+                position: relative;
+                color: #78350f;
+            }
+            .step-list li::before {
+                content: "✓";
+                position: absolute;
+                left: 0;
+                top: 8px;
+                width: 24px;
+                height: 24px;
+                background: #f59e0b;
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            .products-preview {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 20px 0;
+            }
+            .products-preview h3 {
+                margin-top: 0;
+                color: #495057;
+                font-size: 16px;
+            }
+            .preparing-badge {
+                display: inline-flex;
+                align-items: center;
+                padding: 12px 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 15px;
+                margin: 20px 0;
+                gap: 10px;
+            }
+            .btn {
+                display: inline-block;
+                padding: 14px 32px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-decoration: none;
+                border-radius: 25px;
+                font-weight: 600;
+                text-align: center;
+                margin: 10px 5px;
+                transition: all 0.3s ease;
+            }
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+            .btn-secondary {
+                background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            }
+            .estimated-time {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                margin: 20px 0;
+            }
+            .estimated-time h3 {
+                margin: 0 0 10px 0;
+                font-size: 18px;
+            }
+            .estimated-time .time {
+                font-size: 32px;
+                font-weight: bold;
+                margin: 10px 0;
+            }
+            .footer {
+                background: #f8f9fa;
+                padding: 20px;
+                text-align: center;
+                color: #6c757d;
+                font-size: 14px;
+            }
+            .divider {
+                height: 2px;
+                background: linear-gradient(
+                    to right,
+                    transparent,
+                    #667eea,
+                    transparent
+                );
+                margin: 25px 0;
+            }
+            .note-box {
+                background: #e7f3ff;
+                padding: 15px;
+                border-radius: 8px;
+                border-left: 4px solid #0d6efd;
+                margin: 20px 0;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div class="success-icon">📦</div>
+                <h1>Đơn hàng đang chuẩn bị!</h1>
+                <p style="margin: 10px 0 0 0; font-size: 16px">
+                    Shop đang đóng gói sản phẩm cho bạn
+                </p>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <p>Xin chào <strong>{{customer_name}}</strong>,</p>
+
+                <p>
+                    Tin vui! Đơn hàng <strong>#{{order_number}}</strong> của bạn
+                    đã được
+                    <strong>xác nhận và đang trong quá trình chuẩn bị</strong>.
+                    📦
+                </p>
+
+                <!-- Order Confirmed Box -->
+                <div class="order-confirmed-box">
+                    <h3>✅ Thông tin đơn hàng đã xác nhận</h3>
+                    <div class="info-row">
+                        <span class="info-label">Mã đơn hàng:</span>
+                        <span class="info-value">{{order_number}}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Ngày đặt hàng:</span>
+                        <span class="info-value">{{order_date}}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Ngày xác nhận:</span>
+                        <span class="info-value">{{confirmed_date}}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Tổng giá trị:</span>
+                        <span
+                            class="info-value"
+                            style="color: #3b82f6; font-size: 18px"
+                            >{{total_amount}}</span
+                        >
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phương thức thanh toán:</span>
+                        <span class="info-value">{{payment_method}}</span>
+                    </div>
+                </div>
+
+                <!-- Current Status Badge -->
+                <div style="text-align: center">
+                    <div class="preparing-badge">
+                        <span style="font-size: 24px">📦</span>
+                        <span>ĐANG CHUẨN BỊ HÀNG</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Estimated Delivery Time -->
+                <div class="estimated-time">
+                    <h3>⏰ Thời gian giao hàng dự kiến</h3>
+                    <div class="time">2-3 ngày</div>
+                    <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9">
+                        Chúng tôi sẽ giao hàng nhanh nhất có thể!
+                    </p>
+                </div>
+
+                <!-- Next Steps -->
+                <div class="next-steps-card">
+                    <h3>📋 Các bước tiếp theo</h3>
+                    <ul class="step-list">
+                        <li>
+                            <strong>Hiện tại:</strong> Đơn hàng đã xác nhận,
+                            đang đóng gói sản phẩm
+                        </li>
+                        <li>
+                            <strong>Tiếp theo:</strong> Giao cho đơn vị vận
+                            chuyển (trong 24h)
+                        </li>
+                        <li>
+                            <strong>Sau đó:</strong> Bạn sẽ nhận được mã vận đơn
+                            để theo dõi
+                        </li>
+                        <li>
+                            <strong>Cuối cùng:</strong> Shipper giao hàng tận
+                            nơi cho bạn
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Products Preview -->
+                <div class="products-preview">
+                    <h3>🛍️ Sản phẩm trong đơn hàng</h3>
+                    {{order_items}}
+                </div>
+
+                <!-- Payment Note (for COD/Bank Transfer) -->
+                @if(payment_method == 'cod')
+                <div class="note-box">
+                    <strong>💵 Lưu ý thanh toán COD:</strong><br />
+                    Bạn sẽ thanh toán <strong>{{total_amount}}</strong> trực
+                    tiếp cho shipper khi nhận hàng.
+                </div>
+                @endif @if(payment_method == 'bank')
+                <div class="note-box">
+                    <strong>🏦 Chuyển khoản đã xác nhận:</strong><br />
+                    Chúng tôi đã nhận được thanh toán của bạn. Đơn hàng đang
+                    được chuẩn bị.
+                </div>
+                @endif
+
+                <!-- CTA Buttons -->
+                <div style="text-align: center; margin: 30px 0">
+                    <a href="{{order_url}}" class="btn">
+                        🔍 Theo dõi đơn hàng
+                    </a>
+                    <a href="{{shop_url}}" class="btn btn-secondary">
+                        🛒 Tiếp tục mua sắm
+                    </a>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Support Info -->
+                <div
+                    style="
+                        background: #f8f9fa;
+                        padding: 20px;
+                        border-radius: 8px;
+                        text-align: center;
+                    "
+                >
+                    <h3 style="margin-top: 0; color: #495057; font-size: 16px">
+                        💬 Cần hỗ trợ?
+                    </h3>
+                    <p style="color: #6c757d; margin: 10px 0">
+                        Đội ngũ chăm sóc khách hàng luôn sẵn sàng giúp bạn!
+                    </p>
+                    <div
+                        style="
+                            display: flex;
+                            justify-content: center;
+                            gap: 20px;
+                            margin-top: 15px;
+                            flex-wrap: wrap;
+                        "
+                    >
+                        <div>
+                            <strong>📞 Hotline:</strong><br />
+                            <a
+                                href="tel:1900xxxx"
+                                style="color: #667eea; text-decoration: none"
+                                >1900-xxxx</a
+                            >
+                        </div>
+                        <div>
+                            <strong>✉️ Email:</strong><br />
+                            <a
+                                href="mailto:support@shop.com"
+                                style="color: #667eea; text-decoration: none"
+                                >support@{{shop_name}}.com</a
+                            >
+                        </div>
+                        <div>
+                            <strong>💬 Live Chat:</strong><br />
+                            <span style="color: #10b981">Trực tuyến 24/7</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p
+                    style="
+                        margin-top: 30px;
+                        color: #6c757d;
+                        font-size: 14px;
+                        text-align: center;
+                    "
+                >
+                    Cảm ơn bạn đã tin tưởng mua sắm tại {{shop_name}}! 🙏<br />
+                    Chúng tôi sẽ giao hàng nhanh nhất có thể.
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p style="margin: 5px 0"><strong>{{shop_name}}</strong></p>
+                <p style="margin: 5px 0">© 2024 All rights reserved.</p>
+                <p style="margin: 5px 0">
+                    <a
+                        href="{{app_url}}"
+                        style="color: #667eea; text-decoration: none"
+                        >Website</a
+                    >
+                    |
+                    <a
+                        href="{{app_url}}/support"
+                        style="color: #667eea; text-decoration: none"
+                        >Hỗ trợ</a
+                    >
+                    |
+                    <a
+                        href="{{app_url}}/policy"
+                        style="color: #667eea; text-decoration: none"
+                        >Chính sách</a
+                    >
+                </p>
+            </div>
+        </div>
+    </body>
+</html>

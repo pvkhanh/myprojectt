@@ -3,257 +3,274 @@
 namespace App\Http\Controllers\Test;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\OrderItem;
-use App\Models\ShippingAddress;
-use App\Models\Payment;
-use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
-use App\Enums\PaymentMethod;
-use Illuminate\Support\Facades\DB;
+use App\Jobs\SendOrderMailJob;
+use App\Helpers\MailHelper;
+use Illuminate\Http\Request;
 
 class TestOrderController extends Controller
 {
+    /**
+     * Hiển thị UI test
+     */
+    public function index()
+    {
+        return view('test.orders');
+    }
+
     /**
      * Tạo đơn hàng test
      */
     public function createOrder()
     {
-        DB::beginTransaction();
-
-        try {
-            // // 1. Tìm hoặc tạo user
-            // $user = User::firstOrCreate(
-            //     ['email' => 'pvkhanh.tech@gmail.com'],
-            //     [
-            //         'first_name' => 'Khánh',
-            //         'last_name' => 'Phạm Văn',
-            //         'password' => bcrypt('password123'),
-            //         'phone' => '0987654321',
-            //         'email_verified_at' => now(),
-            //     ]
-            // );
-
-            function generateUsername($firstName, $lastName)
-            {
-                $base = strtolower(preg_replace('/\s+/', '', $firstName . $lastName));
-                $username = $base;
-
-                // Kiểm tra username đã tồn tại chưa, nếu có thì thêm số ngẫu nhiên
-                $i = 1;
-                while (\App\Models\User::where('username', $username)->exists()) {
-                    $username = $base . $i++;
-                }
-
-                return $username;
-            }
-
-            // Sửa phần tạo user:
-            $user = User::firstOrCreate(
-                ['email' => 'pvkhanh.tech@gmail.com'],
-                [
-                    'first_name' => 'Khánh',
-                    'last_name' => 'Phan Văn',
-                    'username' => generateUsername('khanh', 'phanvan'), // <-- thêm dòng này
-                    'password' => bcrypt('password123'),
-                    'phone' => '0987654321',
-                    'email_verified_at' => now(),
-                ]
-            );
-
-            //   $user = User::firstOrCreate(
-            //     ['email' => 'huongnht.31b@gmail.com'],
-            //     [
-            //         'first_name' => 'Ngô Hoàng Thanh',
-            //         'last_name' => 'Hương',
-            //         'username' => generateUsername('ngohoangthanh', 'huong'), // <-- thêm dòng này
-            //         'password' => bcrypt('password123'),
-            //         'phone' => '0987654321',
-            //         'email_verified_at' => now(),
-            //     ]
-            // );
-
-            // 2. Lấy sản phẩm
-            $products = Product::where('status', 'active')->take(2)->get();
-
-            if ($products->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không có sản phẩm nào. Vui lòng tạo sản phẩm trước!'
-                ], 400);
-            }
-
-            // 3. Tính giá
-            $subtotal = 0;
-            $orderItems = [];
-
-            foreach ($products as $product) {
-                $quantity = rand(1, 3);
-                $price = $product->price;
-                $itemTotal = $price * $quantity;
-                $subtotal += $itemTotal;
-
-                $orderItems[] = [
-                    'product' => $product,
-                    'quantity' => $quantity,
-                    'price' => $price,
-                    'total' => $itemTotal,
-                ];
-            }
-
-            $shippingFee = 30000;
-            $totalAmount = $subtotal + $shippingFee;
-
-            // 4. Tạo đơn hàng
-            $order = Order::create([
-                'user_id' => $user->id,
-                'order_number' => 'ORD' . strtoupper(uniqid()),
-                'status' => OrderStatus::Pending->value,
-                'subtotal' => $subtotal,
-                'shipping_fee' => $shippingFee,
-                'total_amount' => $totalAmount,
-                'currency' => 'VND',
-                'notes' => 'Test order - ' . now()->format('d/m/Y H:i:s'),
-            ]);
-
-            // 5. Tạo order items
-            foreach ($orderItems as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['product']->id,
-                    'variant_id' => null,
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                    'total' => $item['total'],
-                ]);
-            }
-
-            // 6. Tạo địa chỉ
-            ShippingAddress::create([
-                'order_id' => $order->id,
-                'receiver_name' => $user->first_name . ' ' . $user->last_name,
-                'phone' => $user->phone ?? '0987654321',
-                'address' => '123 Nguyễn Huệ',
-                'ward' => 'Phường Bến Nghé',
-                'district' => 'Quận 1',
-                'province' => 'TP. Hồ Chí Minh',
-                'postal_code' => '70000',
-            ]);
-
-
-            // 7. Tạo payment
-            Payment::create([
-                'order_id' => $order->id,
-                'payment_method' => PaymentMethod::COD->value,
-                'amount' => $totalAmount,
-                'status' => PaymentStatus::Pending->value,
-                'currency' => 'VND',
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Tạo đơn hàng test thành công!',
-                'data' => [
-                    'order_id' => $order->id,
-                    'order_number' => $order->order_number,
-                    'user_email' => $user->email,
-                    'total_amount' => number_format($totalAmount) . 'đ',
-                    'status' => $order->status->value,
-                    'admin_url' => route('admin.orders.show', $order->id),
-                    'note' => '📬 Mail sẽ được gửi sau 5 giây!'
-                ]
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Lỗi: ' . $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ], 500);
-        }
-    }
-
-    /**
-     * Test thay đổi trạng thái đơn hàng
-     */
-    public function changeStatus($orderId, $status)
-    {
-        try {
-            $order = Order::findOrFail($orderId);
-
-            // Validate status
-            $validStatuses = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
-            if (!in_array($status, $validStatuses)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Trạng thái không hợp lệ!'
-                ], 400);
-            }
-
-            // Update status - Observer sẽ tự động gửi mail
-            $oldStatus = $order->status->value;
-            $order->update([
-                'status' => OrderStatus::from($status)
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Cập nhật trạng thái thành công!',
-                'data' => [
-                    'order_number' => $order->order_number,
-                    'old_status' => $oldStatus,
-                    'new_status' => $status,
-                    'user_email' => $order->user->email,
-                    'note' => '📬 Mail thông báo sẽ được gửi sau 2 giây!'
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lỗi: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Xem danh sách đơn hàng test
-     */
-    public function listOrders()
-    {
-        $user = User::where('email', 'pvkhanh.tech@gmail.com')->first();
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User test chưa được tạo!'
-            ]);
-        }
-
-        $orders = Order::where('user_id', $user->id)
-            ->with(['orderItems.product', 'shippingAddress', 'payments'])
-            ->latest()
-            ->get();
+        // Logic tạo order test của bạn
+        $order = Order::factory()->create();
 
         return response()->json([
             'success' => true,
-            'user_email' => $user->email,
-            'total_orders' => $orders->count(),
-            'orders' => $orders->map(function ($order) {
-                return [
-                    'id' => $order->id,
-                    'order_number' => $order->order_number,
-                    'status' => $order->status->value,
-                    'total_amount' => number_format($order->total_amount) . 'đ',
-                    'created_at' => $order->created_at->format('d/m/Y H:i:s'),
-                    'admin_url' => route('admin.orders.show', $order->id),
-                ];
-            })
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'message' => 'Order created successfully'
         ]);
+    }
+
+    /**
+     * Danh sách đơn hàng
+     */
+    public function listOrders()
+    {
+        $orders = Order::with(['user', 'payments', 'orderItems'])
+            ->latest()
+            ->paginate(15);
+
+        return view('test.order-list', compact('orders'));
+    }
+public function getOrdersJson()
+{
+    $orders = Order::with('user')
+        ->latest()
+        ->take(20)
+        ->get()
+        ->map(fn($order) => [
+            'id' => $order->id,
+            'order_number' => $order->order_number,
+            'user' => $order->user ? ($order->user->first_name . ' ' . $order->user->last_name) : 'Khách',
+            'total_amount' => $order->total_amount,
+        ]);
+
+    return response()->json([
+        'success' => true,
+        'orders' => $orders
+    ]);
+}
+
+    /**
+     * Thay đổi trạng thái đơn hàng
+     */
+    public function changeStatus($orderId, $status)
+    {
+        $order = Order::findOrFail($orderId);
+
+        $validStatuses = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
+
+        if (!in_array($status, $validStatuses)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid status'
+            ], 400);
+        }
+
+        $order->update(['status' => $status]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Order status updated to {$status}",
+            'order' => $order
+        ]);
+    }
+
+    /**
+     * Preview email template
+     */
+    public function previewEmail($template)
+    {
+        // Lấy order đầu tiên hoặc tạo fake order
+        $order = Order::with(['user', 'orderItems.product', 'orderItems.variant', 'shippingAddress', 'payments'])
+            ->latest()
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No orders found. Please create an order first.'
+            ], 404);
+        }
+
+        // Map template name
+        $templateMap = [
+            'order-confirmation' => 'emails.order-confirmation',
+            'order-preparing' => 'emails.order-preparing',
+            'order-paid' => 'emails.order-paid',
+            'order-shipped' => 'emails.order-shipped',
+            'order-completed' => 'emails.order-completed',
+            'order-cancelled' => 'emails.order-cancelled',
+        ];
+
+        if (!isset($templateMap[$template])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid template name'
+            ], 400);
+        }
+
+        // Prepare data cho email
+        $data = $this->prepareEmailData($order, $template);
+
+        // Return HTML view
+        return view($templateMap[$template], $data);
+    }
+
+    /**
+     * Gửi test email
+     */
+    public function sendTestEmail($orderId, $template)
+    {
+        $order = Order::with(['user', 'orderItems.product', 'orderItems.variant', 'shippingAddress', 'payments'])
+            ->findOrFail($orderId);
+
+        if (!$order->user || !$order->user->email) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order has no user email'
+            ], 400);
+        }
+
+        // Validate template
+        $validTemplates = [
+            'order-confirmation',
+            'order-preparing',
+            'order-paid',
+            'order-shipped',
+            'order-completed',
+            'order-cancelled'
+        ];
+
+        if (!in_array($template, $validTemplates)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid template name'
+            ], 400);
+        }
+
+        try {
+            // Dispatch email job
+            SendOrderMailJob::dispatch($order, $template)
+                ->delay(now()->addSeconds(2));
+
+            return response()->json([
+                'success' => true,
+                'message' => "Test email '{$template}' dispatched successfully",
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'recipient' => $order->user->email,
+                'template' => $template
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send test email: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Prepare data cho email template
+     */
+    private function prepareEmailData(Order $order, string $template): array
+    {
+        $payment = $order->payments->first();
+
+        $data = [
+            'order' => $order,
+            'payment' => $payment,
+            'customer_name' => $order->user ? ($order->user->first_name . ' ' . $order->user->last_name) : 'Khách hàng',
+            'order_number' => $order->order_number,
+            'order_date' => $order->created_at->format('d/m/Y H:i'),
+            'total_amount' => number_format($order->total_amount) . '₫',
+            'subtotal' => number_format($order->subtotal) . '₫',
+            'shipping_fee' => number_format($order->shipping_fee) . '₫',
+            'payment_method' => $payment ? $payment->payment_method->label() : 'N/A',
+            'order_url' => route('client.orders.show', $order->id),
+            'shop_url' => url('/'),
+            'shop_name' => config('app.name'),
+            'app_url' => url('/'),
+            'app_name' => config('app.name'),
+        ];
+
+        // Template-specific data
+        switch ($template) {
+            case 'order-confirmation':
+                // Không cần thêm gì
+                break;
+
+            case 'order-preparing':
+                $data['confirmed_date'] = $order->paid_at ? $order->paid_at->format('d/m/Y H:i') : now()->format('d/m/Y H:i');
+                break;
+
+            case 'order-paid':
+                $data['payment_time'] = $payment && $payment->paid_at
+                    ? $payment->paid_at->format('d/m/Y H:i')
+                    : now()->format('d/m/Y H:i');
+                break;
+
+            case 'order-shipped':
+                $data['tracking_number'] = 'SHIP-' . $order->order_number;
+                $data['estimated_delivery'] = now()->addDays(3)->format('d/m/Y');
+                $data['shipping_address'] = $order->shippingAddress
+                    ? $order->shippingAddress->address
+                    : 'N/A';
+                $data['tracking_url'] = route('client.orders.track', $order->id);
+                break;
+
+            case 'order-completed':
+                $data['delivery_time'] = $order->completed_at
+                    ? $order->completed_at->format('d/m/Y H:i')
+                    : now()->format('d/m/Y H:i');
+                $data['review_url'] = route('client.orders.show', $order->id) . '#review';
+                $data['discount_code'] = 'THANK' . strtoupper(substr($order->order_number, -5));
+                $data['discount_value'] = '10%';
+                $data['discount_expiry'] = now()->addDays(30)->format('d/m/Y');
+                break;
+
+            case 'order-cancelled':
+                $data['cancel_time'] = $order->cancelled_at
+                    ? $order->cancelled_at->format('d/m/Y H:i')
+                    : now()->format('d/m/Y H:i');
+                $data['cancel_reason'] = $order->admin_note ?: 'Không có lý do cụ thể';
+                break;
+        }
+
+        // Order items HTML
+        $orderItemsHtml = '';
+        foreach ($order->orderItems as $item) {
+            $orderItemsHtml .= '<div style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">';
+            $orderItemsHtml .= '<div style="display: flex; justify-content: space-between;">';
+            $orderItemsHtml .= '<div style="flex: 1;">';
+            $orderItemsHtml .= '<strong>' . $item->product->name . '</strong>';
+            if ($item->variant) {
+                $orderItemsHtml .= '<div style="color: #6b7280; font-size: 14px;">' . $item->variant->name . '</div>';
+            }
+            $orderItemsHtml .= '</div>';
+            $orderItemsHtml .= '<div style="text-align: right;">';
+            $orderItemsHtml .= '<div>' . number_format($item->price) . '₫ x ' . $item->quantity . '</div>';
+            $orderItemsHtml .= '<div style="font-weight: bold; color: #667eea;">' . number_format($item->price * $item->quantity) . '₫</div>';
+            $orderItemsHtml .= '</div>';
+            $orderItemsHtml .= '</div>';
+            $orderItemsHtml .= '</div>';
+        }
+        $data['order_items'] = $orderItemsHtml;
+
+        return $data;
     }
 }

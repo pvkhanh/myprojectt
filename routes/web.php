@@ -348,9 +348,359 @@
 
 
 
+// //Bản chạy hoàn thiện
+// use Illuminate\Support\Facades\Route;
+// use App\Http\Controllers\Web\AuthController; // Changed namespace
+// use App\Http\Controllers\Admin\{
+//     DashboardController,
+//     ProductController,
+//     ProductVariantController,
+//     ProductReviewController,
+//     CategoryController,
+//     UserController,
+//     OrderController,
+//     ImageController,
+//     BannerController,
+//     BlogController,
+//     WishlistController,
+//     PaymentController,
+//     NotificationController,
+//     MailController,
+//     UserAddressController,
+//     ShippingAddressController
+// };
+// use App\Http\Controllers\Test\TestOrderController;
+// use App\Http\Controllers\Client\HomeController;
+// use App\Http\Controllers\Client\CheckoutController;
+// //use App\Http\Controllers\Client\ProductController;
+// use App\Http\Controllers\Client\CartController;
+// use App\Http\Controllers\Client\WishlistController as ClientWishlistController;
+// //use App\Http\Controllers\Client\OrderController;
+// //use App\Http\Controllers\Client\ProfileController;
+// /*
+// |--------------------------------------------------------------------------
+// | AUTH ROUTES (WEB ONLY)
+// |--------------------------------------------------------------------------
+// */
+
+// Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+// Route::post('login', [AuthController::class, 'postLogin'])->name('postLogin');
+
+// Route::get('register', [AuthController::class, 'register'])->name('register');
+// Route::post('register', [AuthController::class, 'postRegister'])->name('postRegister');
+
+// Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+
+// /*
+// |--------------------------------------------------------------------------
+// | HOME
+// |--------------------------------------------------------------------------
+// */
+
+// Route::get('/', function () {
+//     if (auth()->check()) {
+//         return redirect()->route('admin.dashboard');
+//     }
+//     return redirect()->route('login');
+// })->name('home');
+
+// // ADMIN ROUTES
+// Route::prefix('admin')->name('admin.')
+//     ->middleware(['auth', \App\Http\Middleware\RoleMiddleware::class . ':admin'])
+//     ->group(function () {
+
+//         // Dashboard
+//         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+//         // Images
+//         Route::get('images/api/list', [ImageController::class, 'apiList'])->name('images.api.list');
+//         Route::post('images/upload', [ImageController::class, 'upload'])->name('images.upload');
+//         Route::post('images/bulk-action', [ImageController::class, 'bulkAction'])->name('images.bulk-action');
+//         Route::resource('images', ImageController::class);
+
+//         // Products
+//         Route::prefix('products')->name('products.')->group(function () {
+//             Route::get('trash', [ProductController::class, 'trash'])->name('trash');
+//             Route::post('restore/{id}', [ProductController::class, 'restore'])->name('restore');
+//             Route::post('restore-all', [ProductController::class, 'restoreAll'])->name('restoreAll');
+//             Route::delete('force-delete/{id}', [ProductController::class, 'forceDestroy'])->name('forceDelete');
+//             Route::delete('force-delete-all', [ProductController::class, 'forceDeleteAll'])->name('forceDeleteAll');
+
+//             Route::post('bulk-delete', [ProductController::class, 'bulkDelete'])->name('bulk-delete');
+//             Route::post('bulk-update-status', [ProductController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
+
+//             Route::get('/', [ProductController::class, 'index'])->name('index');
+//             Route::get('create', [ProductController::class, 'create'])->name('create');
+//             Route::post('/', [ProductController::class, 'store'])->name('store');
+//             Route::get('{product}', [ProductController::class, 'show'])->name('show');
+//             Route::get('{product}/edit', [ProductController::class, 'edit'])->name('edit');
+//             Route::put('{product}', [ProductController::class, 'update'])->name('update');
+//             Route::delete('{product}', [ProductController::class, 'destroy'])->name('destroy');
+
+//             Route::post('{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('toggle-status');
+//         });
+
+//         // Product Variants
+//         Route::prefix('products/{product}/variants')->name('products.variants.')->group(function () {
+//             Route::get('/', [ProductVariantController::class, 'index'])->name('index');
+//             Route::get('/create', [ProductVariantController::class, 'create'])->name('create');
+//             Route::post('/', [ProductVariantController::class, 'store'])->name('store');
+//             Route::get('/{variant}/edit', [ProductVariantController::class, 'edit'])->name('edit');
+//             Route::put('/{variant}', [ProductVariantController::class, 'update'])->name('update');
+//             Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])->name('destroy');
+//             Route::get('/{variant}/stock', [ProductVariantController::class, 'stock'])->name('stock');
+//             Route::post('/{variant}/stock', [ProductVariantController::class, 'updateStock'])->name('update-stock');
+//             Route::post('/bulk-create', [ProductVariantController::class, 'bulkCreate'])->name('bulk-create');
+//             Route::get('/check-sku', [ProductVariantController::class, 'checkSKU'])->name('checkSku');
+//         });
+
+//         // Categories
+//         Route::prefix('categories')->name('categories.')->group(function () {
+//             Route::get('/', [CategoryController::class, 'index'])->name('index');
+//             Route::get('/create', [CategoryController::class, 'create'])->name('create');
+//             Route::post('/', [CategoryController::class, 'store'])->name('store');
+//             Route::get('/{id}', [CategoryController::class, 'show'])->name('show');
+//             Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit');
+//             Route::put('/{id}', [CategoryController::class, 'update'])->name('update');
+//             Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
+
+//             Route::post('/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('bulk-delete');
+//             Route::post('/update-position', [CategoryController::class, 'updatePosition'])->name('update-position');
+//             Route::get('/ajax/get-categories', [CategoryController::class, 'getCategories'])->name('ajax.get-categories');
+//         });
+
+//         // Users
+//         Route::prefix('users')->name('users.')->group(function () {
+//             Route::get('trashed', [UserController::class, 'trashed'])->name('trashed');
+//             Route::post('restore/{id}', [UserController::class, 'restore'])->name('restore');
+//             Route::post('restore-all', [UserController::class, 'restoreAll'])->name('restoreAll');
+//             Route::delete('force-delete/{id}', [UserController::class, 'forceDelete'])->name('forceDelete');
+//             Route::delete('force-delete-selected', [UserController::class, 'forceDeleteSelected'])->name('forceDeleteSelected');
+//             Route::post('{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
+//         });
+//         Route::resource('users', UserController::class);
+
+//         // Product Reviews
+//         Route::prefix('reviews')->name('reviews.')->group(function () {
+//             Route::get('/', [ProductReviewController::class, 'index'])->name('index');
+//             Route::get('/{id}', [ProductReviewController::class, 'show'])->name('show');
+//             Route::get('/{id}/edit', [ProductReviewController::class, 'edit'])->name('edit');
+//             Route::put('/{id}', [ProductReviewController::class, 'update'])->name('update');
+//             Route::post('/{id}/approve', [ProductReviewController::class, 'approve'])->name('approve');
+//             Route::post('/{id}/reject', [ProductReviewController::class, 'reject'])->name('reject');
+//             Route::delete('/{id}', [ProductReviewController::class, 'destroy'])->name('destroy');
+//             Route::post('/bulk-action', [ProductReviewController::class, 'bulkAction'])->name('bulk-action');
+//             Route::get('/trash/list', [ProductReviewController::class, 'trash'])->name('trash');
+//             Route::post('/{id}/restore', [ProductReviewController::class, 'restore'])->name('restore');
+//             Route::delete('/{id}/force-delete', [ProductReviewController::class, 'forceDelete'])->name('force-delete');
+//         });
+
+//         // Blogs
+//         Route::resource('blogs', BlogController::class);
+//         Route::post('blogs/bulk-delete', [BlogController::class, 'bulkDelete'])->name('blogs.bulk-delete');
+//         Route::post('blogs/bulk-update-status', [BlogController::class, 'bulkUpdateStatus'])->name('blogs.bulk-update-status');
+
+//         // Banners
+//         Route::resource('banners', BannerController::class);
+//         Route::post('banners/bulk-delete', [BannerController::class, 'bulkDelete'])->name('banners.bulk-delete');
+//         Route::post('banners/update-positions', [BannerController::class, 'updatePositions'])->name('banners.update-positions');
+//         Route::post('banners/{banner}/toggle-status', [BannerController::class, 'toggleStatus'])->name('banners.toggle-status');
+
+//         // Mails
+//         Route::prefix('mails')->name('mails.')->group(function () {
+//             Route::get('/dashboard', [MailController::class, 'dashboard'])->name('dashboard');
+//             Route::get('/templates', [MailController::class, 'templates'])->name('templates');
+//             Route::get('/segments', [MailController::class, 'segments'])->name('segments');
+//             Route::get('/', [MailController::class, 'index'])->name('index');
+//             Route::get('/create', [MailController::class, 'create'])->name('create');
+//             Route::post('/', [MailController::class, 'store'])->name('store');
+//             Route::get('/{id}', [MailController::class, 'show'])->name('show');
+//             Route::get('/{id}/edit', [MailController::class, 'edit'])->name('edit');
+//             Route::put('/{id}', [MailController::class, 'update'])->name('update');
+//             Route::delete('/{id}', [MailController::class, 'destroy'])->name('destroy');
+//             Route::post('/{id}/send', [MailController::class, 'send'])->name('send');
+//             Route::post('/{id}/resend-failed', [MailController::class, 'resendFailed'])->name('resend-failed');
+//             Route::get('/{id}/preview', [MailController::class, 'preview'])->name('preview');
+//             Route::get('/{id}/analytics', [MailController::class, 'analytics'])->name('analytics');
+//             Route::post('/upload-image', [MailController::class, 'uploadImage'])->name('upload-image');
+//         });
+
+//         // Orders
+//         Route::prefix('orders')->name('orders.')->group(function () {
+//             Route::get('/', [OrderController::class, 'index'])->name('index');
+//             Route::get('/create', [OrderController::class, 'create'])->name('create');
+//             Route::post('/', [OrderController::class, 'store'])->name('store');
+//             Route::get('/{id}', [OrderController::class, 'show'])->name('show');
+//             Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('edit');
+//             Route::put('/{id}', [OrderController::class, 'update'])->name('update');
+//             Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
+//             Route::get('/{id}/invoice', [OrderController::class, 'invoice'])->name('invoice');
+//             Route::get('/{id}/customer-details', [OrderController::class, 'customerDetails'])->name('customer-details');
+//             Route::get('/export', [OrderController::class, 'export'])->name('export');
+//             Route::patch('/{id}/status', [OrderController::class, 'updateStatus'])->name('update-status');
+//             Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+//             Route::post('/{id}/confirm-order', [OrderController::class, 'confirmOrder'])->name('confirm');
+//             Route::get('/pending-payments', [OrderController::class, 'pendingPayments'])->name('pending-payments');
+//             Route::post('/{id}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('confirm-payment');
+//             Route::post('/{id}/reject-payment', [OrderController::class, 'rejectPayment'])->name('reject-payment');
+//             Route::patch('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
+//             Route::get('/trashed/list', [OrderController::class, 'trashed'])->name('trashed');
+//             Route::post('/{id}/restore', [OrderController::class, 'restore'])->name('restore');
+//             Route::delete('/{id}/force-delete', [OrderController::class, 'forceDelete'])->name('force-delete');
+//         });
+//         // Route::prefix('orders')->name('orders.')->group(function () {
+//         //     // Các routes cố định - ĐẶT TRƯỚC
+//         //     Route::get('/', [OrderController::class, 'index'])->name('index');
+//         //     Route::get('/pending/payments', [OrderController::class, 'pendingPayments'])->name('pending-payments');
+//         //     Route::get('/trashed/list', [OrderController::class, 'trashed'])->name('trashed');
+//         //     Route::get('/export/csv', [OrderController::class, 'export'])->name('export');
+
+//         //     // Actions với {id}
+//         //     Route::post('/{id}/confirm-order', [OrderController::class, 'confirmOrder'])->name('confirm');
+//         //     Route::post('/{id}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('confirm-payment');
+//         //     Route::patch('/{id}/reject-payment', [OrderController::class, 'rejectPayment'])->name('reject-payment');
+//         //     Route::patch('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
+//         //     Route::patch('/{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+
+//         //     // Other actions
+//         //     Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('edit');
+//         //     Route::put('/{id}', [OrderController::class, 'update'])->name('update');
+//         //     Route::get('/{id}/invoice', [OrderController::class, 'invoice'])->name('invoice');
+//         //     Route::get('/{orderId}/customer', [OrderController::class, 'customerDetails'])->name('customer-details');
+
+//         //     // Trash
+//         //     Route::post('/{id}/restore', [OrderController::class, 'restore'])->name('restore');
+//         //     Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
+//         //     Route::delete('/{id}/force', [OrderController::class, 'forceDelete'])->name('force-delete');
+
+//         //     // Detail - PHẢI ĐẶT CUỐI CÙNG
+//         //     Route::get('/{id}', [OrderController::class, 'show'])->name('show');
+//         // });
+
+//         // Payments
+//         Route::prefix('payments')->name('payments.')->group(function () {
+//             Route::get('/export', [PaymentController::class, 'export'])->name('export');
+//             Route::get('/', [PaymentController::class, 'index'])->name('index');
+//             Route::get('/pending-verification', [PaymentController::class, 'pendingVerification'])->name('pending-verification');
+//             Route::get('/statistics', [PaymentController::class, 'statistics'])->name('statistics');
+//             Route::get('/{id}', [PaymentController::class, 'show'])->name('show');
+//             Route::get('/{id}/verify', [PaymentController::class, 'verifyForm'])->name('verify-form');
+//             Route::post('/{id}/verify', [PaymentController::class, 'verify'])->name('verify');
+//             Route::post('/{id}/quick-verify', [PaymentController::class, 'quickVerify'])->name('quick-verify');
+//             Route::patch('/{id}/status', [PaymentController::class, 'updateStatus'])->name('update-status');
+//             Route::delete('/{id}', [PaymentController::class, 'destroy'])->name('destroy');
+//         });
+
+//         // Wishlists
+//         Route::prefix('wishlists')->name('wishlists.')->group(function () {
+//             Route::get('/', [WishlistController::class, 'index'])->name('index');
+//             Route::get('/statistics', [WishlistController::class, 'statistics'])->name('statistics');
+//             Route::get('/export', [WishlistController::class, 'export'])->name('export');
+//             Route::get('/{id}', [WishlistController::class, 'show'])->name('show');
+//             Route::delete('/{id}', [WishlistController::class, 'destroy'])->name('destroy');
+//             Route::post('/bulk-destroy', [WishlistController::class, 'bulkDestroy'])->name('bulk-destroy');
+//             Route::get('/user/{userId}', [WishlistController::class, 'userWishlists'])->name('user');
+//             Route::get('/product/{productId}', [WishlistController::class, 'productWishlists'])->name('product');
+//         });
+
+//         // Notifications
+//         Route::prefix('notifications')->name('notifications.')->group(function () {
+//             Route::get('/', [NotificationController::class, 'index'])->name('index');
+//             Route::get('/create', [NotificationController::class, 'create'])->name('create');
+//             Route::post('/', [NotificationController::class, 'store'])->name('store');
+//             Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
+//             Route::get('/{notification}/edit', [NotificationController::class, 'edit'])->name('edit');
+//             Route::put('/{notification}', [NotificationController::class, 'update'])->name('update');
+//             Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+//             Route::post('/bulk-send', [NotificationController::class, 'bulkSend'])->name('bulk-send');
+//             Route::delete('/bulk-delete', [NotificationController::class, 'bulkDelete'])->name('bulk-delete');
+//             Route::get('/stats/dashboard', [NotificationController::class, 'dashboard'])->name('dashboard');
+//         });
+//     });
+
+// /*
+// |--------------------------------------------------------------------------
+// | TEST ROUTES
+// |--------------------------------------------------------------------------
+// */
+// if (app()->environment('local')) {
+//     Route::prefix('test')->name('test.')->group(function () {
+//         Route::get('/', fn() => view('test.orders'))->name('ui');
+//         Route::get('/create-order', [TestOrderController::class, 'createOrder'])->name('create-order');
+//         Route::get('/orders', [TestOrderController::class, 'listOrders'])->name('list-orders');
+//         Route::get('/order/{orderId}/status/{status}', [TestOrderController::class, 'changeStatus'])
+//             ->name('change-status')
+//             ->where([
+//                 'orderId' => '[0-9]+',
+//                 'status' => 'pending|paid|processing|shipped|delivered|completed|cancelled'
+//             ]);
+//     });
+// }
+
+
+
+
+// //Client Routes
+
+
+
+
+// Route::prefix('client')->name('client.')->group(function () {
+
+//     // Public Routes
+//     Route::get('/home', [HomeController::class, 'index'])->name('home');
+//     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+//     Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
+//     Route::get('/category/{slug}', [ProductController::class, 'category'])->name('category.show');
+//     Route::get('/search', [ProductController::class, 'search'])->name('products.search');
+
+//     // Protected Routes
+//     Route::middleware('auth')->group(function () {
+
+//         // Profile
+//         Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+//         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+//         Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+//         // Cart
+//         Route::get('/cart', [CartController::class, 'index'])->name('cart');
+//         Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+//         Route::patch('/cart/update/{cartItem}', [CartController::class, 'update'])->name('cart.update');
+//         Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
+//         Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.coupon');
+//         Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+//         // Wishlist
+//         Route::get('/wishlist', [ClientWishlistController::class, 'index'])->name('wishlist');
+//         Route::post('/wishlist/toggle/{product}', [ClientWishlistController::class, 'toggle'])->name('wishlist.toggle');
+//         Route::delete('/wishlist/remove/{product}', [ClientWishlistController::class, 'remove'])->name('wishlist.remove');
+//         Route::post('/wishlist/add-all-to-cart', [ClientWishlistController::class, 'addAllToCart'])->name('wishlist.addAllToCart');
+//         Route::delete('/wishlist/clear', [ClientWishlistController::class, 'clear'])->name('wishlist.clear');
+
+//         // Checkout
+//         Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+//         Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+//         Route::get('/checkout/payment/{order}', [CheckoutController::class, 'payment'])->name('checkout.payment');
+//         Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+//         Route::post('/checkout/calculate-shipping', [CheckoutController::class, 'calculateShipping'])->name('checkout.calculate-shipping');
+
+//         // Orders
+//         Route::get('/orders', [OrderController::class, 'index'])->name('orders');
+//         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+//         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+//         Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('orders.confirm-received');
+//         Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
+//         Route::get('/orders/{order}/track', [OrderController::class, 'track'])->name('orders.track');
+//     });
+// });
+
+
+
+
+
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Web\AuthController; // Changed namespace
+use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Admin\{
     DashboardController,
     ProductController,
@@ -366,45 +716,51 @@ use App\Http\Controllers\Admin\{
     PaymentController,
     NotificationController,
     MailController,
-    UserAddressController,
-    ShippingAddressController
+};
+use App\Http\Controllers\Client\{
+    HomeController,
+    ProductController as ClientProductController,
+    CartController,
+    CheckoutController,
+    WishlistController as ClientWishlistController,
+    OrderController as ClientOrderController,
+    ProfileController,
 };
 use App\Http\Controllers\Test\TestOrderController;
-use App\Http\Controllers\Client\HomeController;
-use App\Http\Controllers\Client\CheckoutController;
-//use App\Http\Controllers\Client\ProductController;
-use App\Http\Controllers\Client\CartController;
-use App\Http\Controllers\Client\WishlistController as ClientWishlistController;
-//use App\Http\Controllers\Client\OrderController;
-//use App\Http\Controllers\Client\ProfileController;
+
 /*
 |--------------------------------------------------------------------------
 | AUTH ROUTES (WEB ONLY)
 |--------------------------------------------------------------------------
 */
-
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [AuthController::class, 'postLogin'])->name('postLogin');
-
 Route::get('register', [AuthController::class, 'register'])->name('register');
 Route::post('register', [AuthController::class, 'postRegister'])->name('postRegister');
-
 Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| HOME
+| HOME ROUTE
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', function () {
     if (auth()->check()) {
-        return redirect()->route('admin.dashboard');
+        // Nếu là admin thì vào admin dashboard
+        if (auth()->user()->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+        // Nếu là user thì vào trang chủ client
+        return redirect()->route('client.home');
     }
     return redirect()->route('login');
 })->name('home');
 
-// ADMIN ROUTES
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES
+|--------------------------------------------------------------------------
+*/
 Route::prefix('admin')->name('admin.')
     ->middleware(['auth', \App\Http\Middleware\RoleMiddleware::class . ':admin'])
     ->group(function () {
@@ -413,32 +769,28 @@ Route::prefix('admin')->name('admin.')
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Images
-        Route::get('images/api/list', [ImageController::class, 'apiList'])->name('images.api.list');
-        Route::post('images/upload', [ImageController::class, 'upload'])->name('images.upload');
-        Route::post('images/bulk-action', [ImageController::class, 'bulkAction'])->name('images.bulk-action');
+        Route::prefix('images')->name('images.')->group(function () {
+            Route::get('/api/list', [ImageController::class, 'apiList'])->name('api.list');
+            Route::post('/upload', [ImageController::class, 'upload'])->name('upload');
+            Route::post('/bulk-action', [ImageController::class, 'bulkAction'])->name('bulk-action');
+        });
         Route::resource('images', ImageController::class);
 
         // Products
         Route::prefix('products')->name('products.')->group(function () {
+            // Trash management
             Route::get('trash', [ProductController::class, 'trash'])->name('trash');
             Route::post('restore/{id}', [ProductController::class, 'restore'])->name('restore');
             Route::post('restore-all', [ProductController::class, 'restoreAll'])->name('restoreAll');
             Route::delete('force-delete/{id}', [ProductController::class, 'forceDestroy'])->name('forceDelete');
             Route::delete('force-delete-all', [ProductController::class, 'forceDeleteAll'])->name('forceDeleteAll');
 
+            // Bulk actions
             Route::post('bulk-delete', [ProductController::class, 'bulkDelete'])->name('bulk-delete');
             Route::post('bulk-update-status', [ProductController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
-
-            Route::get('/', [ProductController::class, 'index'])->name('index');
-            Route::get('create', [ProductController::class, 'create'])->name('create');
-            Route::post('/', [ProductController::class, 'store'])->name('store');
-            Route::get('{product}', [ProductController::class, 'show'])->name('show');
-            Route::get('{product}/edit', [ProductController::class, 'edit'])->name('edit');
-            Route::put('{product}', [ProductController::class, 'update'])->name('update');
-            Route::delete('{product}', [ProductController::class, 'destroy'])->name('destroy');
-
             Route::post('{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('toggle-status');
         });
+        Route::resource('products', ProductController::class);
 
         // Product Variants
         Route::prefix('products/{product}/variants')->name('products.variants.')->group(function () {
@@ -456,18 +808,11 @@ Route::prefix('admin')->name('admin.')
 
         // Categories
         Route::prefix('categories')->name('categories.')->group(function () {
-            Route::get('/', [CategoryController::class, 'index'])->name('index');
-            Route::get('/create', [CategoryController::class, 'create'])->name('create');
-            Route::post('/', [CategoryController::class, 'store'])->name('store');
-            Route::get('/{id}', [CategoryController::class, 'show'])->name('show');
-            Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [CategoryController::class, 'update'])->name('update');
-            Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
-
             Route::post('/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('bulk-delete');
             Route::post('/update-position', [CategoryController::class, 'updatePosition'])->name('update-position');
             Route::get('/ajax/get-categories', [CategoryController::class, 'getCategories'])->name('ajax.get-categories');
         });
+        Route::resource('categories', CategoryController::class);
 
         // Users
         Route::prefix('users')->name('users.')->group(function () {
@@ -482,107 +827,108 @@ Route::prefix('admin')->name('admin.')
 
         // Product Reviews
         Route::prefix('reviews')->name('reviews.')->group(function () {
-            Route::get('/', [ProductReviewController::class, 'index'])->name('index');
-            Route::get('/{id}', [ProductReviewController::class, 'show'])->name('show');
-            Route::get('/{id}/edit', [ProductReviewController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [ProductReviewController::class, 'update'])->name('update');
             Route::post('/{id}/approve', [ProductReviewController::class, 'approve'])->name('approve');
             Route::post('/{id}/reject', [ProductReviewController::class, 'reject'])->name('reject');
-            Route::delete('/{id}', [ProductReviewController::class, 'destroy'])->name('destroy');
             Route::post('/bulk-action', [ProductReviewController::class, 'bulkAction'])->name('bulk-action');
             Route::get('/trash/list', [ProductReviewController::class, 'trash'])->name('trash');
             Route::post('/{id}/restore', [ProductReviewController::class, 'restore'])->name('restore');
             Route::delete('/{id}/force-delete', [ProductReviewController::class, 'forceDelete'])->name('force-delete');
         });
+        Route::resource('reviews', ProductReviewController::class)->except(['create', 'store']);
 
         // Blogs
-        Route::resource('blogs', BlogController::class);
         Route::post('blogs/bulk-delete', [BlogController::class, 'bulkDelete'])->name('blogs.bulk-delete');
         Route::post('blogs/bulk-update-status', [BlogController::class, 'bulkUpdateStatus'])->name('blogs.bulk-update-status');
+        Route::resource('blogs', BlogController::class);
 
         // Banners
-        Route::resource('banners', BannerController::class);
         Route::post('banners/bulk-delete', [BannerController::class, 'bulkDelete'])->name('banners.bulk-delete');
         Route::post('banners/update-positions', [BannerController::class, 'updatePositions'])->name('banners.update-positions');
         Route::post('banners/{banner}/toggle-status', [BannerController::class, 'toggleStatus'])->name('banners.toggle-status');
+        Route::resource('banners', BannerController::class);
 
         // Mails
         Route::prefix('mails')->name('mails.')->group(function () {
             Route::get('/dashboard', [MailController::class, 'dashboard'])->name('dashboard');
             Route::get('/templates', [MailController::class, 'templates'])->name('templates');
             Route::get('/segments', [MailController::class, 'segments'])->name('segments');
-            Route::get('/', [MailController::class, 'index'])->name('index');
-            Route::get('/create', [MailController::class, 'create'])->name('create');
-            Route::post('/', [MailController::class, 'store'])->name('store');
-            Route::get('/{id}', [MailController::class, 'show'])->name('show');
-            Route::get('/{id}/edit', [MailController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [MailController::class, 'update'])->name('update');
-            Route::delete('/{id}', [MailController::class, 'destroy'])->name('destroy');
             Route::post('/{id}/send', [MailController::class, 'send'])->name('send');
             Route::post('/{id}/resend-failed', [MailController::class, 'resendFailed'])->name('resend-failed');
             Route::get('/{id}/preview', [MailController::class, 'preview'])->name('preview');
             Route::get('/{id}/analytics', [MailController::class, 'analytics'])->name('analytics');
             Route::post('/upload-image', [MailController::class, 'uploadImage'])->name('upload-image');
         });
-
-        // Orders
+        Route::resource('mails', MailController::class);
         Route::prefix('orders')->name('orders.')->group(function () {
+            // Các routes cố định - ĐẶT TRƯỚC
             Route::get('/', [OrderController::class, 'index'])->name('index');
-            Route::get('/create', [OrderController::class, 'create'])->name('create');
-            Route::post('/', [OrderController::class, 'store'])->name('store');
-            Route::get('/{id}', [OrderController::class, 'show'])->name('show');
+            Route::get('/pending/payments', [OrderController::class, 'pendingPayments'])->name('pending-payments');
+            Route::get('/trashed/list', [OrderController::class, 'trashed'])->name('trashed');
+            Route::get('/export/csv', [OrderController::class, 'export'])->name('export');
+
+            // Actions với {id}
+            Route::post('/{id}/confirm-order', [OrderController::class, 'confirmOrder'])->name('confirm');
+            Route::post('/{id}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('confirm-payment');
+            Route::patch('/{id}/reject-payment', [OrderController::class, 'rejectPayment'])->name('reject-payment');
+            Route::patch('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
+            Route::patch('/{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+
+            // Other actions
             Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('edit');
             Route::put('/{id}', [OrderController::class, 'update'])->name('update');
-            Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
             Route::get('/{id}/invoice', [OrderController::class, 'invoice'])->name('invoice');
-            Route::get('/{id}/customer-details', [OrderController::class, 'customerDetails'])->name('customer-details');
-            Route::get('/export', [OrderController::class, 'export'])->name('export');
-            Route::patch('/{id}/status', [OrderController::class, 'updateStatus'])->name('update-status');
-            Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
-            Route::post('/{id}/confirm-order', [OrderController::class, 'confirmOrder'])->name('confirm');
-            Route::get('/pending-payments', [OrderController::class, 'pendingPayments'])->name('pending-payments');
-            Route::post('/{id}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('confirm-payment');
-            Route::post('/{id}/reject-payment', [OrderController::class, 'rejectPayment'])->name('reject-payment');
-            Route::patch('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
-            Route::get('/trashed/list', [OrderController::class, 'trashed'])->name('trashed');
-            Route::post('/{id}/restore', [OrderController::class, 'restore'])->name('restore');
-            Route::delete('/{id}/force-delete', [OrderController::class, 'forceDelete'])->name('force-delete');
-        });
-        // Route::prefix('orders')->name('orders.')->group(function () {
-        //     // Các routes cố định - ĐẶT TRƯỚC
-        //     Route::get('/', [OrderController::class, 'index'])->name('index');
-        //     Route::get('/pending/payments', [OrderController::class, 'pendingPayments'])->name('pending-payments');
-        //     Route::get('/trashed/list', [OrderController::class, 'trashed'])->name('trashed');
-        //     Route::get('/export/csv', [OrderController::class, 'export'])->name('export');
+            Route::get('/{orderId}/customer', [OrderController::class, 'customerDetails'])->name('customer-details');
 
-        //     // Actions với {id}
+            // Trash
+            Route::post('/{id}/restore', [OrderController::class, 'restore'])->name('restore');
+            Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
+            Route::delete('/{id}/force', [OrderController::class, 'forceDelete'])->name('force-delete');
+
+            // Detail - PHẢI ĐẶT CUỐI CÙNG
+            Route::get('/{id}', [OrderController::class, 'show'])->name('show');
+        });
+        // Orders - CHÚ Ý THỨ TỰ ROUTE
+        // Route::prefix('orders')->name('orders.')->group(function () {
+        //     // Static routes trước (không có parameter động)
+        //     Route::get('/', [OrderController::class, 'index'])->name('index');
+        //     Route::get('/create', [OrderController::class, 'create'])->name('create');
+        //     Route::get('/pending-payments', [OrderController::class, 'pendingPayments'])->name('pending-payments');
+        //     Route::get('/trashed/list', [OrderController::class, 'trashed'])->name('trashed');
+        //     Route::get('/export', [OrderController::class, 'export'])->name('export');
+
+        //     // POST routes
+        //     Route::post('/', [OrderController::class, 'store'])->name('store');
+
+        //     // Dynamic routes sau (có {id} parameter)
+        //     Route::get('/{id}', [OrderController::class, 'show'])->name('show');
+        //     Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('edit');
+        //     Route::get('/{id}/invoice', [OrderController::class, 'invoice'])->name('invoice');
+        //     Route::get('/{id}/customer-details', [OrderController::class, 'customerDetails'])->name('customer-details');
+
+        //     // Update routes
+        //     Route::put('/{id}', [OrderController::class, 'update'])->name('update');
+        //     Route::patch('/{id}/status', [OrderController::class, 'updateStatus'])->name('update-status');
+
+        //     // Action routes - ✅ QUAN TRỌNG CHO EMAIL
         //     Route::post('/{id}/confirm-order', [OrderController::class, 'confirmOrder'])->name('confirm');
         //     Route::post('/{id}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('confirm-payment');
-        //     Route::patch('/{id}/reject-payment', [OrderController::class, 'rejectPayment'])->name('reject-payment');
-        //     Route::patch('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
-        //     Route::patch('/{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+        //     Route::post('/{id}/reject-payment', [OrderController::class, 'rejectPayment'])->name('reject-payment');
+        //     Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
 
-        //     // Other actions
-        //     Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('edit');
-        //     Route::put('/{id}', [OrderController::class, 'update'])->name('update');
-        //     Route::get('/{id}/invoice', [OrderController::class, 'invoice'])->name('invoice');
-        //     Route::get('/{orderId}/customer', [OrderController::class, 'customerDetails'])->name('customer-details');
-
-        //     // Trash
+        //     // Trash routes
         //     Route::post('/{id}/restore', [OrderController::class, 'restore'])->name('restore');
         //     Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
-        //     Route::delete('/{id}/force', [OrderController::class, 'forceDelete'])->name('force-delete');
-
-        //     // Detail - PHẢI ĐẶT CUỐI CÙNG
-        //     Route::get('/{id}', [OrderController::class, 'show'])->name('show');
+        //     Route::delete('/{id}/force-delete', [OrderController::class, 'forceDelete'])->name('force-delete');
         // });
+
+
 
         // Payments
         Route::prefix('payments')->name('payments.')->group(function () {
-            Route::get('/export', [PaymentController::class, 'export'])->name('export');
             Route::get('/', [PaymentController::class, 'index'])->name('index');
             Route::get('/pending-verification', [PaymentController::class, 'pendingVerification'])->name('pending-verification');
             Route::get('/statistics', [PaymentController::class, 'statistics'])->name('statistics');
+            Route::get('/export', [PaymentController::class, 'export'])->name('export');
             Route::get('/{id}', [PaymentController::class, 'show'])->name('show');
             Route::get('/{id}/verify', [PaymentController::class, 'verifyForm'])->name('verify-form');
             Route::post('/{id}/verify', [PaymentController::class, 'verify'])->name('verify');
@@ -596,31 +942,99 @@ Route::prefix('admin')->name('admin.')
             Route::get('/', [WishlistController::class, 'index'])->name('index');
             Route::get('/statistics', [WishlistController::class, 'statistics'])->name('statistics');
             Route::get('/export', [WishlistController::class, 'export'])->name('export');
+            Route::get('/user/{userId}', [WishlistController::class, 'userWishlists'])->name('user');
+            Route::get('/product/{productId}', [WishlistController::class, 'productWishlists'])->name('product');
             Route::get('/{id}', [WishlistController::class, 'show'])->name('show');
             Route::delete('/{id}', [WishlistController::class, 'destroy'])->name('destroy');
             Route::post('/bulk-destroy', [WishlistController::class, 'bulkDestroy'])->name('bulk-destroy');
-            Route::get('/user/{userId}', [WishlistController::class, 'userWishlists'])->name('user');
-            Route::get('/product/{productId}', [WishlistController::class, 'productWishlists'])->name('product');
         });
 
         // Notifications
         Route::prefix('notifications')->name('notifications.')->group(function () {
-            Route::get('/', [NotificationController::class, 'index'])->name('index');
-            Route::get('/create', [NotificationController::class, 'create'])->name('create');
-            Route::post('/', [NotificationController::class, 'store'])->name('store');
-            Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
-            Route::get('/{notification}/edit', [NotificationController::class, 'edit'])->name('edit');
-            Route::put('/{notification}', [NotificationController::class, 'update'])->name('update');
-            Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+            Route::get('/stats/dashboard', [NotificationController::class, 'dashboard'])->name('dashboard');
             Route::post('/bulk-send', [NotificationController::class, 'bulkSend'])->name('bulk-send');
             Route::delete('/bulk-delete', [NotificationController::class, 'bulkDelete'])->name('bulk-delete');
-            Route::get('/stats/dashboard', [NotificationController::class, 'dashboard'])->name('dashboard');
         });
+        Route::resource('notifications', NotificationController::class);
     });
 
 /*
 |--------------------------------------------------------------------------
-| TEST ROUTES
+| CLIENT ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::prefix('client')->name('client.')->group(function () {
+
+    // Public Routes
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/products', [ClientProductController::class, 'index'])->name('products.index');
+    Route::get('/products/{slug}', [ClientProductController::class, 'show'])->name('products.show');
+    Route::get('/category/{slug}', [ClientProductController::class, 'category'])->name('category.show');
+    Route::get('/search', [ClientProductController::class, 'search'])->name('products.search');
+
+    // Protected Routes
+    Route::middleware('auth')->group(function () {
+
+        // Profile
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/', [ProfileController::class, 'index'])->name('index');
+            Route::put('/', [ProfileController::class, 'update'])->name('update');
+            Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
+            Route::get('/addresses', [ProfileController::class, 'addresses'])->name('addresses');
+            Route::post('/addresses', [ProfileController::class, 'storeAddress'])->name('addresses.store');
+            Route::put('/addresses/{id}', [ProfileController::class, 'updateAddress'])->name('addresses.update');
+            Route::delete('/addresses/{id}', [ProfileController::class, 'deleteAddress'])->name('addresses.delete');
+        });
+
+        // Cart
+        Route::prefix('cart')->name('cart.')->group(function () {
+            Route::get('/', [CartController::class, 'index'])->name('index');
+            Route::post('/add/{product}', [CartController::class, 'add'])->name('add');
+            Route::post('/add-variant', [CartController::class, 'addVariant'])->name('add-variant');
+            Route::patch('/update/{cartItem}', [CartController::class, 'update'])->name('update');
+            Route::delete('/remove/{cartItem}', [CartController::class, 'remove'])->name('remove');
+            Route::post('/apply-coupon', [CartController::class, 'applyCoupon'])->name('coupon');
+            Route::delete('/remove-coupon', [CartController::class, 'removeCoupon'])->name('remove-coupon');
+            Route::delete('/clear', [CartController::class, 'clear'])->name('clear');
+            Route::get('/count', [CartController::class, 'count'])->name('count');
+        });
+
+        // Wishlist
+        Route::prefix('wishlist')->name('wishlist.')->group(function () {
+            Route::get('/', [ClientWishlistController::class, 'index'])->name('index');
+            Route::post('/toggle/{product}', [ClientWishlistController::class, 'toggle'])->name('toggle');
+            Route::delete('/remove/{product}', [ClientWishlistController::class, 'remove'])->name('remove');
+            Route::post('/add-all-to-cart', [ClientWishlistController::class, 'addAllToCart'])->name('addAllToCart');
+            Route::delete('/clear', [ClientWishlistController::class, 'clear'])->name('clear');
+            Route::get('/check/{product}', [ClientWishlistController::class, 'check'])->name('check');
+        });
+
+        // Checkout
+        Route::prefix('checkout')->name('checkout.')->group(function () {
+            Route::get('/', [CheckoutController::class, 'index'])->name('index');
+            Route::post('/process', [CheckoutController::class, 'process'])->name('process');
+            Route::get('/payment/{order}', [CheckoutController::class, 'payment'])->name('payment');
+            Route::get('/success/{order}', [CheckoutController::class, 'success'])->name('success');
+            Route::post('/calculate-shipping', [CheckoutController::class, 'calculateShipping'])->name('calculate-shipping');
+            Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('apply-coupon');
+        });
+
+        // Orders
+        Route::prefix('orders')->name('orders.')->group(function () {
+            Route::get('/', [ClientOrderController::class, 'index'])->name('index');
+            Route::get('/{order}', [ClientOrderController::class, 'show'])->name('show');
+            Route::get('/{order}/track', [ClientOrderController::class, 'track'])->name('track');
+            Route::post('/{order}/cancel', [ClientOrderController::class, 'cancel'])->name('cancel');
+            Route::post('/{order}/confirm-received', [ClientOrderController::class, 'confirmReceived'])->name('confirm-received');
+            Route::post('/{order}/reorder', [ClientOrderController::class, 'reorder'])->name('reorder');
+            Route::post('/{order}/review', [ClientOrderController::class, 'review'])->name('review');
+        });
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| TEST ROUTES (LOCAL ONLY)
 |--------------------------------------------------------------------------
 */
 if (app()->environment('local')) {
@@ -634,62 +1048,20 @@ if (app()->environment('local')) {
                 'orderId' => '[0-9]+',
                 'status' => 'pending|paid|processing|shipped|delivered|completed|cancelled'
             ]);
+Route::get('/orders/json', [TestOrderController::class, 'getOrdersJson'])->name('orders-json');
+
+        // Test email routes
+        Route::prefix('emails')->name('emails.')->group(function () {
+            Route::get('/preview/{template}', [TestOrderController::class, 'previewEmail'])
+                ->name('preview')
+                ->where('template', 'order-confirmation|order-preparing|order-paid|order-shipped|order-completed|order-cancelled');
+
+            Route::get('/send-test/{orderId}/{template}', [TestOrderController::class, 'sendTestEmail'])
+                ->name('send-test')
+                ->where([
+                    'orderId' => '[0-9]+',
+                    'template' => 'order-confirmation|order-preparing|order-paid|order-shipped|order-completed|order-cancelled'
+                ]);
+        });
     });
 }
-
-
-
-
-//Client Routes
-
-
-
-
-Route::prefix('client')->name('client.')->group(function () {
-
-    // Public Routes
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
-    Route::get('/category/{slug}', [ProductController::class, 'category'])->name('category.show');
-    Route::get('/search', [ProductController::class, 'search'])->name('products.search');
-
-    // Protected Routes
-    Route::middleware('auth')->group(function () {
-
-        // Profile
-        Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
-        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
-
-        // Cart
-        Route::get('/cart', [CartController::class, 'index'])->name('cart');
-        Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
-        Route::patch('/cart/update/{cartItem}', [CartController::class, 'update'])->name('cart.update');
-        Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
-        Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.coupon');
-        Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-
-        // Wishlist
-        Route::get('/wishlist', [ClientWishlistController::class, 'index'])->name('wishlist');
-        Route::post('/wishlist/toggle/{product}', [ClientWishlistController::class, 'toggle'])->name('wishlist.toggle');
-        Route::delete('/wishlist/remove/{product}', [ClientWishlistController::class, 'remove'])->name('wishlist.remove');
-        Route::post('/wishlist/add-all-to-cart', [ClientWishlistController::class, 'addAllToCart'])->name('wishlist.addAllToCart');
-        Route::delete('/wishlist/clear', [ClientWishlistController::class, 'clear'])->name('wishlist.clear');
-
-        // Checkout
-        Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
-        Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
-        Route::get('/checkout/payment/{order}', [CheckoutController::class, 'payment'])->name('checkout.payment');
-        Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
-        Route::post('/checkout/calculate-shipping', [CheckoutController::class, 'calculateShipping'])->name('checkout.calculate-shipping');
-
-        // Orders
-        Route::get('/orders', [OrderController::class, 'index'])->name('orders');
-        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-        Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-        Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('orders.confirm-received');
-        Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
-        Route::get('/orders/{order}/track', [OrderController::class, 'track'])->name('orders.track');
-    });
-});

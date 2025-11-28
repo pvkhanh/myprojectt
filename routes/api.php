@@ -378,6 +378,7 @@ use App\Http\Controllers\Api\V1\Customer\{
     OrderController,
     WishlistController,
     ReviewController,
+    PaymentController,
     AddressController
 };
 use App\Http\Controllers\Api\V1\CategoryController;
@@ -469,8 +470,10 @@ Route::prefix('v1')->group(function () {
         // Order Management
         Route::prefix('orders')->group(function () {
             Route::get('/', [OrderController::class, 'index']);
+            Route::post('/checkout', [OrderController::class, 'checkout']);
             Route::post('/', [OrderController::class, 'store']);
             Route::get('/{id}', [OrderController::class, 'show']);
+            Route::post('/{id}/pay', [OrderController::class, 'pay']);
             Route::post('/{id}/cancel', [OrderController::class, 'cancel']);
             Route::post('/{id}/confirm-received', [OrderController::class, 'confirmReceived']);
             Route::get('/{id}/track', [OrderController::class, 'track']);
@@ -494,6 +497,27 @@ Route::prefix('v1')->group(function () {
             Route::put('/{id}', [AddressController::class, 'update']);
             Route::delete('/{id}', [AddressController::class, 'destroy']);
             Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+        });
+        // Payment Management
+        Route::prefix('payments')->group(function () {
+            Route::get('/', [PaymentController::class, 'index']); // danh sách payment
+            Route::get('/methods', [PaymentController::class, 'getPaymentMethods']); // lấy phương thức thanh toán
+            Route::get('/statistics', [PaymentController::class, 'statistics']); // thống kê
+            Route::get('/{id}', [PaymentController::class, 'show']); // chi tiết payment
+            Route::post('/', [PaymentController::class, 'createPayment']); // tạo payment mới
+            Route::post('/{id}/confirm-bank', [PaymentController::class, 'confirmBankTransfer']); // confirm bank/wallet
+            Route::post('/{id}/initialize-gateway', [PaymentController::class, 'initializeGateway']); // tạo URL thanh toán
+            Route::get('/{id}/status', [PaymentController::class, 'checkStatus']); // check trạng thái
+        });
+        Route::prefix('stripe')->group(function () {
+            // Tạo payment intent
+            Route::post('/create-payment-intent', [\App\Http\Controllers\Api\V1\StripePaymentController::class, 'createPaymentIntent']);
+
+            // Xác nhận payment intent nếu cần (manual confirmation)
+            Route::post('/confirm-payment-intent', [\App\Http\Controllers\Api\V1\StripePaymentController::class, 'confirmPaymentIntent']);
+
+            // Lấy trạng thái payment theo ID
+            Route::get('/status/{payment_intent_id}', [\App\Http\Controllers\Api\V1\StripePaymentController::class, 'checkPaymentStatus']);
         });
     });
 });
