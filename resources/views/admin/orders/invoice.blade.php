@@ -355,10 +355,10 @@
             <div class="meta-block">
                 <h3>📍 Thông tin công ty</h3>
                 <p><strong>{{ config('app.name', 'Your Shop') }}</strong></p>
-                <p>123 Đường ABC, Quận XYZ</p>
+                <p>Lĩnh Nam, Quận Hoàng Mai</p>
                 <p>Thành phố Hà Nội, Việt Nam</p>
-                <p>📞 Hotline: 1900-xxxx</p>
-                <p>✉️ Email: contact@yourshop.com</p>
+                <p>📞 Hotline: 0987654321</p>
+                <p>✉️ Email: pvkhanh.tech@gmail.com</p>
             </div>
 
             <div class="meta-block">
@@ -493,7 +493,7 @@
                 ⭐ Cảm ơn quý khách đã mua hàng tại {{ config('app.name') }}!
             </p>
             <p style="color: #888; font-size: 13px;">
-                Mọi thắc mắc xin vui lòng liên hệ: hotline 1900-xxxx hoặc email: contact@yourshop.com
+                Mọi thắc mắc xin vui lòng liên hệ: hotline 0987654321 hoặc email: pvkhanh.tech@gmail.com
             </p>
 
             <div class="footer-signature">
