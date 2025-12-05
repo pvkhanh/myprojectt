@@ -369,6 +369,185 @@ Route::prefix('products')->group(function () {
 
 
 
+
+//Bản hoàn thiện 5/12/2025
+// use Illuminate\Support\Facades\Route;
+// use App\Http\Controllers\Api\V1\Auth\AuthController;
+// use App\Http\Controllers\Api\V1\Auth\ProfileController;
+// use App\Http\Controllers\Api\V1\Customer\{
+//     ProductController,
+//     CartController,
+//     OrderController,
+//     WishlistController,
+//     ReviewController,
+//     PaymentController,
+//     AddressController
+// };
+// use App\Http\Controllers\Api\V1\CategoryController;
+
+// /*
+// |--------------------------------------------------------------------------
+// | API Routes V1
+// |--------------------------------------------------------------------------
+// */
+
+// Route::prefix('v1')->group(function () {
+
+
+//     // Stripe Webhook (NO AUTH)
+//     Route::post('/webhooks/stripe', [\App\Http\Controllers\Api\V1\StripeWebhookController::class, 'handle'])
+//         ->name('webhooks.stripe');
+
+//     // ==================== PUBLIC ROUTES (KHÔNG CẦN TOKEN) ====================
+
+//     // Authentication
+//     Route::prefix('auth')->group(function () {
+//         Route::post('/register', [AuthController::class, 'register']);
+//         Route::post('/login', [AuthController::class, 'login']);
+
+//         // Protected Auth Routes (CẦN TOKEN)
+//         Route::middleware('auth:api')->group(function () {
+//             Route::post('/logout', [AuthController::class, 'logout']);
+//             Route::post('/refresh', [AuthController::class, 'refresh']);
+//             Route::get('/me', [AuthController::class, 'me']);
+//             Route::post('/change-password', [AuthController::class, 'changePassword']);
+//         });
+//     });
+
+//     // Products (Public - KHÔNG CẦN TOKEN)
+//     Route::prefix('products')->group(function () {
+//         Route::get('/', [ProductController::class, 'index']);
+//         Route::get('/search', [ProductController::class, 'search']);
+//         Route::get('/featured', [ProductController::class, 'featured']);
+//         Route::get('/latest', [ProductController::class, 'latest']);
+//         Route::get('/bestseller', [ProductController::class, 'bestseller']);
+//         Route::get('/on-sale', [ProductController::class, 'onSale']);
+//         Route::get('/{id}', [ProductController::class, 'show']);
+//         Route::get('/slug/{slug}', [ProductController::class, 'showBySlug']);
+//         Route::get('/{id}/related', [ProductController::class, 'related']);
+//         Route::get('/{id}/reviews', [ProductController::class, 'productReviews']);
+//     });
+
+//     // Categories (Public - KHÔNG CẦN TOKEN)
+//     Route::prefix('categories')->group(function () {
+//         Route::get('/', [CategoryController::class, 'index']);
+//         Route::get('/{id}', [CategoryController::class, 'show']);
+//         Route::get('/{id}/products', [CategoryController::class, 'products']);
+//     });
+
+//     // ==================== PROTECTED ROUTES (CẦN TOKEN) ====================
+
+//     Route::middleware('auth:api')->group(function () {
+
+//         // Profile Management
+//         Route::prefix('profile')->group(function () {
+//             Route::get('/', [ProfileController::class, 'show']);
+//             Route::put('/', [ProfileController::class, 'update']);
+//             Route::post('/avatar', [ProfileController::class, 'updateAvatar']);
+//             Route::delete('/avatar', [ProfileController::class, 'removeAvatar']);
+//         });
+
+//         // Cart Management
+//         Route::prefix('cart')->group(function () {
+//             Route::get('/', [CartController::class, 'index']);
+//             Route::post('/add', [CartController::class, 'add']);
+//             // Route::post('/add', [CartController::class, 'store']);
+//             Route::put('/items/{id}', [CartController::class, 'update']);
+//             Route::delete('/items/{id}', [CartController::class, 'remove']);
+//             Route::delete('/clear', [CartController::class, 'clear']);
+//             Route::post('/sync', [CartController::class, 'sync']);
+//         });
+
+//         // Wishlist Management
+//         Route::prefix('wishlist')->group(function () {
+//             Route::get('/', [WishlistController::class, 'index']);
+//             Route::post('/toggle', [WishlistController::class, 'toggle']);
+//             Route::post('/add', [WishlistController::class, 'add']);
+//             //  Route::post('/add', [WishlistController::class, 'store']);
+//             Route::delete('/{id}', [WishlistController::class, 'remove']);
+//             Route::delete('/clear', [WishlistController::class, 'clear']);
+//             Route::get('/check/{productId}', [WishlistController::class, 'check']);
+//         });
+
+//         // Order Management
+//         Route::prefix('orders')->group(function () {
+//             Route::get('/', [OrderController::class, 'index']);
+//             Route::post('/checkout', [OrderController::class, 'checkout']);
+//             Route::post('/', [OrderController::class, 'store']);
+//             Route::get('/{id}', [OrderController::class, 'show']);
+//             Route::post('/{id}/pay', [OrderController::class, 'pay']);
+//             Route::post('/{id}/cancel', [OrderController::class, 'cancel']);
+//             Route::post('/{id}/confirm-received', [OrderController::class, 'confirmReceived']);
+//             Route::get('/{id}/track', [OrderController::class, 'track']);
+//         });
+
+//         // Review Management
+//         Route::prefix('reviews')->group(function () {
+//             Route::get('/my-reviews', [ReviewController::class, 'myReviews']);
+//             Route::post('/', [ReviewController::class, 'store']);
+//             Route::put('/{id}', [ReviewController::class, 'update']);
+//             Route::delete('/{id}', [ReviewController::class, 'destroy']);
+//             Route::post('/{id}/helpful', [ReviewController::class, 'markHelpful']);
+//             Route::get('/can-review/{productId}', [ReviewController::class, 'canReview']);
+//         });
+
+//         // Address Management
+//         Route::prefix('addresses')->group(function () {
+//             Route::get('/', [AddressController::class, 'index']);
+//             Route::post('/', [AddressController::class, 'store']);
+//             Route::get('/{id}', [AddressController::class, 'show']);
+//             Route::put('/{id}', [AddressController::class, 'update']);
+//             Route::delete('/{id}', [AddressController::class, 'destroy']);
+//             Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+//         });
+//         // Payment Management
+//         Route::prefix('payments')->group(function () {
+//             Route::get('/', [PaymentController::class, 'index']); // danh sách payment
+//             Route::get('/methods', [PaymentController::class, 'getPaymentMethods']); // lấy phương thức thanh toán
+//             Route::get('/statistics', [PaymentController::class, 'statistics']); // thống kê
+//             Route::get('/{id}', [PaymentController::class, 'show']); // chi tiết payment
+//             Route::post('/', [PaymentController::class, 'createPayment']); // tạo payment mới
+//             Route::post('/{id}/confirm-bank', [PaymentController::class, 'confirmBankTransfer']); // confirm bank/wallet
+//             Route::post('/{id}/initialize-gateway', [PaymentController::class, 'initializeGateway']); // tạo URL thanh toán
+//             Route::get('/{id}/status', [PaymentController::class, 'checkStatus']); // check trạng thái
+//         });
+//         Route::prefix('stripe')->group(function () {
+//             // Tạo payment intent
+//             Route::post('/create-payment-intent', [\App\Http\Controllers\Api\V1\StripePaymentController::class, 'createPaymentIntent']);
+
+//             // Xác nhận payment intent nếu cần (manual confirmation)
+//             Route::post('/confirm-payment-intent', [\App\Http\Controllers\Api\V1\StripePaymentController::class, 'confirmPaymentIntent']);
+
+//             // Lấy trạng thái payment theo ID
+//             Route::get('/status/{payment_intent_id}', [\App\Http\Controllers\Api\V1\StripePaymentController::class, 'checkPaymentStatus']);
+//         });
+//     });
+// });
+
+// /*
+// |--------------------------------------------------------------------------
+// | API Health Check (PUBLIC)
+// |--------------------------------------------------------------------------
+// */
+// Route::get('/health', function () {
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'API is running',
+//         'version' => '1.0.0',
+//         'timestamp' => now()->toDateTimeString()
+//     ]);
+// });
+
+
+
+
+
+
+
+
+
+
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\ProfileController;
@@ -390,7 +569,6 @@ use App\Http\Controllers\Api\V1\CategoryController;
 */
 
 Route::prefix('v1')->group(function () {
-
 
     // Stripe Webhook (NO AUTH)
     Route::post('/webhooks/stripe', [\App\Http\Controllers\Api\V1\StripeWebhookController::class, 'handle'])
@@ -445,14 +623,29 @@ Route::prefix('v1')->group(function () {
             Route::delete('/avatar', [ProfileController::class, 'removeAvatar']);
         });
 
-        // Cart Management
+        // Cart Management - CẢI TIẾN
         Route::prefix('cart')->group(function () {
+            // Xem giỏ hàng
             Route::get('/', [CartController::class, 'index']);
+            
+            // Thêm/sửa/xóa sản phẩm
             Route::post('/add', [CartController::class, 'add']);
-            // Route::post('/add', [CartController::class, 'store']);
             Route::put('/items/{id}', [CartController::class, 'update']);
             Route::delete('/items/{id}', [CartController::class, 'remove']);
+            
+            // Chọn sản phẩm để checkout
+            Route::post('/items/{id}/toggle-select', [CartController::class, 'toggleSelect']);
+            Route::post('/select-all', [CartController::class, 'selectAll']);
+            
+            // Xóa giỏ hàng
             Route::delete('/clear', [CartController::class, 'clear']);
+            Route::delete('/remove-selected', [CartController::class, 'removeSelected']);
+            
+            // Validate và cleanup
+            Route::post('/validate-checkout', [CartController::class, 'validateCheckout']);
+            Route::post('/cleanup', [CartController::class, 'cleanup']);
+            
+            // Đồng bộ giỏ hàng
             Route::post('/sync', [CartController::class, 'sync']);
         });
 
@@ -461,21 +654,33 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [WishlistController::class, 'index']);
             Route::post('/toggle', [WishlistController::class, 'toggle']);
             Route::post('/add', [WishlistController::class, 'add']);
-            //  Route::post('/add', [WishlistController::class, 'store']);
             Route::delete('/{id}', [WishlistController::class, 'remove']);
             Route::delete('/clear', [WishlistController::class, 'clear']);
             Route::get('/check/{productId}', [WishlistController::class, 'check']);
         });
 
-        // Order Management
+        // Order Management - CẢI TIẾN
         Route::prefix('orders')->group(function () {
+            // Danh sách đơn hàng
             Route::get('/', [OrderController::class, 'index']);
+            
+            // Tạo đơn hàng (checkout chỉ các sản phẩm đã chọn)
             Route::post('/checkout', [OrderController::class, 'checkout']);
-            Route::post('/', [OrderController::class, 'store']);
+            Route::post('/', [OrderController::class, 'checkout']); // Alias
+            
+            // Chi tiết đơn hàng
             Route::get('/{id}', [OrderController::class, 'show']);
+            
+            // Thanh toán (test)
             Route::post('/{id}/pay', [OrderController::class, 'pay']);
+            
+            // Hủy đơn hàng
             Route::post('/{id}/cancel', [OrderController::class, 'cancel']);
+            
+            // Xác nhận đã nhận hàng
             Route::post('/{id}/confirm-received', [OrderController::class, 'confirmReceived']);
+            
+            // Theo dõi đơn hàng
             Route::get('/{id}/track', [OrderController::class, 'track']);
         });
 
@@ -498,25 +703,23 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{id}', [AddressController::class, 'destroy']);
             Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
         });
+
         // Payment Management
         Route::prefix('payments')->group(function () {
-            Route::get('/', [PaymentController::class, 'index']); // danh sách payment
-            Route::get('/methods', [PaymentController::class, 'getPaymentMethods']); // lấy phương thức thanh toán
-            Route::get('/statistics', [PaymentController::class, 'statistics']); // thống kê
-            Route::get('/{id}', [PaymentController::class, 'show']); // chi tiết payment
-            Route::post('/', [PaymentController::class, 'createPayment']); // tạo payment mới
-            Route::post('/{id}/confirm-bank', [PaymentController::class, 'confirmBankTransfer']); // confirm bank/wallet
-            Route::post('/{id}/initialize-gateway', [PaymentController::class, 'initializeGateway']); // tạo URL thanh toán
-            Route::get('/{id}/status', [PaymentController::class, 'checkStatus']); // check trạng thái
+            Route::get('/', [PaymentController::class, 'index']);
+            Route::get('/methods', [PaymentController::class, 'getPaymentMethods']);
+            Route::get('/statistics', [PaymentController::class, 'statistics']);
+            Route::get('/{id}', [PaymentController::class, 'show']);
+            Route::post('/', [PaymentController::class, 'createPayment']);
+            Route::post('/{id}/confirm-bank', [PaymentController::class, 'confirmBankTransfer']);
+            Route::post('/{id}/initialize-gateway', [PaymentController::class, 'initializeGateway']);
+            Route::get('/{id}/status', [PaymentController::class, 'checkStatus']);
         });
+
+        // Stripe Payment
         Route::prefix('stripe')->group(function () {
-            // Tạo payment intent
             Route::post('/create-payment-intent', [\App\Http\Controllers\Api\V1\StripePaymentController::class, 'createPaymentIntent']);
-
-            // Xác nhận payment intent nếu cần (manual confirmation)
             Route::post('/confirm-payment-intent', [\App\Http\Controllers\Api\V1\StripePaymentController::class, 'confirmPaymentIntent']);
-
-            // Lấy trạng thái payment theo ID
             Route::get('/status/{payment_intent_id}', [\App\Http\Controllers\Api\V1\StripePaymentController::class, 'checkPaymentStatus']);
         });
     });

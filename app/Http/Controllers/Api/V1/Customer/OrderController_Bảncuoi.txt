@@ -64,10 +64,16 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    public function store(Request $request)
+    {
+        return $this->checkout($request);
+    }
+
 
     /**
-     * Checkout: tạo đơn hàng mới - CHỈ THANH TOÁN CÁC SẢN PHẨM ĐÃ CHỌN
+     * Checkout: tạo đơn hàng mới
      */
+
     public function checkout(Request $request)
     {
         $request->validate([
@@ -79,6 +85,7 @@ class OrderController extends Controller
             'district' => 'required_without:address_id|string|max:255',
             'ward' => 'required_without:address_id|string|max:255',
             'postal_code' => 'nullable|string|max:20',
+            // 'payment_method' => 'required|in:cod,bank,momo,vnpay',
             'payment_method' => ['required', Rule::in(PaymentMethod::values())],
             'note' => 'nullable|string|max:500',
         ]);
@@ -87,37 +94,101 @@ class OrderController extends Controller
         try {
             $userId = auth('api')->id();
 
-            // 1️⃣ Lấy địa chỉ
-            $userAddress = $this->getUserAddress($request, $userId);
+            // // 1️⃣ Lấy địa chỉ hoặc tạo mới
+            // if ($request->filled('address_id')) {
+            //     $userAddress = UserAddress::where('id', $request->address_id)
+            //         ->where('user_id', $userId)
+            //         ->first();
 
-            // 2️⃣ Lấy các items ĐÃ CHỌN trong giỏ hàng
-            $selectedCartItems = $this->cartRepo->selectedForUser($userId);
-            
-            if ($selectedCartItems->isEmpty()) {
-                DB::rollBack();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Vui lòng chọn sản phẩm để thanh toán',
-                    'code' => 'NO_ITEMS_SELECTED'
-                ], 400);
+            //     if (!$userAddress) {
+            //         return response()->json([
+            //             'success' => false,
+            //             'message' => 'Địa chỉ không tồn tại hoặc không thuộc người dùng'
+            //         ], 400);
+            //     }
+            // } else {
+            //     $userAddress = UserAddress::create([
+            //         'user_id' => $userId,
+            //         'receiver_name' => $request->receiver_name,
+            //         'phone' => $request->phone,
+            //         'address' => $request->address,
+            //         'province' => $request->province,
+            //         'district' => $request->district,
+            //         'ward' => $request->ward,
+            //         'postal_code' => $request->postal_code,
+            //         'is_default' => true,
+            //     ]);
+            // }
+            // 1️⃣ Lấy địa chỉ hoặc tạo mới
+            $userAddress = null;
+            if ($request->address_id) {
+                $userAddress = UserAddress::where('id', $request->address_id)
+                    ->where('user_id', $userId)
+                    ->first();
+
+                // Nếu address_id không tồn tại hoặc không thuộc user → tạo mới
+                if (!$userAddress) {
+                    $userAddress = UserAddress::create([
+                        'user_id' => $userId,
+                        'receiver_name' => $request->receiver_name ?? 'Người nhận',
+                        'phone' => $request->phone ?? '0000000000',
+                        'address' => $request->address ?? 'Chưa cập nhật',
+                        'province' => $request->province ?? '',
+                        'district' => $request->district ?? '',
+                        'ward' => $request->ward ?? '',
+                        'postal_code' => $request->postal_code,
+                        'is_default' => true,
+                    ]);
+                }
+            } else {
+                $userAddress = UserAddress::create([
+                    'user_id' => $userId,
+                    'receiver_name' => $request->receiver_name,
+                    'phone' => $request->phone,
+                    'address' => $request->address,
+                    'province' => $request->province,
+                    'district' => $request->district,
+                    'ward' => $request->ward,
+                    'postal_code' => $request->postal_code,
+                    'is_default' => true,
+                ]);
             }
 
-            // 3️⃣ Validate tồn kho và tính toán
-            $validationResult = $this->validateAndCalculateOrder($selectedCartItems);
-            
-            if (!$validationResult['success']) {
+            // 2️⃣ Lấy giỏ hàng
+            $cartItems = $this->cartRepo->selectedForUser($userId);
+            if ($cartItems->isEmpty()) {
                 DB::rollBack();
-                return response()->json([
-                    'success' => false,
-                    'message' => $validationResult['message'],
-                    'errors' => $validationResult['errors'] ?? [],
-                    'code' => $validationResult['code']
-                ], 400);
+                return response()->json(['success' => false, 'message' => 'Giỏ hàng trống'], 400);
             }
 
-            $orderItems = $validationResult['orderItems'];
-            $subtotal = $validationResult['subtotal'];
-            $shippingFee = 30000;
+            // 3️⃣ Tính toán subtotal, tổng
+            $subtotal = 0;
+            $orderItems = [];
+            // dd($cartItems);
+            foreach ($cartItems as $item) {
+                $product = $item->product;
+                $variant = $item->variant;
+                $price = $variant ? $variant->price : ($product->sale_price ?? $product->price);
+                $availableStock = $variant ? $variant->stockItems->sum('quantity') : $product->stock_quantity;
+                
+                if ($availableStock < $item->quantity) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Sản phẩm {$product->name} không đủ hàng",
+                    ], 400);
+                }
+
+                $subtotal += $price * $item->quantity;
+                $orderItems[] = [
+                    'product_id' => $product->id,
+                    'variant_id' => $variant?->id,
+                    'quantity' => $item->quantity,
+                    'price' => $price,
+                ];
+            }
+
+            $shippingFee = 30000; // phí ship mặc định
             $totalAmount = $subtotal + $shippingFee;
 
             // 4️⃣ Tạo Order
@@ -132,10 +203,43 @@ class OrderController extends Controller
             ]);
 
             // 5️⃣ Tạo ShippingAddress
-            $shippingAddress = $this->createShippingAddress($order, $userAddress);
+            $shippingAddress = ShippingAddress::create([
+                'order_id' => $order->id,
+                'receiver_name' => $userAddress->receiver_name,
+                'phone' => $userAddress->phone,
+                'address' => $userAddress->address,
+                'province' => $userAddress->province,
+                'district' => $userAddress->district,
+                'ward' => $userAddress->ward,
+                'postal_code' => $userAddress->postal_code,
+            ]);
 
+            // // 6️⃣ Tạo OrderItems và trừ tồn kho
+            // foreach ($orderItems as $item) {
+            //     $order->orderItems()->create($item);
+            //     if ($item['variant_id']) {
+            //         \App\Models\ProductVariant::find($item['variant_id'])
+            //             ->stockItems()->decrement('quantity', $item['quantity']);
+            //     } else {
+            //         \App\Models\Product::find($item['product_id'])
+            //             ->decrement('stock_quantity', $item['quantity']);
+            //     }
+            // }
             // 6️⃣ Tạo OrderItems và trừ tồn kho
-            $this->createOrderItemsAndUpdateStock($order, $orderItems);
+            foreach ($orderItems as $item) {
+                $order->orderItems()->create($item);
+
+                if ($item['variant_id']) {
+                    // Trừ tồn kho của variant
+                    $variant = \App\Models\ProductVariant::find($item['variant_id']);
+                    $variant->stockItems()->decrement('quantity', $item['quantity']);
+                } else {
+                    // Trừ tồn kho của sản phẩm chính
+                    $product = \App\Models\Product::find($item['product_id']);
+                    $product->stockItems()->decrement('quantity', $item['quantity']);
+                }
+            }
+
 
             // 7️⃣ Tạo Payment
             $payment = Payment::create([
@@ -145,13 +249,12 @@ class OrderController extends Controller
                 'status' => PaymentStatus::Pending,
             ]);
 
-            // 8️⃣ Xóa các items ĐÃ CHỌN khỏi giỏ hàng
-            foreach ($selectedCartItems as $item) {
-                $item->forceDelete();
-            }
+            // 8️⃣ Xóa giỏ hàng
+            $this->cartRepo->clearUserCart($userId);
 
             DB::commit();
 
+            // 9️⃣ Trả về dữ liệu đầy đủ cho frontend
             return response()->json([
                 'success' => true,
                 'message' => 'Đặt hàng thành công',
@@ -203,6 +306,71 @@ class OrderController extends Controller
         }
     }
 
+    //  /**
+    //  * Hủy đơn hàng
+    //  */
+    // public function cancel(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'reason' => 'required|string|max:500'
+    //     ]);
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         $userId = auth('api')->id();
+
+    //         $order = Order::where('id', $id)
+    //             ->where('user_id', $userId)
+    //             ->with(['orderItems', 'payments'])
+    //             ->firstOrFail();
+
+    //         // Chỉ được hủy đơn hàng pending hoặc paid
+    //         if (!in_array($order->status, [OrderStatus::Pending, OrderStatus::Paid])) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Không thể hủy đơn hàng ở trạng thái này'
+    //             ], 400);
+    //         }
+
+    //         // Cập nhật trạng thái
+    //         $order->update([
+    //             'status' => OrderStatus::Cancelled,
+    //             'cancelled_at' => now(),
+    //             'customer_note' => $request->reason,
+    //         ]);
+
+    //         // Hoàn lại tồn kho
+    //         foreach ($order->orderItems as $item) {
+    //             if ($item->variant_id) {
+    //                 $item->variant->stockItems()->increment('quantity', $item->quantity);
+    //             } else {
+    //                 $item->product->increment('stock_quantity', $item->quantity);
+    //             }
+    //         }
+
+    //         // Cập nhật payment
+    //         if ($payment = $order->payments->first()) {
+    //             $payment->update(['status' => PaymentStatus::Failed]);
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Đã hủy đơn hàng',
+    //             'data' => new OrderResource($order->fresh())
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Không thể hủy đơn hàng',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     /**
      * Hủy đơn hàng
      */
@@ -214,6 +382,7 @@ class OrderController extends Controller
 
         $userId = auth('api')->id();
 
+        // Lấy đơn hàng, tránh dùng firstOrFail()
         $order = Order::where('id', $id)
             ->where('user_id', $userId)
             ->with(['orderItems', 'orderItems.product', 'orderItems.variant', 'payments'])
@@ -226,6 +395,7 @@ class OrderController extends Controller
             ], 404);
         }
 
+        // Chỉ được hủy đơn hàng pending hoặc paid
         if (!in_array($order->status, [OrderStatus::Pending, OrderStatus::Paid])) {
             return response()->json([
                 'success' => false,
@@ -235,6 +405,7 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
+            // Cập nhật trạng thái đơn hàng
             $order->update([
                 'status' => OrderStatus::Cancelled,
                 'cancelled_at' => now(),
@@ -244,13 +415,18 @@ class OrderController extends Controller
             // Hoàn lại tồn kho
             foreach ($order->orderItems as $item) {
                 if ($item->variant_id) {
+                    // Nếu là variant, tăng quantity trong stockItems
                     $item->variant->stockItems()->increment('quantity', $item->quantity);
                 } else {
+                    // Nếu là sản phẩm thường, tăng quantity trong stockItems liên quan
                     if ($item->product->stockItems()->exists()) {
                         $item->product->stockItems()->increment('quantity', $item->quantity);
+                    } else {
+                        // Không có stockItems => không làm gì (hoặc log cảnh báo)
                     }
                 }
             }
+
 
             // Cập nhật payment
             if ($payment = $order->payments->first()) {
@@ -273,6 +449,8 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
+
 
     /**
      * Xác nhận đã nhận hàng
@@ -374,13 +552,10 @@ class OrderController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Thanh toán đơn hàng (test)
-     */
+    //     //Mới thêm ngày 27/11/2025 để test pay
     public function pay(Order $order)
     {
-        $payment = $order->payments()->first();
+        $payment = $order->payments()->first(); // Lấy bản ghi payment đầu tiên
 
         if ($payment) {
             $payment->update([
@@ -395,148 +570,4 @@ class OrderController extends Controller
         ]);
     }
 
-    // ==================== PRIVATE HELPER METHODS ====================
-
-    /**
-     * Lấy hoặc tạo địa chỉ người dùng
-     */
-    private function getUserAddress(Request $request, $userId)
-    {
-        if ($request->address_id) {
-            $userAddress = UserAddress::where('id', $request->address_id)
-                ->where('user_id', $userId)
-                ->first();
-
-            if (!$userAddress) {
-                $userAddress = UserAddress::create([
-                    'user_id' => $userId,
-                    'receiver_name' => $request->receiver_name ?? 'Người nhận',
-                    'phone' => $request->phone ?? '0000000000',
-                    'address' => $request->address ?? 'Chưa cập nhật',
-                    'province' => $request->province ?? '',
-                    'district' => $request->district ?? '',
-                    'ward' => $request->ward ?? '',
-                    'postal_code' => $request->postal_code,
-                    'is_default' => true,
-                ]);
-            }
-        } else {
-            $userAddress = UserAddress::create([
-                'user_id' => $userId,
-                'receiver_name' => $request->receiver_name,
-                'phone' => $request->phone,
-                'address' => $request->address,
-                'province' => $request->province,
-                'district' => $request->district,
-                'ward' => $request->ward,
-                'postal_code' => $request->postal_code,
-                'is_default' => true,
-            ]);
-        }
-
-        return $userAddress;
-    }
-
-    /**
-     * Validate tồn kho và tính toán đơn hàng
-     */
-    private function validateAndCalculateOrder($cartItems)
-    {
-        $subtotal = 0;
-        $orderItems = [];
-        $errors = [];
-
-        foreach ($cartItems as $item) {
-            $product = $item->product;
-            $variant = $item->variant;
-            $price = $variant ? $variant->price : ($product->sale_price ?? $product->price);
-            
-            // Kiểm tra tồn kho
-            $availableStock = $variant 
-                ? $variant->stockItems->sum('quantity') 
-                : $product->stock_quantity;
-            
-            // Sản phẩm hết hàng
-            if ($availableStock <= 0) {
-                $errors[] = [
-                    'product_name' => $product->name,
-                    'variant' => $variant?->name,
-                    'message' => 'Sản phẩm đã hết hàng',
-                    'code' => 'OUT_OF_STOCK'
-                ];
-                continue;
-            }
-
-            // Không đủ số lượng
-            if ($availableStock < $item->quantity) {
-                $errors[] = [
-                    'product_name' => $product->name,
-                    'variant' => $variant?->name,
-                    'message' => "Chỉ còn {$availableStock} sản phẩm trong kho",
-                    'available_stock' => $availableStock,
-                    'requested_quantity' => $item->quantity,
-                    'code' => 'INSUFFICIENT_STOCK'
-                ];
-                continue;
-            }
-
-            $subtotal += $price * $item->quantity;
-            $orderItems[] = [
-                'product_id' => $product->id,
-                'variant_id' => $variant?->id,
-                'quantity' => $item->quantity,
-                'price' => $price,
-            ];
-        }
-
-        if (!empty($errors)) {
-            return [
-                'success' => false,
-                'message' => 'Một số sản phẩm không đủ điều kiện thanh toán',
-                'errors' => $errors,
-                'code' => 'VALIDATION_FAILED'
-            ];
-        }
-
-        return [
-            'success' => true,
-            'orderItems' => $orderItems,
-            'subtotal' => $subtotal
-        ];
-    }
-
-    /**
-     * Tạo địa chỉ giao hàng
-     */
-    private function createShippingAddress($order, $userAddress)
-    {
-        return ShippingAddress::create([
-            'order_id' => $order->id,
-            'receiver_name' => $userAddress->receiver_name,
-            'phone' => $userAddress->phone,
-            'address' => $userAddress->address,
-            'province' => $userAddress->province,
-            'district' => $userAddress->district,
-            'ward' => $userAddress->ward,
-            'postal_code' => $userAddress->postal_code,
-        ]);
-    }
-
-    /**
-     * Tạo OrderItems và cập nhật tồn kho
-     */
-    private function createOrderItemsAndUpdateStock($order, $orderItems)
-    {
-        foreach ($orderItems as $item) {
-            $order->orderItems()->create($item);
-
-            if ($item['variant_id']) {
-                $variant = \App\Models\ProductVariant::find($item['variant_id']);
-                $variant->stockItems()->decrement('quantity', $item['quantity']);
-            } else {
-                $product = \App\Models\Product::find($item['product_id']);
-                $product->stockItems()->decrement('quantity', $item['quantity']);
-            }
-        }
-    }
 }

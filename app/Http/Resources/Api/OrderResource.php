@@ -110,15 +110,27 @@ class OrderResource extends JsonResource
             'cancelled_at' => $this->cancelled_at?->toDateTimeString(),
 
             // Shipping Address
-            'shipping_address' => $this->shippingAddress ? [
-                'receiver_name' => $this->shippingAddress->receiver_name,
-                'phone' => $this->shippingAddress->phone,
-                'address' => $this->shippingAddress->address,
-                'ward' => $this->shippingAddress->ward,
-                'district' => $this->shippingAddress->district,
-                'province' => $this->shippingAddress->province,
-                'postal_code' => $this->shippingAddress->postal_code,
-            ] : null,
+            // 'shipping_address' => $this->shippingAddress ? [
+            //     'receiver_name' => $this->shippingAddress->receiver_name,
+            //     'phone' => $this->shippingAddress->phone,
+            //     'address' => $this->shippingAddress->address,
+            //     'ward' => $this->shippingAddress->ward,
+            //     'district' => $this->shippingAddress->district,
+            //     'province' => $this->shippingAddress->province,
+            //     'postal_code' => $this->shippingAddress->postal_code,
+            // ] : null,
+            'shipping_address' => $this->whenLoaded('shippingAddress', function () {
+                return [
+                    'receiver_name' => $this->shippingAddress->receiver_name,
+                    'phone' => $this->shippingAddress->phone,
+                    'address' => $this->shippingAddress->address,
+                    'ward' => $this->shippingAddress->ward,
+                    'district' => $this->shippingAddress->district,
+                    'province' => $this->shippingAddress->province,
+                    'postal_code' => $this->shippingAddress->postal_code,
+                ];
+            }),
+
 
             // Order Items
             'items' => $this->orderItems->map(function ($item) {
