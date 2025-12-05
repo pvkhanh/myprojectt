@@ -1247,7 +1247,7 @@ Route::prefix('admin')->name('admin.')
             Route::post('/upload-image', [MailController::class, 'uploadImage'])->name('upload-image');
         });
         Route::resource('mails', MailController::class);
-Route::prefix('orders')->name('orders.')->group(function () {
+        Route::prefix('orders')->name('orders.')->group(function () {
             // Các routes cố định - ĐẶT TRƯỚC
             Route::get('/', [OrderController::class, 'index'])->name('index');
             Route::get('/pending/payments', [OrderController::class, 'pendingPayments'])->name('pending-payments');
@@ -1361,7 +1361,7 @@ Route::prefix('orders')->name('orders.')->group(function () {
 Route::prefix('client')->name('client.')->group(function () {
 
     // ================== PUBLIC ROUTES ==================
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/home', [HomeController::class, 'index'])->name('home.index');
 
     // Products
     Route::prefix('products')->name('products.')->group(function () {

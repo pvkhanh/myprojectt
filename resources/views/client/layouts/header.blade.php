@@ -179,7 +179,7 @@
         <div class="row align-items-center">
             <!-- Logo -->
             <div class="col-lg-2 col-6">
-                <a href="{{ route('home') }}" class="logo">
+                <a href="{{ route('client.home.index') }}" class="logo">
                     <i class="fas fa-store me-2"></i>ShopX
                 </a>
             </div>
@@ -287,10 +287,14 @@
         <div class="container">
             <ul class="nav justify-content-center">
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                    {{-- <a class="nav-link {{ request()->routeIs('client.home.index') ? 'active' : '' }}"
+                        href="{{ route('client.home.index') }}">
                         <i class="fas fa-home me-1"></i> Trang chủ
-                    </a>
+                    </a> --}}
+                    <a class="nav-link {{ request()->routeIs('client.home.index') ? 'active' : '' }} "
+                        href="{{ route('client.home.index') }}"><i class="fas fa-home me-1"></i> Trang chủ</a>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('product.*') ? 'active' : '' }}"
                         href="{{ route('client.products.index') }}">
