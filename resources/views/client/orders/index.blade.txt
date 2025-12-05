@@ -1,0 +1,46 @@
+@extends('client.layouts.master')
+
+@section('title', 'Đơn hàng của tôi')
+
+@section('content')
+
+    <h3 class="fw-bold mb-3">Đơn hàng của tôi</h3>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Mã đơn hàng</th>
+                        <th>Ngày tạo</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach ($orders as $order)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $order->order_number }}</td>
+                            <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                            <td class="text-danger fw-bold">{{ number_format($order->total_amount) }}₫</td>
+                            <td>
+                                <span class="badge bg-info">{{ $order->status }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ route('client.orders.show', $order->id) }}" class="btn btn-sm btn-primary">Xem</a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+@endsection

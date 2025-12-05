@@ -85,17 +85,29 @@ class Product extends Model
     /**
      * Tồn kho qua variants
      */
+    // public function stockItems()
+    // {
+    //     return $this->hasManyThrough(
+    //         StockItem::class,
+    //         ProductVariant::class,
+    //         'product_id',
+    //         'variant_id',
+    //         'id',
+    //         'id'
+    //     );
+    // }
     public function stockItems()
     {
         return $this->hasManyThrough(
             StockItem::class,
             ProductVariant::class,
-            'product_id',
-            'variant_id',
-            'id',
-            'id'
+            'product_id',   // product_variants.product_id
+            'variant_id',   // stock_items.variant_id
+            'id',           // products.id
+            'id'            // product_variants.id
         );
     }
+
 
     /* ===================== ACCESSORS ===================== */
 
@@ -542,5 +554,44 @@ class Product extends Model
         }
 
         return $this->images->where('pivot.is_main', false);
+    }
+    //4/12/2025
+    // Accessor để lấy main image
+    public function getMainImageAttribute()
+    {
+        $mainImage = $this->images()->where('is_main', true)->first();
+
+        if ($mainImage) {
+            return $mainImage->path;
+        }
+
+        $firstImage = $this->images()->first();
+        if ($firstImage) {
+            return $firstImage->path;
+        }
+
+        return asset('images/no-image.png');
+    }
+
+    // Accessor để lấy giá hiển thị
+    public function getDisplayPriceAttribute()
+    {
+        return $this->sale_price ?? $this->price;
+    }
+
+    // Accessor kiểm tra có giảm giá không
+    public function getHasDiscountAttribute()
+    {
+        return $this->sale_price && $this->sale_price < $this->price;
+    }
+
+    // Accessor tính % giảm giá
+    public function getDiscountPercentAttribute()
+    {
+        if (!$this->has_discount) {
+            return 0;
+        }
+
+        return round((($this->price - $this->sale_price) / $this->price) * 100);
     }
 }

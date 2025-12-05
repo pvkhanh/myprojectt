@@ -164,12 +164,13 @@ class OrderController extends Controller
             // 3️⃣ Tính toán subtotal, tổng
             $subtotal = 0;
             $orderItems = [];
+            // dd($cartItems);
             foreach ($cartItems as $item) {
                 $product = $item->product;
                 $variant = $item->variant;
                 $price = $variant ? $variant->price : ($product->sale_price ?? $product->price);
                 $availableStock = $variant ? $variant->stockItems->sum('quantity') : $product->stock_quantity;
-
+                
                 if ($availableStock < $item->quantity) {
                     DB::rollBack();
                     return response()->json([

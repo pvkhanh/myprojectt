@@ -1,0 +1,627 @@
+
+{{-- resources/views/client/product/index.blade.php --}}
+@extends('client.layouts.master')
+
+@section('title', 'Danh Sách Sản Phẩm')
+
+@push('styles')
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+        }
+
+        .products-page {
+            padding: 40px 0;
+            background: #f8fafc;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 30px 30px;
+        }
+
+        .page-title {
+            color: white;
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            font-size: 18px;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .filter-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-reset {
+            color: #ef4444;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filter-reset:hover {
+            color: #dc2626;
+        }
+
+        .filter-group {
+            margin-bottom: 25px;
+        }
+
+        .filter-label {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+            display: block;
+            font-size: 15px;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-option {
+            padding: 10px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .filter-option:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .filter-option.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Toolbar */
+        .products-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .results-count {
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .results-count strong {
+            color: #1e293b;
+        }
+
+        .view-modes {
+            display: flex;
+            gap: 8px;
+        }
+
+        .view-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+        }
+
+        .view-btn:hover,
+        .view-btn.active {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sort-label {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .sort-select {
+            padding: 10px 40px 10px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .products-grid.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 20px;
+        }
+
+        .empty-icon {
+            font-size: 80px;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .empty-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .empty-text {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        /* Pagination */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-link {
+            padding: 12px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .page-link:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .page-link.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .page-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Mobile Filter Toggle */
+        .filter-toggle {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+            z-index: 100;
+        }
+
+        @media (max-width: 991px) {
+            .filter-section {
+                display: none;
+            }
+
+            .filter-section.show {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1000;
+                margin: 0;
+                border-radius: 0;
+                overflow-y: auto;
+            }
+
+            .filter-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .page-title {
+                font-size: 32px;
+            }
+
+            .products-toolbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .toolbar-left,
+            .toolbar-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
+        }
+    </style>
+@endpush
+
+@section('content')
+    <div class="products-page">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="container">
+                <h1 class="page-title">Khám Phá Sản Phẩm</h1>
+                <p class="page-subtitle">Tìm kiếm và chọn lựa những sản phẩm tốt nhất dành cho bạn</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <!-- Sidebar Filters -->
+                <div class="col-lg-3">
+                    <div class="filter-section" id="filterSection">
+                        <div class="filter-header">
+                            <h3 class="filter-title">
+                                <i class="fas fa-filter"></i>
+                                Bộ Lọc
+                            </h3>
+                            <a href="{{ route('client.products.index') }}" class="filter-reset">
+                                <i class="fas fa-redo"></i>
+                                Đặt lại
+                            </a>
+                        </div>
+
+                        <form action="{{ route('client.products.index') }}" method="GET" id="filterForm">
+                            <!-- Price Range -->
+                            <div class="filter-group">
+                                <label class="filter-label">Khoảng Giá</label>
+                                <div class="filter-options">
+                                    <button type="button" class="filter-option" data-price="0-500000">
+                                        Dưới 500K
+                                    </button>
+                                    <button type="button" class="filter-option" data-price="500000-1000000">
+                                        500K - 1 Triệu
+                                    </button>
+                                    <button type="button" class="filter-option" data-price="1000000-2000000">
+                                        1 - 2 Triệu
+                                    </button>
+                                    <button type="button" class="filter-option" data-price="2000000-5000000">
+                                        2 - 5 Triệu
+                                    </button>
+                                    <button type="button" class="filter-option" data-price="5000000-999999999">
+                                        Trên 5 Triệu
+                                    </button>
+                                </div>
+                                <input type="hidden" name="price_min" id="priceMin">
+                                <input type="hidden" name="price_max" id="priceMax">
+                            </div>
+
+                            <!-- Ratings -->
+                            <div class="filter-group">
+                                <label class="filter-label">Đánh Giá</label>
+                                <div class="filter-options" style="flex-direction: column; align-items: flex-start;">
+                                    @for ($i = 5; $i >= 1; $i--)
+                                        <label class="filter-option" style="cursor: pointer; width: 100%;">
+                                            <input type="radio" name="rating" value="{{ $i }}"
+                                                style="margin-right: 8px;">
+                                            @for ($j = 1; $j <= 5; $j++)
+                                                <i class="fas fa-star"
+                                                    style="color: {{ $j <= $i ? '#fbbf24' : '#e2e8f0' }}"></i>
+                                            @endfor
+                                            <span style="margin-left: 8px;">Từ {{ $i }} sao</span>
+                                        </label>
+                                    @endfor
+                                </div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="filter-group">
+                                <label class="filter-label">Trạng Thái</label>
+                                <div class="filter-options">
+                                    <label class="filter-option">
+                                        <input type="checkbox" name="is_new" value="1" style="margin-right: 8px;">
+                                        Sản phẩm mới
+                                    </label>
+                                    <label class="filter-option">
+                                        <input type="checkbox" name="is_hot" value="1" style="margin-right: 8px;">
+                                        Sản phẩm hot
+                                    </label>
+                                    <label class="filter-option">
+                                        <input type="checkbox" name="on_sale" value="1" style="margin-right: 8px;">
+                                        Đang giảm giá
+                                    </label>
+                                    <label class="filter-option">
+                                        <input type="checkbox" name="in_stock" value="1" style="margin-right: 8px;">
+                                        Còn hàng
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>
+                                Áp Dụng Lọc
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div class="col-lg-9">
+                    <!-- Toolbar -->
+                    <div class="products-toolbar">
+                        <div class="toolbar-left">
+                            <div class="results-count">
+                                Hiển thị <strong>{{ $products->count() }}</strong> trong tổng số
+                                <strong>{{ $products->total() }}</strong> sản phẩm
+                            </div>
+                            <div class="view-modes">
+                                <button class="view-btn active" data-view="grid" title="Lưới">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                                <button class="view-btn" data-view="list" title="Danh sách">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="toolbar-right">
+                            <span class="sort-label">Sắp xếp:</span>
+                            <select class="sort-select" id="sortSelect" onchange="window.location.href=this.value">
+                                <option
+                                    value="{{ route('client.products.index', array_merge(request()->except('sort'), ['sort' => 'latest'])) }}"
+                                    {{ request('sort') == 'latest' ? 'selected' : '' }}>
+                                    Mới nhất
+                                </option>
+                                <option
+                                    value="{{ route('client.products.index', array_merge(request()->except('sort'), ['sort' => 'price_asc'])) }}"
+                                    {{ request('sort') == 'price_asc' ? 'selected' : '' }}>
+                                    Giá tăng dần
+                                </option>
+                                <option
+                                    value="{{ route('client.products.index', array_merge(request()->except('sort'), ['sort' => 'price_desc'])) }}"
+                                    {{ request('sort') == 'price_desc' ? 'selected' : '' }}>
+                                    Giá giảm dần
+                                </option>
+                                <option
+                                    value="{{ route('client.products.index', array_merge(request()->except('sort'), ['sort' => 'popular'])) }}"
+                                    {{ request('sort') == 'popular' ? 'selected' : '' }}>
+                                    Phổ biến
+                                </option>
+                                <option
+                                    value="{{ route('client.products.index', array_merge(request()->except('sort'), ['sort' => 'rating'])) }}"
+                                    {{ request('sort') == 'rating' ? 'selected' : '' }}>
+                                    Đánh giá cao
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Products Grid -->
+                    @if ($products->count() > 0)
+                        <div class="products-grid" id="productsGrid">
+                            @foreach ($products as $product)
+                                @include('client.components.product-card', ['product' => $product])
+                            @endforeach
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="pagination-wrapper">
+                            {{ $products->links() }}
+                        </div>
+                    @else
+                        <!-- Empty State -->
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                            <h3 class="empty-title">Không Tìm Thấy Sản Phẩm</h3>
+                            <p class="empty-text">Không có sản phẩm nào phù hợp với bộ lọc của bạn.<br>Vui lòng thử lại với
+                                các tiêu chí khác.</p>
+                            <a href="{{ route('client.products.index') }}" class="btn btn-primary">
+                                <i class="fas fa-redo me-2"></i>
+                                Xem Tất Cả Sản Phẩm
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Filter Toggle -->
+    <button class="filter-toggle" id="filterToggle">
+        <i class="fas fa-filter"></i>
+    </button>
+@endsection
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            // View mode toggle
+            $('.view-btn').click(function() {
+                const view = $(this).data('view');
+                $('.view-btn').removeClass('active');
+                $(this).addClass('active');
+
+                if (view === 'list') {
+                    $('#productsGrid').addClass('list-view');
+                } else {
+                    $('#productsGrid').removeClass('list-view');
+                }
+            });
+
+            // Price filter
+            $('.filter-option[data-price]').click(function(e) {
+                e.preventDefault();
+                const priceRange = $(this).data('price').split('-');
+                $('#priceMin').val(priceRange[0]);
+                $('#priceMax').val(priceRange[1]);
+
+                $('.filter-option[data-price]').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // Mobile filter toggle
+            $('#filterToggle').click(function() {
+                $('#filterSection').toggleClass('show');
+            });
+
+            // Close filter on mobile
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#filterSection, #filterToggle').length) {
+                    $('#filterSection').removeClass('show');
+                }
+            });
+
+            // Quick add to cart
+            $(document).on('click', '.btn-quick-add', function() {
+                const productId = $(this).data('product-id');
+
+                $.ajax({
+                    url: `/cart/add/${productId}`,
+                    method: 'POST',
+                    data: {
+                        product_id: productId,
+                        quantity: 1,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+                            // Update cart count
+                            if ($('.cart-count').length) {
+                                $('.cart-count').text(response.cart_count);
+                            }
+                        }
+                    },
+                    error: function() {
+                        showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
+                    }
+                });
+            });
+
+            // Wishlist toggle
+            $(document).on('click', '.btn-wishlist', function() {
+                const btn = $(this);
+                const productId = btn.data('product-id');
+
+                $.ajax({
+                    url: '{{ route('client.wishlist.toggle', $product) }}',
+                    method: 'POST',
+                    data: {
+                        product_id: productId,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            btn.toggleClass('active');
+                            btn.find('i').toggleClass('far fas');
+                            showToast(response.message, 'success');
+                        }
+                    }
+                });
+            });
+        });
+
+        function showToast(message, type) {
+            // Implement toast notification
+            alert(message);
+        }
+    </script>
+@endpush

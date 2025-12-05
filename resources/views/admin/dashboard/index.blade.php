@@ -117,14 +117,14 @@
         </div>
 
         <!-- Biểu đồ doanh thu -->
-        <div class="row g-4 mb-4">
+        {{-- <div class="row g-4 mb-4">
             <div class="col-md-12">
                 <div class="card shadow-sm rounded-3 p-3">
                     <h6 class="text-muted mb-3">Biểu đồ doanh thu năm {{ now()->year }}</h6>
                     <canvas id="revenueChart" height="120"></canvas>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Đơn hàng gần đây -->
         <div class="row g-4">
@@ -145,7 +145,7 @@
                                 @foreach ($recentOrders as $order)
                                     <tr>
                                         <td>{{ $order->id }}</td>
-                                        <td>{{ $order->user->name ?? 'N/A' }}</td>
+                                        <td>{{ trim(($order->user->first_name ?? '') . ' ' . ($order->user->last_name ?? '')) ?: 'N/A' }}</td>
                                         <td>{{ number_format($order->total_amount) }} đ</td>
                                         <td>{!! $order->status instanceof \App\Enums\OrderStatus ? $order->status->badge() : $order->status !!}</td>
                                     </tr>

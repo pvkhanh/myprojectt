@@ -1,0 +1,23 @@
+@extends('client.layouts.master')
+
+@section('title', 'Danh sách yêu thích')
+
+@section('content')
+
+    <h3 class="fw-bold mb-3">Danh sách yêu thích</h3>
+
+    <div class="row g-3">
+
+        @forelse($items as $wishlist)
+            <div class="col-md-3">
+                @include('client.components.product-card', [
+                    'product' => $wishlist->product,
+                ])
+            </div>
+        @empty
+            <p>Bạn chưa có sản phẩm nào trong danh sách yêu thích.</p>
+        @endforelse
+
+    </div>
+
+@endsection

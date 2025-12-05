@@ -33,17 +33,17 @@ class StockItem extends Model
     /**
      * Relationship to Product (through variant)
      */
-    public function product()
-    {
-        return $this->hasOneThrough(
-            Product::class,
-            ProductVariant::class,
-            'id',           // Foreign key on ProductVariant table
-            'id',           // Foreign key on Product table
-            'variant_id',   // Local key on StockItem table
-            'product_id'    // Local key on ProductVariant table
-        );
-    }
+    // public function product()
+    // {
+    //     return $this->hasOneThrough(
+    //         Product::class,
+    //         ProductVariant::class,
+    //         'id',           // Foreign key on ProductVariant table
+    //         'id',           // Foreign key on Product table
+    //         'variant_id',   // Local key on StockItem table
+    //         'product_id'    // Local key on ProductVariant table
+    //     );
+    // }
 
     /**
      * Check if stock is available

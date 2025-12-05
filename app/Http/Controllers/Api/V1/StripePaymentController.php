@@ -193,6 +193,54 @@ class StripePaymentController extends Controller
     /**
      * Handle payment intent succeeded
      */
+    // private function handlePaymentIntentSucceeded($paymentIntent)
+    // {
+    //     $payment = Payment::where('transaction_id', $paymentIntent->id)->first();
+
+    //     if (!$payment) {
+    //         Log::warning('Payment not found for PaymentIntent', [
+    //             'payment_intent_id' => $paymentIntent->id
+    //         ]);
+    //         return;
+    //     }
+
+    //     DB::beginTransaction();
+    //     try {
+    //         // Update payment
+    //         $payment->update([
+    //             'status' => PaymentStatus::Success,
+    //             'paid_at' => now(),
+    //             'is_verified' => true,
+    //             'verified_at' => now(),
+    //             'gateway_response' => array_merge(
+    //                 $payment->gateway_response ?? [],
+    //                 ['payment_intent' => $paymentIntent->toArray()]
+    //             ),
+    //         ]);
+
+    //         // Update order
+    //         $payment->order->update([
+    //             'status' => OrderStatus::Paid,
+    //             'paid_at' => now(),
+    //         ]);
+
+    //         DB::commit();
+
+    //         Log::info('Payment succeeded', [
+    //             'payment_id' => $payment->id,
+    //             'order_id' => $payment->order_id,
+    //         ]);
+
+    //         // TODO: Send confirmation email
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         Log::error('Failed to process successful payment', [
+    //             'payment_id' => $payment->id,
+    //             'error' => $e->getMessage()
+    //         ]);
+    //     }
+    // }
     private function handlePaymentIntentSucceeded($paymentIntent)
     {
         $payment = Payment::where('transaction_id', $paymentIntent->id)->first();
@@ -204,9 +252,18 @@ class StripePaymentController extends Controller
             return;
         }
 
+        // Fix: tránh double processing khi Stripe gửi lại webhook
+        if ($payment->status === PaymentStatus::Success) {
+            Log::info("Duplicate webhook ignored", [
+                'payment_id' => $payment->id
+            ]);
+            return;
+        }
+
+        $charge = $paymentIntent->charges->data[0] ?? null;
+
         DB::beginTransaction();
         try {
-            // Update payment
             $payment->update([
                 'status' => PaymentStatus::Success,
                 'paid_at' => now(),
@@ -214,11 +271,16 @@ class StripePaymentController extends Controller
                 'verified_at' => now(),
                 'gateway_response' => array_merge(
                     $payment->gateway_response ?? [],
-                    ['payment_intent' => $paymentIntent->toArray()]
+                    [
+                        'payment_intent' => $paymentIntent->toArray(),
+                        'charge' => $charge ? $charge->toArray() : null,
+                    ]
                 ),
+                'charge_id' => $charge->id ?? null,
+                'card_brand' => $charge->payment_method_details->card->brand ?? null,
+                'card_last4' => $charge->payment_method_details->card->last4 ?? null,
             ]);
 
-            // Update order
             $payment->order->update([
                 'status' => OrderStatus::Paid,
                 'paid_at' => now(),
@@ -226,21 +288,22 @@ class StripePaymentController extends Controller
 
             DB::commit();
 
-            Log::info('Payment succeeded', [
+            Log::info('Payment processed successfully', [
                 'payment_id' => $payment->id,
                 'order_id' => $payment->order_id,
+                'charge_id' => $charge->id ?? null,
             ]);
-
-            // TODO: Send confirmation email
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to process successful payment', [
                 'payment_id' => $payment->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }
+
 
     /**
      * Handle payment intent failed

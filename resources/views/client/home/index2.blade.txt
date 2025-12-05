@@ -1,0 +1,111 @@
+@extends('client.layouts.master')
+
+@section('title', 'Trang chủ ShopX')
+
+@section('content')
+    <!-- Banner chính -->
+    <div class="home-banner mb-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="banner-slider">
+                        <img src="{{ asset('assets/images/banners/banner1.jpg') }}" alt="Banner 1" class="img-fluid rounded">
+                        <img src="{{ asset('assets/images/banners/banner2.jpg') }}" alt="Banner 2"
+                            class="img-fluid rounded mt-3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh mục nổi bật -->
+    <div class="featured-categories mb-5">
+        <div class="container">
+            <h2 class="mb-4">Danh mục nổi bật</h2>
+            <div class="row">
+                @foreach ($categories as $category)
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ route('client.category.show', $category->slug) }}"
+                            class="category-card d-block text-center p-3 border rounded hover-shadow">
+                            <img src="{{ asset('assets/images/categories/' . $category->image) }}"
+                                alt="{{ $category->name }}" class="img-fluid mb-2">
+                            <h5>{{ $category->name }}</h5>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <!-- Sản phẩm mới -->
+    <div class="new-products mb-5">
+        <div class="container">
+            <h2 class="mb-4">Sản phẩm mới</h2>
+            <div class="row">
+                @foreach ($products as $product)
+                    <div class="col-md-3 mb-4">
+                        <div class="product-card border rounded p-3 hover-shadow">
+                            <a href="{{ route('client.products.show', $product->slug) }}">
+                                <img src="{{ asset('assets/images/products/' . $product->images->first()?->path ?? 'placeholder.png') }}"
+                                    alt="{{ $product->name }}" class="img-fluid mb-2">
+                                <h5 class="mb-2">{{ $product->name }}</h5>
+                                <p class="text-primary fw-bold">{{ number_format($product->price, 0, ',', '.') }}₫</p>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-outline-primary w-100 mt-2 add-to-cart"
+                                data-id="{{ $product->id }}">Thêm vào giỏ</a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <!-- Banner nhỏ / Quảng cáo -->
+    <div class="home-small-banner mb-5">
+        <div class="container">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <img src="{{ asset('assets/images/banners/small1.jpg') }}" alt="Banner 1" class="img-fluid rounded">
+                </div>
+                <div class="col-md-6">
+                    <img src="{{ asset('assets/images/banners/small2.jpg') }}" alt="Banner 2" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </div>
+
+@endsection
+
+@push('styles')
+    <style>
+        /* Home page styling */
+        .hover-shadow:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px);
+            transition: all 0.3s;
+        }
+
+        .category-card img {
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .product-card img {
+            height: 200px;
+            object-fit: cover;
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            // Thêm vào giỏ hàng demo
+            $('.add-to-cart').click(function(e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                showToast('Đã thêm sản phẩm vào giỏ!', 'success');
+            });
+        });
+    </script>
+@endpush

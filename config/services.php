@@ -40,6 +40,7 @@ return [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
-        'currency' => env('PAYMENT_CURRENCY', 'VND'),
+        // 'currency' => env('PAYMENT_CURRENCY', 'VND'),
+        'currency' => env('STRIPE_CURRENCY', 'USD'),
     ],
 ];
